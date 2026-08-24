@@ -105,7 +105,14 @@ export async function saveProductToSupabase(product: ProductData): Promise<boole
   if (!client) return false;
   const userId = await getActiveUserId();
   const row = mapProductToDb(product, userId);
-  const { error } = await client.from('products').upsert(row, { onConflict: 'id' });
+  let { error } = await client.from('products').upsert(row, { onConflict: 'id' });
+  
+  if (error && (error.code === 'PGRST204' || error.message?.includes('user_id'))) {
+    delete row.user_id;
+    const retry = await client.from('products').upsert(row, { onConflict: 'id' });
+    error = retry.error;
+  }
+
   if (error) {
     console.warn('Error upserting product to Supabase:', error);
     return false;
@@ -129,7 +136,14 @@ export async function saveAllProductsToSupabase(products: ProductData[]): Promis
   if (!client || products.length === 0) return false;
   const userId = await getActiveUserId();
   const rows = products.map((p) => mapProductToDb(p, userId));
-  const { error } = await client.from('products').upsert(rows, { onConflict: 'id' });
+  let { error } = await client.from('products').upsert(rows, { onConflict: 'id' });
+
+  if (error && (error.code === 'PGRST204' || error.message?.includes('user_id'))) {
+    const fallbackRows = products.map((p) => mapProductToDb(p, undefined));
+    const retry = await client.from('products').upsert(fallbackRows, { onConflict: 'id' });
+    error = retry.error;
+  }
+
   if (error) {
     console.warn('Error saving products to Supabase:', error);
     return false;
