@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { ProductData } from '../../types/product';
@@ -7,6 +9,7 @@ import { ProductRow } from './ProductRow';
 interface ProductTableProps {
   products: ProductData[];
   onUpdateProduct: (id: string, field: keyof ProductData, value: any) => void;
+  onDuplicateProduct: (id: string) => void;
   onDeleteProduct: (id: string) => void;
   onAddProduct: () => void;
   onOpenLightbox: (src: string) => void;
@@ -15,6 +18,7 @@ interface ProductTableProps {
 export const ProductTable: React.FC<ProductTableProps> = ({
   products,
   onUpdateProduct,
+  onDuplicateProduct,
   onDeleteProduct,
   onAddProduct,
   onOpenLightbox,
@@ -30,6 +34,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               index={index}
               product={p}
               onUpdate={onUpdateProduct}
+              onDuplicate={onDuplicateProduct}
               onDelete={onDeleteProduct}
               onOpenLightbox={onOpenLightbox}
             />

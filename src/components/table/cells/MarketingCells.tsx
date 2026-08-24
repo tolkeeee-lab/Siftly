@@ -1,14 +1,22 @@
+'use client';
+
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Copy } from 'lucide-react';
 import { ProductData } from '../../../types/product';
 
 interface MarketingCellsProps {
   product: ProductData;
   onChange: (field: keyof ProductData, value: any) => void;
+  onDuplicate: () => void;
   onDelete: () => void;
 }
 
-export const MarketingCells: React.FC<MarketingCellsProps> = ({ product, onChange, onDelete }) => {
+export const MarketingCells: React.FC<MarketingCellsProps> = ({
+  product,
+  onChange,
+  onDuplicate,
+  onDelete,
+}) => {
   return (
     <>
       <td>
@@ -30,14 +38,24 @@ export const MarketingCells: React.FC<MarketingCellsProps> = ({ product, onChang
         />
       </td>
       <td>
-        <button
-          className="rowdel"
-          type="button"
-          title="Supprimer la ligne"
-          onClick={onDelete}
-        >
-          <X className="w-3 h-3 text-red-700" />
-        </button>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <button
+            className="rowdel"
+            type="button"
+            title="Dupliquer la fiche"
+            onClick={onDuplicate}
+          >
+            <Copy className="w-3 h-3 text-gold-deep" />
+          </button>
+          <button
+            className="rowdel"
+            type="button"
+            title="Supprimer la ligne"
+            onClick={onDelete}
+          >
+            <X className="w-3 h-3 text-red-700" />
+          </button>
+        </div>
       </td>
     </>
   );

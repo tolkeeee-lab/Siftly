@@ -10,6 +10,7 @@ import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
 import { ProductTable } from './components/table/ProductTable';
 import { HelpNotes } from './components/common/HelpNotes';
+import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
 
@@ -18,10 +19,12 @@ export function App() {
     products,
     updateProduct,
     addProduct,
+    duplicateProduct,
     addMultipleProducts,
     deleteProduct,
     replaceAllProducts,
     showAutoSaveToast,
+    storageInfo,
   } = useProducts();
 
   const {
@@ -43,6 +46,8 @@ export function App() {
   return (
     <div className="sheet">
       <Masthead />
+
+      <StorageBanner storageInfo={storageInfo} />
 
       <Toolbar
         products={products}
@@ -67,6 +72,7 @@ export function App() {
       <ProductTable
         products={displayProducts}
         onUpdateProduct={updateProduct}
+        onDuplicateProduct={duplicateProduct}
         onDeleteProduct={deleteProduct}
         onAddProduct={() => addProduct()}
         onOpenLightbox={(src) => setLightboxSrc(src)}

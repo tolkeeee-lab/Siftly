@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { ProductData } from '../../types/product';
 import { IdentificationCells } from './cells/IdentificationCells';
@@ -10,6 +12,7 @@ interface ProductRowProps {
   index: number;
   product: ProductData;
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
+  onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenLightbox: (src: string) => void;
 }
@@ -18,6 +21,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   index,
   product,
   onUpdate,
+  onDuplicate,
   onDelete,
   onOpenLightbox,
 }) => {
@@ -39,6 +43,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
       <MarketingCells
         product={product}
         onChange={handleChange}
+        onDuplicate={() => onDuplicate(product.id)}
         onDelete={() => onDelete(product.id)}
       />
     </tr>

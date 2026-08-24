@@ -1,6 +1,9 @@
+'use client';
+
 import React, { ChangeEvent, useRef } from 'react';
 import { Edit2 } from 'lucide-react';
 import { ProductData } from '../../../types/product';
+import { compressImage } from '../../../utils/imageCompressor';
 
 interface IdentificationCellsProps {
   product: ProductData;
@@ -19,8 +22,10 @@ export const IdentificationCells: React.FC<IdentificationCellsProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      onChange('imgSrc', reader.result as string);
+    reader.onload = async () => {
+      const rawDataUrl = reader.result as string;
+      const compressed = await compressImage(rawDataUrl, 500, 0.75);
+      onChange('imgSrc', compressed);
     };
     reader.readAsDataURL(file);
   };
