@@ -1,6 +1,22 @@
 import { ProductData, ImportMode } from '../types/product';
 import { normalizeKey, parseNum } from './formatters';
 
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function ensureProductId(p: any, seq: number): ProductData {
+  return {
+    ...p,
+    id: p.id && typeof p.id === 'string' && p.id.trim() !== '' ? p.id : generateUUID(),
+    seq: p.seq ?? seq,
+  } as ProductData;
+}
+
 const LABEL_FIELD_MAP: Record<string, keyof ProductData> = {
   produit: 'produit',
   nom: 'produit',
@@ -73,18 +89,22 @@ export function parseJsonFile(jsonString: string): ProductData[] {
   const cleanStr = jsonString.replace(/^\uFEFF/, '').trim();
   const parsed = JSON.parse(cleanStr);
 
+  let raw: any[];
+
   if (Array.isArray(parsed)) {
-    return parsed;
+    raw = parsed;
+  } else if (typeof parsed === 'object' && parsed !== null) {
+    if (Array.isArray(parsed.products)) raw = parsed.products;
+    else if (Array.isArray(parsed.data)) raw = parsed.data;
+    else if (Array.isArray(parsed.rows)) raw = parsed.rows;
+    else if (parsed.id || parsed.produit) raw = [parsed];
+    else throw new Error('Format JSON non reconnu (attendu : [ { ... } ] ou { products: [...] })');
+  } else {
+    throw new Error('Format JSON non reconnu (attendu : [ { ... } ] ou { products: [...] })');
   }
 
-  if (typeof parsed === 'object' && parsed !== null) {
-    if (Array.isArray(parsed.products)) return parsed.products;
-    if (Array.isArray(parsed.data)) return parsed.data;
-    if (Array.isArray(parsed.rows)) return parsed.rows;
-    if (parsed.id || parsed.produit) return [parsed as ProductData];
-  }
-
-  throw new Error('Format JSON non reconnu (attendu : [ { ... } ] ou { products: [...] })');
+  // Ensure every product has a valid non-null id
+  return raw.map((item, idx) => ensureProductId(item, idx + 1));
 }
 
 export function parseTextSheet(text: string): Partial<ProductData>[] {

@@ -218,11 +218,24 @@ export function useProducts() {
       })
     );
 
-    setProducts(processedData);
+    // Ensure every product has a valid non-null UUID (guards against external JSON with missing ids)
+    const sanitized = processedData.map((p, idx) => ({
+      ...p,
+      id: p.id && typeof p.id === 'string' && p.id.trim() !== ''
+        ? p.id
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }),
+      seq: p.seq ?? idx + 1,
+    }));
+
+    setProducts(sanitized);
 
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(processedData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
       } catch (e) {
         console.warn('LocalStorage quota exceeded on import, saving to Supabase cloud', e);
       }
@@ -230,7 +243,7 @@ export function useProducts() {
 
     if (getStoredSupabaseConfig()) {
       setIsSyncing(true);
-      await saveAllProductsToSupabase(processedData);
+      await saveAllProductsToSupabase(sanitized);
       setIsSyncing(false);
     }
   }, []);
