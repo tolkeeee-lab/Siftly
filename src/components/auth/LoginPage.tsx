@@ -47,7 +47,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="auth-logo">Siftly</div>
+        <div className="auth-logo">Siftly EAA</div>
         <p className="auth-subtitle">
           Passez au tamis les tendances du marché et isolez les produits EAA à fort potentiel.
         </p>

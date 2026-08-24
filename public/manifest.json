@@ -1,6 +1,6 @@
 {
-  "name": "Siftly — Recherche produit EAA",
-  "short_name": "Siftly",
+  "name": "Siftly EAA — Recherche Produit",
+  "short_name": "Siftly EAA",
   "description": "Passez au tamis les tendances du marché et isolez les produits EAA à fort potentiel.",
   "start_url": "/",
   "display": "standalone",
