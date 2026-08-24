@@ -4,6 +4,13 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { ProductData } from '../types/product';
 import { INITIAL_PRODUCTS } from '../constants/defaultData';
 import { checkLocalStorageUsage, StorageUsageInfo } from '../utils/storageCheck';
+import {
+  fetchProductsFromSupabase,
+  saveProductToSupabase,
+  deleteProductFromSupabase,
+  saveAllProductsToSupabase,
+} from '../services/supabaseService';
+import { getStoredSupabaseConfig } from '../lib/supabaseClient';
 
 const STORAGE_KEY = 'eaa-produits-benin';
 
@@ -14,9 +21,7 @@ export function useProducts() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed;
-          }
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
       } catch (e) {
         console.warn('Could not read saved products from localStorage', e);
@@ -25,6 +30,7 @@ export function useProducts() {
     return INITIAL_PRODUCTS;
   });
 
+  const [isSyncing, setIsSyncing] = useState(false);
   const [showAutoSaveToast, setShowAutoSaveToast] = useState(false);
   const [storageInfo, setStorageInfo] = useState<StorageUsageInfo>({
     usedBytes: 0,
@@ -39,19 +45,46 @@ export function useProducts() {
     setStorageInfo(checkLocalStorageUsage(STORAGE_KEY));
   }, []);
 
+  const loadFromSupabase = useCallback(async () => {
+    if (!getStoredSupabaseConfig()) return;
+    setIsSyncing(true);
+    const dbProducts = await fetchProductsFromSupabase();
+    if (dbProducts && dbProducts.length > 0) {
+      setProducts(dbProducts);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
+      }
+    }
+    setIsSyncing(false);
+  }, []);
+
+  useEffect(() => {
+    loadFromSupabase();
+  }, [loadFromSupabase]);
+
   useEffect(() => {
     updateStorageMetrics();
   }, [products, updateStorageMetrics]);
 
-  const saveToStorage = useCallback((data: ProductData[]) => {
+  const saveToStorage = useCallback((data: ProductData[], updatedProduct?: ProductData) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
+    saveTimerRef.current = setTimeout(async () => {
       if (typeof window === 'undefined') return;
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         setShowAutoSaveToast(true);
         updateStorageMetrics();
         setTimeout(() => setShowAutoSaveToast(false), 1500);
+
+        if (getStoredSupabaseConfig()) {
+          setIsSyncing(true);
+          if (updatedProduct) {
+            await saveProductToSupabase(updatedProduct);
+          } else {
+            await saveAllProductsToSupabase(data);
+          }
+          setIsSyncing(false);
+        }
       } catch (err) {
         console.warn('Save failed', err);
       }
@@ -61,7 +94,8 @@ export function useProducts() {
   const updateProduct = useCallback((id: string, field: keyof ProductData, value: any) => {
     setProducts((prev) => {
       const next = prev.map((p) => (p.id === id ? { ...p, [field]: value } : p));
-      saveToStorage(next);
+      const target = next.find((p) => p.id === id);
+      saveToStorage(next, target);
       return next;
     });
   }, [saveToStorage]);
@@ -100,7 +134,7 @@ export function useProducts() {
         angle: initialData?.angle || '',
       };
       const next = [...prev, newProduct];
-      saveToStorage(next);
+      saveToStorage(next, newProduct);
       return next;
     });
   }, [saveToStorage]);
@@ -119,7 +153,7 @@ export function useProducts() {
       };
       const next = [...prev];
       next.splice(targetIndex + 1, 0, cloned);
-      saveToStorage(next);
+      saveToStorage(next, cloned);
       return next;
     });
   }, [saveToStorage]);
@@ -132,6 +166,9 @@ export function useProducts() {
     setProducts((prev) => {
       const next = prev.filter((p) => p.id !== id);
       saveToStorage(next);
+      if (getStoredSupabaseConfig()) {
+        deleteProductFromSupabase(id);
+      }
       return next;
     });
   }, [saveToStorage]);
@@ -151,5 +188,7 @@ export function useProducts() {
     replaceAllProducts,
     showAutoSaveToast,
     storageInfo,
+    isSyncing,
+    loadFromSupabase,
   };
 }

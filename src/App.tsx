@@ -13,6 +13,7 @@ import { HelpNotes } from './components/common/HelpNotes';
 import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
+import { SupabaseConfigModal } from './components/modals/SupabaseConfigModal';
 
 export function App() {
   const {
@@ -25,6 +26,8 @@ export function App() {
     replaceAllProducts,
     showAutoSaveToast,
     storageInfo,
+    isSyncing,
+    loadFromSupabase,
   } = useProducts();
 
   const {
@@ -40,6 +43,7 @@ export function App() {
 
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
 
   const stats = useMemo(() => calculateAppStats(products), [products]);
 
@@ -54,7 +58,9 @@ export function App() {
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
+        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         showAutoSaveToast={showAutoSaveToast}
+        isSyncing={isSyncing}
       />
 
       <StatStrip stats={stats} />
@@ -86,6 +92,12 @@ export function App() {
         isOpen={isPasteModalOpen}
         onClose={() => setIsPasteModalOpen(false)}
         onImportRows={addMultipleProducts}
+      />
+
+      <SupabaseConfigModal
+        isOpen={isSupabaseModalOpen}
+        onClose={() => setIsSupabaseModalOpen(false)}
+        onConfigSaved={loadFromSupabase}
       />
     </div>
   );
