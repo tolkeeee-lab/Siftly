@@ -2,6 +2,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const LOCAL_CFG_KEY = 'siftly-supabase-config';
 
+const DEFAULT_SUPABASE_URL = 'https://tkbqmthwqxvevlrqrann.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYnFtdGh3cXh2ZXZscnFyYW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzMwMjMsImV4cCI6MjEwMzE0OTAyM30._fSab7MBOGn0maQFGf86b2oLMhg0s41a-bGh4Y_9D54';
+
 export interface SupabaseConfig {
   url: string;
   anonKey: string;
@@ -10,19 +14,21 @@ export interface SupabaseConfig {
 let cachedClient: SupabaseConfig & { client: SupabaseClient } | null = null;
 
 export function sanitizeSupabaseUrl(url: string): string {
-  if (!url) return '';
+  if (!url) return DEFAULT_SUPABASE_URL;
   let cleaned = url.trim();
   cleaned = cleaned.replace(/\/rest\/v1\/?$/i, '');
   cleaned = cleaned.replace(/\/auth\/v1\/?$/i, '');
   cleaned = cleaned.replace(/\/+$/, '');
-  return cleaned;
+  return cleaned || DEFAULT_SUPABASE_URL;
 }
 
-export function getStoredSupabaseConfig(): SupabaseConfig | null {
-  if (typeof window === 'undefined') return null;
+export function getStoredSupabaseConfig(): SupabaseConfig {
+  if (typeof window === 'undefined') {
+    return { url: DEFAULT_SUPABASE_URL, anonKey: DEFAULT_SUPABASE_ANON_KEY };
+  }
   try {
-    const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const envKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const envKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (envUrl && envKey) {
       return { url: sanitizeSupabaseUrl(envUrl), anonKey: envKey.trim() };
     }
@@ -36,7 +42,7 @@ export function getStoredSupabaseConfig(): SupabaseConfig | null {
   } catch (e) {
     console.warn('Could not read Supabase config', e);
   }
-  return null;
+  return { url: DEFAULT_SUPABASE_URL, anonKey: DEFAULT_SUPABASE_ANON_KEY };
 }
 
 export function saveStoredSupabaseConfig(config: SupabaseConfig): void {
@@ -57,28 +63,21 @@ export function clearStoredSupabaseConfig(): void {
   }
 }
 
-export function getSupabaseClient(): SupabaseClient | null {
+export function getSupabaseClient(): SupabaseClient {
   const cfg = getStoredSupabaseConfig();
-  if (!cfg?.url || !cfg?.anonKey) return null;
-
   const cleanUrl = sanitizeSupabaseUrl(cfg.url);
 
   if (cachedClient && cachedClient.url === cleanUrl && cachedClient.anonKey === cfg.anonKey) {
     return cachedClient.client;
   }
 
-  try {
-    const client = createClient(cleanUrl, cfg.anonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-    });
-    cachedClient = { url: cleanUrl, anonKey: cfg.anonKey, client };
-    return client;
-  } catch (e) {
-    console.warn('Invalid Supabase configuration', e);
-    return null;
-  }
+  const client = createClient(cleanUrl, cfg.anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
+  cachedClient = { url: cleanUrl, anonKey: cfg.anonKey, client };
+  return client;
 }
