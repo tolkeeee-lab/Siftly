@@ -59,6 +59,22 @@ export function useProducts() {
           console.warn('LocalStorage quota warning during Supabase load', e);
         }
       }
+    } else {
+      // If Supabase has 0 products for user but local PC storage has products, upload them to Supabase cloud!
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              await saveAllProductsToSupabase(parsed);
+              setProducts(parsed);
+            }
+          } catch (e) {
+            console.warn('Could not sync local products to Supabase cloud', e);
+          }
+        }
+      }
     }
     setIsSyncing(false);
   }, []);
