@@ -9,6 +9,7 @@ import { ProductRow } from './ProductRow';
 interface ProductTableProps {
   products: ProductData[];
   onUpdateProduct: (id: string, field: keyof ProductData, value: any) => void;
+  onOpenBreakEven: (product: ProductData) => void;
   onDuplicateProduct: (id: string) => void;
   onDeleteProduct: (id: string) => void;
   onAddProduct: () => void;
@@ -18,6 +19,7 @@ interface ProductTableProps {
 export const ProductTable: React.FC<ProductTableProps> = ({
   products,
   onUpdateProduct,
+  onOpenBreakEven,
   onDuplicateProduct,
   onDeleteProduct,
   onAddProduct,
@@ -34,6 +36,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               index={index}
               product={p}
               onUpdate={onUpdateProduct}
+              onOpenBreakEven={onOpenBreakEven}
               onDuplicate={onDuplicateProduct}
               onDelete={onDeleteProduct}
               onOpenLightbox={onOpenLightbox}

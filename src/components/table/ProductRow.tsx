@@ -12,6 +12,7 @@ interface ProductRowProps {
   index: number;
   product: ProductData;
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
+  onOpenBreakEven: (product: ProductData) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenLightbox: (src: string) => void;
@@ -21,6 +22,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   index,
   product,
   onUpdate,
+  onOpenBreakEven,
   onDuplicate,
   onDelete,
   onOpenLightbox,
@@ -43,6 +45,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
       <MarketingCells
         product={product}
         onChange={handleChange}
+        onOpenBreakEven={() => onOpenBreakEven(product)}
         onDuplicate={() => onDuplicate(product.id)}
         onDelete={() => onDelete(product.id)}
       />

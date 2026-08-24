@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useProducts } from './hooks/useProducts';
 import { useProductRanking } from './hooks/useProductRanking';
 import { calculateAppStats } from './utils/calculations';
+import { ProductData } from './types/product';
 import { Masthead } from './components/header/Masthead';
 import { Toolbar } from './components/header/Toolbar';
 import { StatStrip } from './components/stats/StatStrip';
@@ -14,6 +15,7 @@ import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
 import { SupabaseConfigModal } from './components/modals/SupabaseConfigModal';
+import { BreakEvenModal } from './components/modals/BreakEvenModal';
 
 export function App() {
   const {
@@ -44,6 +46,7 @@ export function App() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+  const [breakEvenProduct, setBreakEvenProduct] = useState<ProductData | null>(null);
 
   const stats = useMemo(() => calculateAppStats(products), [products]);
 
@@ -78,6 +81,7 @@ export function App() {
       <ProductTable
         products={displayProducts}
         onUpdateProduct={updateProduct}
+        onOpenBreakEven={(p) => setBreakEvenProduct(p)}
         onDuplicateProduct={duplicateProduct}
         onDeleteProduct={deleteProduct}
         onAddProduct={() => addProduct()}
@@ -98,6 +102,12 @@ export function App() {
         isOpen={isSupabaseModalOpen}
         onClose={() => setIsSupabaseModalOpen(false)}
         onConfigSaved={loadFromSupabase}
+      />
+
+      <BreakEvenModal
+        product={breakEvenProduct}
+        isOpen={!!breakEvenProduct}
+        onClose={() => setBreakEvenProduct(null)}
       />
     </div>
   );

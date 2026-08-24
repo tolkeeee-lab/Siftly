@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import { X, Copy } from 'lucide-react';
+import { X, Copy, Calculator } from 'lucide-react';
 import { ProductData } from '../../../types/product';
 
 interface MarketingCellsProps {
   product: ProductData;
   onChange: (field: keyof ProductData, value: any) => void;
+  onOpenBreakEven: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }
@@ -14,6 +15,7 @@ interface MarketingCellsProps {
 export const MarketingCells: React.FC<MarketingCellsProps> = ({
   product,
   onChange,
+  onOpenBreakEven,
   onDuplicate,
   onDelete,
 }) => {
@@ -39,6 +41,14 @@ export const MarketingCells: React.FC<MarketingCellsProps> = ({
       </td>
       <td>
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <button
+            className="rowdel"
+            type="button"
+            title="Calculer le Seuil de Rentabilité (Break-Even)"
+            onClick={onOpenBreakEven}
+          >
+            <Calculator className="w-3 h-3 text-steel" />
+          </button>
           <button
             className="rowdel"
             type="button"
