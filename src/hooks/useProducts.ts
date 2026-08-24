@@ -67,8 +67,22 @@ export function useProducts() {
           try {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed) && parsed.length > 0) {
-              await saveAllProductsToSupabase(parsed);
-              setProducts(parsed);
+              // Ensure every product has a valid non-null UUID before uploading
+              const sanitized = parsed.map((p: any, idx: number) => ({
+                ...p,
+                id: p.id && typeof p.id === 'string' && p.id.trim() !== ''
+                  ? p.id
+                  : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                      const r = (Math.random() * 16) | 0;
+                      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+                      return v.toString(16);
+                    }),
+                seq: p.seq ?? idx + 1,
+              }));
+              // Persist sanitized products back to localStorage so future loads are also clean
+              try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized)); } catch { /* quota */ }
+              await saveAllProductsToSupabase(sanitized);
+              setProducts(sanitized);
             }
           } catch (e) {
             console.warn('Could not sync local products to Supabase cloud', e);
