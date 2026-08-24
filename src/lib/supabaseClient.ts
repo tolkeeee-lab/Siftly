@@ -7,6 +7,8 @@ export interface SupabaseConfig {
   anonKey: string;
 }
 
+let cachedClient: SupabaseConfig & { client: SupabaseClient } | null = null;
+
 export function getStoredSupabaseConfig(): SupabaseConfig | null {
   if (typeof window === 'undefined') return null;
   try {
@@ -29,20 +31,35 @@ export function getStoredSupabaseConfig(): SupabaseConfig | null {
 export function saveStoredSupabaseConfig(config: SupabaseConfig): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(LOCAL_CFG_KEY, JSON.stringify(config));
+    cachedClient = null;
   }
 }
 
 export function clearStoredSupabaseConfig(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(LOCAL_CFG_KEY);
+    cachedClient = null;
   }
 }
 
 export function getSupabaseClient(): SupabaseClient | null {
   const cfg = getStoredSupabaseConfig();
   if (!cfg?.url || !cfg?.anonKey) return null;
+
+  if (cachedClient && cachedClient.url === cfg.url && cachedClient.anonKey === cfg.anonKey) {
+    return cachedClient.client;
+  }
+
   try {
-    return createClient(cfg.url, cfg.anonKey);
+    const client = createClient(cfg.url, cfg.anonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+    cachedClient = { url: cfg.url, anonKey: cfg.anonKey, client };
+    return client;
   } catch (e) {
     console.warn('Invalid Supabase configuration', e);
     return null;

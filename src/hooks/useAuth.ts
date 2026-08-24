@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { getSupabaseClient } from '../lib/supabaseClient';
+import { getSupabaseClient, getStoredSupabaseConfig } from '../lib/supabaseClient';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -36,8 +36,12 @@ export function useAuth() {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    const cfg = getStoredSupabaseConfig();
     const client = getSupabaseClient();
-    if (!client) return;
+    if (!client || !cfg?.anonKey) {
+      alert('Veuillez renseigner votre clé Supabase (Anon Key) avant de vous connecter.');
+      return;
+    }
 
     const redirectUrl = typeof window !== 'undefined'
       ? window.location.origin
@@ -47,6 +51,9 @@ export function useAuth() {
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
+        queryParams: {
+          apikey: cfg.anonKey,
+        },
       },
     });
 
