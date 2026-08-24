@@ -27,6 +27,7 @@ export function App() {
     showAutoSaveToast,
     storageInfo,
     isSyncing,
+    loadFromSupabase,
   } = useProducts();
 
   const {
@@ -57,6 +58,7 @@ export function App() {
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
+        onRefreshSupabase={loadFromSupabase}
         showAutoSaveToast={showAutoSaveToast}
         isSyncing={isSyncing}
       />

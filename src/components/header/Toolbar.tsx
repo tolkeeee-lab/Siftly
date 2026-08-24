@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ChangeEvent } from 'react';
-import { Download, Upload, FileText, Clipboard, Printer, Code } from 'lucide-react';
+import { Download, Upload, FileText, Clipboard, Printer, Code, RefreshCw } from 'lucide-react';
 import { ProductData } from '../../types/product';
 import { downloadJsonBackup, downloadHtmlReport } from '../../utils/exportHelpers';
 import { parseTextSheet, parseJsonFile } from '../../utils/parsers';
@@ -12,6 +12,7 @@ interface ToolbarProps {
   onLoadProducts: (products: ProductData[]) => void;
   onImportTextRows: (rows: Partial<ProductData>[]) => void;
   onOpenPasteModal: () => void;
+  onRefreshSupabase?: () => void;
   showAutoSaveToast: boolean;
   isSyncing?: boolean;
 }
@@ -21,6 +22,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onLoadProducts,
   onImportTextRows,
   onOpenPasteModal,
+  onRefreshSupabase,
   showAutoSaveToast,
   isSyncing,
 }) => {
@@ -64,6 +66,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     <div className="toolbar">
       <PWAInstallButton />
 
+      {onRefreshSupabase && (
+        <button
+          className="tbtn load"
+          type="button"
+          onClick={onRefreshSupabase}
+          disabled={isSyncing}
+          title="Forcer la synchronisation instantanée avec Supabase Cloud"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+          <span>{isSyncing ? 'Synchro...' : 'Synchro Cloud'}</span>
+        </button>
+      )}
+
       <button className="tbtn save" type="button" onClick={() => downloadJsonBackup(products)}>
         <Download className="w-3.5 h-3.5" />
         Télécharger (.json)
@@ -96,7 +111,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         Exporter HTML
       </button>
 
-      <span className={`toolbar-hint ${showAutoSaveToast ? 'show' : ''}`}>
+      <span className={`toolbar-hint ${showAutoSaveToast || isSyncing ? 'show' : ''}`}>
         {isSyncing ? 'Synchronisation Supabase en cours...' : 'Sauvegarde automatique activée'}
       </span>
     </div>
