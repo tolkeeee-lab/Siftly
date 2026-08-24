@@ -5,7 +5,6 @@ import { Download, Upload, FileText, Clipboard, Printer, Code } from 'lucide-rea
 import { ProductData } from '../../types/product';
 import { downloadJsonBackup, downloadHtmlReport } from '../../utils/exportHelpers';
 import { parseTextSheet } from '../../utils/parsers';
-import { SupabaseStatusBadge } from '../common/SupabaseStatusBadge';
 
 interface ToolbarProps {
   products: ProductData[];
@@ -62,8 +61,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   return (
     <div className="toolbar">
-      <SupabaseStatusBadge isSyncing={isSyncing} />
-
       <button className="tbtn save" type="button" onClick={() => downloadJsonBackup(products)}>
         <Download className="w-3.5 h-3.5" />
         Télécharger (.json)
