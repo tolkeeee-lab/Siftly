@@ -36,10 +36,9 @@ export function useAuth() {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    const cfg = getStoredSupabaseConfig();
     const client = getSupabaseClient();
-    if (!client || !cfg?.anonKey) {
-      alert('Veuillez renseigner votre clé Supabase (Anon Key) avant de vous connecter.');
+    if (!client) {
+      alert('Configuration Supabase non disponible.');
       return;
     }
 
@@ -51,9 +50,6 @@ export function useAuth() {
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
-        queryParams: {
-          apikey: cfg.anonKey,
-        },
       },
     });
 

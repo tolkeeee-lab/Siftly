@@ -12,7 +12,6 @@ interface ToolbarProps {
   onLoadProducts: (products: ProductData[]) => void;
   onImportTextRows: (rows: Partial<ProductData>[]) => void;
   onOpenPasteModal: () => void;
-  onOpenSupabaseModal: () => void;
   showAutoSaveToast: boolean;
   isSyncing?: boolean;
 }
@@ -22,7 +21,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onLoadProducts,
   onImportTextRows,
   onOpenPasteModal,
-  onOpenSupabaseModal,
   showAutoSaveToast,
   isSyncing,
 }) => {
@@ -64,7 +62,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   return (
     <div className="toolbar">
-      <SupabaseStatusBadge onOpenConfig={onOpenSupabaseModal} isSyncing={isSyncing} />
+      <SupabaseStatusBadge isSyncing={isSyncing} />
 
       <button className="tbtn save" type="button" onClick={() => downloadJsonBackup(products)}>
         <Download className="w-3.5 h-3.5" />

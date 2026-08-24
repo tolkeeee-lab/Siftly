@@ -14,7 +14,6 @@ import { HelpNotes } from './components/common/HelpNotes';
 import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
-import { SupabaseConfigModal } from './components/modals/SupabaseConfigModal';
 import { BreakEvenModal } from './components/modals/BreakEvenModal';
 
 export function App() {
@@ -29,7 +28,6 @@ export function App() {
     showAutoSaveToast,
     storageInfo,
     isSyncing,
-    loadFromSupabase,
   } = useProducts();
 
   const {
@@ -45,7 +43,6 @@ export function App() {
 
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
   const [breakEvenProduct, setBreakEvenProduct] = useState<ProductData | null>(null);
 
   const stats = useMemo(() => calculateAppStats(products), [products]);
@@ -61,7 +58,6 @@ export function App() {
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
-        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         showAutoSaveToast={showAutoSaveToast}
         isSyncing={isSyncing}
       />
@@ -96,12 +92,6 @@ export function App() {
         isOpen={isPasteModalOpen}
         onClose={() => setIsPasteModalOpen(false)}
         onImportRows={addMultipleProducts}
-      />
-
-      <SupabaseConfigModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
-        onConfigSaved={loadFromSupabase}
       />
 
       <BreakEvenModal
