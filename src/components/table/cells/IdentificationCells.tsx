@@ -38,6 +38,8 @@ export const IdentificationCells: React.FC<IdentificationCellsProps> = ({
   const handleCellClick = () => {
     if (product.imgSrc) {
       onOpenLightbox(product.imgSrc);
+    } else {
+      fileInputRef.current?.click();
     }
   };
 
