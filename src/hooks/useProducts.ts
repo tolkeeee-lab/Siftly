@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { ProductData } from '../types/product';
 import { INITIAL_PRODUCTS } from '../constants/defaultData';
 import { checkLocalStorageUsage, StorageUsageInfo } from '../utils/storageCheck';
+import { compressImage } from '../utils/imageCompressor';
 import {
   fetchProductsFromSupabase,
   saveProductToSupabase,
@@ -49,10 +50,14 @@ export function useProducts() {
     if (!getStoredSupabaseConfig()) return;
     setIsSyncing(true);
     const dbProducts = await fetchProductsFromSupabase();
-    if (dbProducts !== null) {
+    if (dbProducts !== null && dbProducts.length > 0) {
       setProducts(dbProducts);
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
+        } catch (e) {
+          console.warn('LocalStorage quota warning during Supabase load', e);
+        }
       }
     }
     setIsSyncing(false);
@@ -67,13 +72,13 @@ export function useProducts() {
   }, [products, updateStorageMetrics]);
 
   const saveToStorage = useCallback((data: ProductData[], updatedProduct?: ProductData) => {
-    // 1. Immediately write to localStorage so page refresh never loses data
+    // 1. Immediately write to localStorage (caught if quota exceeded)
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         updateStorageMetrics();
       } catch (e) {
-        console.warn('LocalStorage save error', e);
+        console.warn('LocalStorage quota exceeded (cloud sync will preserve data)', e);
       }
     }
 
@@ -181,16 +186,38 @@ export function useProducts() {
     });
   }, [saveToStorage]);
 
-  const replaceAllProducts = useCallback((data: ProductData[]) => {
-    setProducts(data);
+  const replaceAllProducts = useCallback(async (data: ProductData[]) => {
+    // Compress base64 images if too large
+    const processedData = await Promise.all(
+      data.map(async (p) => {
+        if (p.imgSrc && p.imgSrc.startsWith('data:image/') && p.imgSrc.length > 100000) {
+          try {
+            const compressed = await compressImage(p.imgSrc, 400, 0.65);
+            return { ...p, imgSrc: compressed };
+          } catch {
+            return p;
+          }
+        }
+        return p;
+      })
+    );
+
+    setProducts(processedData);
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(processedData));
+      } catch (e) {
+        console.warn('LocalStorage quota exceeded on import, saving to Supabase cloud', e);
+      }
     }
-    saveToStorage(data);
+
     if (getStoredSupabaseConfig()) {
-      saveAllProductsToSupabase(data);
+      setIsSyncing(true);
+      await saveAllProductsToSupabase(processedData);
+      setIsSyncing(false);
     }
-  }, [saveToStorage]);
+  }, []);
 
   return {
     products,
