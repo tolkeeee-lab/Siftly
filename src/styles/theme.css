@@ -1,0 +1,57 @@
+:root {
+  --canvas: #141B32;
+  --panel: #F7F2E4;
+  --panel-line: #DCD3B8;
+  --ink: #1E1B14;
+  --ink-soft: #6B6353;
+  --ink-faint: #A29A85;
+  --gold: #B8862F;
+  --gold-deep: #7A5A1E;
+  --gold-wash: #EFE0BB;
+  --rust: #A6431F;
+  --rust-wash: #F0DBCB;
+  --sage: #4B6B45;
+  --sage-wash: #DCE6D3;
+  --steel: #3F5E76;
+  --steel-wash: #DAE3E8;
+  --line-on-canvas: rgba(247, 242, 228, 0.14);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--canvas);
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--ink);
+  padding: 56px 28px 90px;
+}
+.sheet { max-width: 1760px; margin: 0 auto; }
+
+/* ---- Header ---- */
+.masthead {
+  color: var(--panel);
+  padding: 0 4px 34px;
+  border-bottom: 1px solid var(--line-on-canvas);
+  margin-bottom: 30px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 24px; flex-wrap: wrap;
+}
+.masthead-left .eyebrow {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+  margin: 0 0 14px;
+}
+.masthead-left h1 {
+  font-family: 'Fraunces', serif; font-weight: 500; font-size: 46px;
+  line-height: 1.05; margin: 0 0 12px; letter-spacing: -.01em;
+}
+.masthead-left h1 em { font-style: italic; font-weight: 500; color: var(--gold); }
+.masthead-left p { font-size: 14.5px; color: rgba(247,242,228,0.62); max-width: 480px; line-height: 1.6; margin: 0; }
+.masthead-right {
+  text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+  color: rgba(247,242,228,0.5); line-height: 1.9; padding-bottom: 6px;
+}
+.masthead-right .tag {
+  display: inline-block; border: 1px solid rgba(184,134,47,0.55); color: var(--gold);
+  padding: 3px 10px; border-radius: 2px; letter-spacing: .06em;
+}

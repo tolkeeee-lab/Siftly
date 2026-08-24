@@ -1,0 +1,38 @@
+{
+  "name": "siftly",
+  "version": "1.0.0",
+  "description": "Siftly est une plateforme conçue pour aider les e-commerçants à passer au tamis les tendances du marché et à isoler les produits à fort potentiel. L'application permet de centraliser vos recherches, d'analyser les métriques essentielles et de classer vos opportunités grâce à un système de notation sur-mesure.",
+  "main": "index.js",
+
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tolkeeee-lab/Siftly.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tolkeeee-lab/Siftly/issues"
+  },
+  "homepage": "https://github.com/tolkeeee-lab/Siftly#readme",
+  "dependencies": {
+    "lucide-react": "^1.34.0",
+    "next": "^16.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  }
+}
