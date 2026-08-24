@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { getSupabaseClient, getStoredSupabaseConfig } from '../lib/supabaseClient';
+import { getSupabaseClient } from '../lib/supabaseClient';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -59,6 +59,28 @@ export function useAuth() {
     }
   }, []);
 
+  const signInWithEmail = useCallback(async (email: string, pass: string) => {
+    const client = getSupabaseClient();
+    if (!client) throw new Error('Client Supabase non initialisé');
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password: pass,
+    });
+    if (error) throw error;
+    return data;
+  }, []);
+
+  const signUpWithEmail = useCallback(async (email: string, pass: string) => {
+    const client = getSupabaseClient();
+    if (!client) throw new Error('Client Supabase non initialisé');
+    const { data, error } = await client.auth.signUp({
+      email,
+      password: pass,
+    });
+    if (error) throw error;
+    return data;
+  }, []);
+
   const signOut = useCallback(async () => {
     const client = getSupabaseClient();
     if (!client) return;
@@ -70,6 +92,8 @@ export function useAuth() {
     session,
     loading,
     signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
     signOut,
   };
 }
