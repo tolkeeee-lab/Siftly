@@ -1,8 +1,9 @@
--- SQL Schema for Siftly Product Research Grid in Supabase
+-- SQL Schema for Siftly Product Research Grid in Supabase (Multi-tenant with Google Auth)
 -- Paste this script into your Supabase SQL Editor (https://app.supabase.com)
 
 CREATE TABLE IF NOT EXISTS public.products (
   id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
   seq INT,
   produit TEXT,
   img_src TEXT,
@@ -34,17 +35,39 @@ CREATE TABLE IF NOT EXISTS public.products (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Enable Row Level Security (RLS) & Allow public read/write access for demonstration
+-- Add user_id column if table already exists without it
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'products' AND column_name = 'user_id'
+  ) THEN
+    ALTER TABLE public.products ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+  END IF;
+END $$;
+
+-- Enable Row Level Security (RLS)
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public read access" ON public.products
-  FOR SELECT USING (true);
+-- Drop old public policies if present
+DROP POLICY IF EXISTS "Allow public read access" ON public.products;
+DROP POLICY IF EXISTS "Allow public insert access" ON public.products;
+DROP POLICY IF EXISTS "Allow public update access" ON public.products;
+DROP POLICY IF EXISTS "Allow public delete access" ON public.products;
+DROP POLICY IF EXISTS "Users can read own products or unassigned" ON public.products;
+DROP POLICY IF EXISTS "Users can insert own products" ON public.products;
+DROP POLICY IF EXISTS "Users can update own products" ON public.products;
+DROP POLICY IF EXISTS "Users can delete own products" ON public.products;
 
-CREATE POLICY "Allow public insert access" ON public.products
-  FOR INSERT WITH CHECK (true);
+-- Create user-isolated RLS Policies
+CREATE POLICY "Users can read own products or unassigned" ON public.products
+  FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
 
-CREATE POLICY "Allow public update access" ON public.products
-  FOR UPDATE USING (true);
+CREATE POLICY "Users can insert own products" ON public.products
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
-CREATE POLICY "Allow public delete access" ON public.products
-  FOR DELETE USING (true);
+CREATE POLICY "Users can update own products" ON public.products
+  FOR UPDATE USING (auth.uid() = user_id OR user_id IS NULL);
+
+CREATE POLICY "Users can delete own products" ON public.products
+  FOR DELETE USING (auth.uid() = user_id OR user_id IS NULL);

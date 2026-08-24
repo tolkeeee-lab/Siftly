@@ -1,4 +1,5 @@
 import React from 'react';
+import { UserMenu } from '../auth/UserMenu';
 
 export const Masthead: React.FC = () => {
   return (
@@ -14,10 +15,12 @@ export const Masthead: React.FC = () => {
         </p>
       </div>
       <div className="masthead-right">
-        <span className="tag">En cours de remplissage</span>
+        <UserMenu />
+        <span className="tag" style={{ marginTop: '8px', display: 'inline-block' }}>En cours de remplissage</span>
         <br />
         Cotonou · Août 2026
       </div>
     </div>
   );
 };
+

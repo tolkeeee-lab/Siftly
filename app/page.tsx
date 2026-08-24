@@ -1,7 +1,13 @@
 'use client';
 
 import App from '@/App';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function HomePage() {
-  return <App />;
+  return (
+    <AuthGuard>
+      <App />
+    </AuthGuard>
+  );
 }
+

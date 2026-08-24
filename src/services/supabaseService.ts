@@ -2,8 +2,8 @@ import { ProductData } from '../types/product';
 import { getSupabaseClient } from '../lib/supabaseClient';
 import { parseNum } from '../utils/formatters';
 
-export function mapProductToDb(p: ProductData): Record<string, any> {
-  return {
+export function mapProductToDb(p: ProductData, userId?: string): Record<string, any> {
+  const row: Record<string, any> = {
     id: p.id,
     seq: p.seq,
     produit: p.produit || '',
@@ -34,6 +34,12 @@ export function mapProductToDb(p: ProductData): Record<string, any> {
     angle: p.angle || '',
     updated_at: new Date().toISOString(),
   };
+
+  if (userId) {
+    row.user_id = userId;
+  }
+
+  return row;
 }
 
 export function mapDbToProduct(row: Record<string, any>): ProductData {
@@ -83,7 +89,8 @@ export async function fetchProductsFromSupabase(): Promise<ProductData[] | null>
 export async function saveProductToSupabase(product: ProductData): Promise<boolean> {
   const client = getSupabaseClient();
   if (!client) return false;
-  const row = mapProductToDb(product);
+  const { data: { user } } = await client.auth.getUser();
+  const row = mapProductToDb(product, user?.id);
   const { error } = await client.from('products').upsert(row, { onConflict: 'id' });
   if (error) {
     console.warn('Error upserting product to Supabase:', error);
@@ -106,7 +113,8 @@ export async function deleteProductFromSupabase(id: string): Promise<boolean> {
 export async function saveAllProductsToSupabase(products: ProductData[]): Promise<boolean> {
   const client = getSupabaseClient();
   if (!client) return false;
-  const rows = products.map(mapProductToDb);
+  const { data: { user } } = await client.auth.getUser();
+  const rows = products.map((p) => mapProductToDb(p, user?.id));
   const { error } = await client.from('products').upsert(rows, { onConflict: 'id' });
   if (error) {
     console.warn('Error saving products to Supabase:', error);
@@ -114,3 +122,4 @@ export async function saveAllProductsToSupabase(products: ProductData[]): Promis
   }
   return true;
 }
+
