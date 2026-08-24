@@ -11,6 +11,7 @@ import { MarketingCells } from './cells/MarketingCells';
 interface ProductRowProps {
   index: number;
   product: ProductData;
+  isRankingActive?: boolean;
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
   onDuplicate: (id: string) => void;
@@ -21,6 +22,7 @@ interface ProductRowProps {
 export const ProductRow: React.FC<ProductRowProps> = ({
   index,
   product,
+  isRankingActive = true,
   onUpdate,
   onOpenBreakEven,
   onDuplicate,
@@ -31,9 +33,17 @@ export const ProductRow: React.FC<ProductRowProps> = ({
     onUpdate(product.id, field, value);
   };
 
+  const renderRankBadge = () => {
+    if (!isRankingActive) return index + 1;
+    if (index === 0) return <span style={{ color: '#D4AF37', fontWeight: 600 }} title="Produit #1 Gagnant">🥇 1</span>;
+    if (index === 1) return <span style={{ color: '#C0C0C0', fontWeight: 600 }} title="Produit #2">🥈 2</span>;
+    if (index === 2) return <span style={{ color: '#CD7F32', fontWeight: 600 }} title="Produit #3">🥉 3</span>;
+    return index + 1;
+  };
+
   return (
-    <tr>
-      <td className="rownum">{index + 1}</td>
+    <tr className={isRankingActive && index === 0 ? 'top-winner-row' : ''}>
+      <td className="rownum">{renderRankBadge()}</td>
       <IdentificationCells
         product={product}
         onChange={handleChange}

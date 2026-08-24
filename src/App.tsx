@@ -38,6 +38,7 @@ export function App() {
     applyPreset,
     applyRanking,
     resetRanking,
+    isRankingActive,
     displayProducts,
   } = useProductRanking(products);
 
@@ -77,6 +78,7 @@ export function App() {
 
       <ProductTable
         products={displayProducts}
+        isRankingActive={isRankingActive}
         onUpdateProduct={updateProduct}
         onOpenBreakEven={(p) => setBreakEvenProduct(p)}
         onDuplicateProduct={duplicateProduct}

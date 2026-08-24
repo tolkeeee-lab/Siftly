@@ -118,7 +118,23 @@ thead .grp th.group-block { border-right: 1px solid var(--panel-line); }
 thead .cols th { text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; padding: 8px 12px 14px; border-bottom: 1.5px solid var(--ink); white-space: nowrap; background: var(--panel); }
 thead .cols th.num-col { text-align: right; }
 thead .cols th.group-end { border-right: 1px solid var(--panel-line); }
-tbody tr { border-bottom: 1px solid var(--panel-line); }
+tbody tr.top-winner-row td {
+  background: #FFFDF5;
+  border-top: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+}
+
+tbody tr.top-winner-row td:first-child {
+  border-left: 2px solid var(--gold);
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+tbody tr.top-winner-row td:last-child {
+  border-right: 2px solid var(--gold);
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover td { filter: brightness(0.97); }
 tbody td { padding: 10px; vertical-align: middle; background: var(--panel); border-bottom: 1px solid var(--panel-line); }

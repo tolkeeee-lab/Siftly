@@ -8,6 +8,7 @@ import { ProductRow } from './ProductRow';
 
 interface ProductTableProps {
   products: ProductData[];
+  isRankingActive?: boolean;
   onUpdateProduct: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
   onDuplicateProduct: (id: string) => void;
@@ -18,6 +19,7 @@ interface ProductTableProps {
 
 export const ProductTable: React.FC<ProductTableProps> = ({
   products,
+  isRankingActive = true,
   onUpdateProduct,
   onOpenBreakEven,
   onDuplicateProduct,
@@ -35,6 +37,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               key={p.id}
               index={index}
               product={p}
+              isRankingActive={isRankingActive}
               onUpdate={onUpdateProduct}
               onOpenBreakEven={onOpenBreakEven}
               onDuplicate={onDuplicateProduct}
