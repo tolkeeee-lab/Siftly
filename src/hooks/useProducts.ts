@@ -21,7 +21,7 @@ export function useProducts() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed)) return parsed;
         }
       } catch (e) {
         console.warn('Could not read saved products from localStorage', e);
@@ -49,7 +49,7 @@ export function useProducts() {
     if (!getStoredSupabaseConfig()) return;
     setIsSyncing(true);
     const dbProducts = await fetchProductsFromSupabase();
-    if (dbProducts && dbProducts.length > 0) {
+    if (dbProducts !== null) {
       setProducts(dbProducts);
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
@@ -67,13 +67,21 @@ export function useProducts() {
   }, [products, updateStorageMetrics]);
 
   const saveToStorage = useCallback((data: ProductData[], updatedProduct?: ProductData) => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
-      if (typeof window === 'undefined') return;
+    // 1. Immediately write to localStorage so page refresh never loses data
+    if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        setShowAutoSaveToast(true);
         updateStorageMetrics();
+      } catch (e) {
+        console.warn('LocalStorage save error', e);
+      }
+    }
+
+    // 2. Debounce Supabase network call
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        setShowAutoSaveToast(true);
         setTimeout(() => setShowAutoSaveToast(false), 1500);
 
         if (getStoredSupabaseConfig()) {
@@ -86,9 +94,9 @@ export function useProducts() {
           setIsSyncing(false);
         }
       } catch (err) {
-        console.warn('Save failed', err);
+        console.warn('Supabase save failed', err);
       }
-    }, 400);
+    }, 300);
   }, [updateStorageMetrics]);
 
   const updateProduct = useCallback((id: string, field: keyof ProductData, value: any) => {
@@ -175,7 +183,13 @@ export function useProducts() {
 
   const replaceAllProducts = useCallback((data: ProductData[]) => {
     setProducts(data);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
     saveToStorage(data);
+    if (getStoredSupabaseConfig()) {
+      saveAllProductsToSupabase(data);
+    }
   }, [saveToStorage]);
 
   return {

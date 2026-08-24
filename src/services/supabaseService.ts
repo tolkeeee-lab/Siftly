@@ -75,6 +75,20 @@ export function mapDbToProduct(row: Record<string, any>): ProductData {
   };
 }
 
+async function getActiveUserId(): Promise<string | undefined> {
+  const client = getSupabaseClient();
+  if (!client) return undefined;
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user?.id) return session.user.id;
+    const { data: { user } } = await client.auth.getUser();
+    return user?.id;
+  } catch (e) {
+    console.warn('Error getting active user ID', e);
+    return undefined;
+  }
+}
+
 export async function fetchProductsFromSupabase(): Promise<ProductData[] | null> {
   const client = getSupabaseClient();
   if (!client) return null;
@@ -89,8 +103,8 @@ export async function fetchProductsFromSupabase(): Promise<ProductData[] | null>
 export async function saveProductToSupabase(product: ProductData): Promise<boolean> {
   const client = getSupabaseClient();
   if (!client) return false;
-  const { data: { user } } = await client.auth.getUser();
-  const row = mapProductToDb(product, user?.id);
+  const userId = await getActiveUserId();
+  const row = mapProductToDb(product, userId);
   const { error } = await client.from('products').upsert(row, { onConflict: 'id' });
   if (error) {
     console.warn('Error upserting product to Supabase:', error);
@@ -112,9 +126,9 @@ export async function deleteProductFromSupabase(id: string): Promise<boolean> {
 
 export async function saveAllProductsToSupabase(products: ProductData[]): Promise<boolean> {
   const client = getSupabaseClient();
-  if (!client) return false;
-  const { data: { user } } = await client.auth.getUser();
-  const rows = products.map((p) => mapProductToDb(p, user?.id));
+  if (!client || products.length === 0) return false;
+  const userId = await getActiveUserId();
+  const rows = products.map((p) => mapProductToDb(p, userId));
   const { error } = await client.from('products').upsert(rows, { onConflict: 'id' });
   if (error) {
     console.warn('Error saving products to Supabase:', error);
@@ -122,4 +136,3 @@ export async function saveAllProductsToSupabase(products: ProductData[]): Promis
   }
   return true;
 }
-
