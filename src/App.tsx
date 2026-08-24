@@ -10,7 +10,6 @@ import { Toolbar } from './components/header/Toolbar';
 import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
 import { ProductTable } from './components/table/ProductTable';
-import { HelpNotes } from './components/common/HelpNotes';
 import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
@@ -83,8 +82,6 @@ export function App() {
         onAddProduct={() => addProduct()}
         onOpenLightbox={(src) => setLightboxSrc(src)}
       />
-
-      <HelpNotes />
 
       <LightboxModal imageSrc={lightboxSrc} onClose={() => setLightboxSrc(null)} />
 
