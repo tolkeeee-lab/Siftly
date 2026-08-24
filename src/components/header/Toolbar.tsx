@@ -4,7 +4,7 @@ import React, { ChangeEvent } from 'react';
 import { Download, Upload, FileText, Clipboard, Printer, Code } from 'lucide-react';
 import { ProductData } from '../../types/product';
 import { downloadJsonBackup, downloadHtmlReport } from '../../utils/exportHelpers';
-import { parseTextSheet } from '../../utils/parsers';
+import { parseTextSheet, parseJsonFile } from '../../utils/parsers';
 
 interface ToolbarProps {
   products: ProductData[];
@@ -29,14 +29,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const rows = JSON.parse(reader.result as string);
-        if (Array.isArray(rows)) {
+        const rows = parseJsonFile(reader.result as string);
+        if (rows.length > 0) {
           onLoadProducts(rows);
         } else {
-          alert('Fichier JSON invalide.');
+          alert('Le fichier JSON ne contient aucun produit valide.');
         }
-      } catch {
-        alert('Erreur lors de la lecture du fichier JSON.');
+      } catch (err: any) {
+        alert('Erreur lors de la lecture du fichier JSON : ' + (err?.message || 'fichier invalide'));
       }
     };
     reader.readAsText(file);

@@ -69,6 +69,24 @@ const LABEL_FIELD_MAP: Record<string, keyof ProductData> = {
   angle: 'angle',
 };
 
+export function parseJsonFile(jsonString: string): ProductData[] {
+  const cleanStr = jsonString.replace(/^\uFEFF/, '').trim();
+  const parsed = JSON.parse(cleanStr);
+
+  if (Array.isArray(parsed)) {
+    return parsed;
+  }
+
+  if (typeof parsed === 'object' && parsed !== null) {
+    if (Array.isArray(parsed.products)) return parsed.products;
+    if (Array.isArray(parsed.data)) return parsed.data;
+    if (Array.isArray(parsed.rows)) return parsed.rows;
+    if (parsed.id || parsed.produit) return [parsed as ProductData];
+  }
+
+  throw new Error('Format JSON non reconnu (attendu : [ { ... } ] ou { products: [...] })');
+}
+
 export function parseTextSheet(text: string): Partial<ProductData>[] {
   const blocks = text.split(/\n\s*-{3,}\s*\n/g).map((b) => b.trim()).filter(Boolean);
   return blocks
@@ -100,9 +118,7 @@ export function parsePastedRows(text: string): Partial<ProductData>[] {
   const trimmed = text.trim();
   if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
     try {
-      const parsed = JSON.parse(trimmed);
-      const arr = Array.isArray(parsed) ? parsed : [parsed];
-      return arr.filter((r) => r && typeof r === 'object' && Object.keys(r).length > 0);
+      return parseJsonFile(trimmed);
     } catch {
       // Fallback to key-value sheet parsing
     }
