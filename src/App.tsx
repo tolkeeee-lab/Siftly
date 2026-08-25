@@ -16,6 +16,7 @@ import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
 import { BreakEvenModal } from './components/modals/BreakEvenModal';
+import { CurrencyConverterModal } from './components/modals/CurrencyConverterModal';
 
 export function App() {
   const {
@@ -60,8 +61,17 @@ export function App() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
   const [breakEvenProduct, setBreakEvenProduct] = useState<ProductData | null>(null);
+  const [currencyModalProductId, setCurrencyModalProductId] = useState<string | null>(null);
+  const [isGlobalCurrencyModalOpen, setIsGlobalCurrencyModalOpen] = useState(false);
 
   const stats = useMemo(() => calculateAppStats(products), [products]);
+
+  const handleApplyCurrencyToProduct = (fcfaAmount: number) => {
+    if (currencyModalProductId) {
+      updateProduct(currencyModalProductId, 'sourcing', fcfaAmount);
+      setCurrencyModalProductId(null);
+    }
+  };
 
   return (
     <div className="sheet">
@@ -74,6 +84,7 @@ export function App() {
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
+        onOpenCurrencyModal={() => setIsGlobalCurrencyModalOpen(true)}
         onRefreshSupabase={loadFromSupabase}
         showAutoSaveToast={showAutoSaveToast}
         isSyncing={isSyncing}
@@ -109,6 +120,7 @@ export function App() {
         onToggleSort={toggleSort}
         onUpdateProduct={updateProduct}
         onOpenBreakEven={(p) => setBreakEvenProduct(p)}
+        onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
         onDuplicateProduct={duplicateProduct}
         onDeleteProduct={deleteProduct}
         onAddProduct={() => addProduct()}
@@ -127,6 +139,19 @@ export function App() {
         product={breakEvenProduct}
         isOpen={!!breakEvenProduct}
         onClose={() => setBreakEvenProduct(null)}
+      />
+
+      {/* Row-level sourcing currency converter */}
+      <CurrencyConverterModal
+        isOpen={!!currencyModalProductId}
+        onClose={() => setCurrencyModalProductId(null)}
+        onApplyConvertedPrice={handleApplyCurrencyToProduct}
+      />
+
+      {/* Global currency converter */}
+      <CurrencyConverterModal
+        isOpen={isGlobalCurrencyModalOpen}
+        onClose={() => setIsGlobalCurrencyModalOpen(false)}
       />
     </div>
   );

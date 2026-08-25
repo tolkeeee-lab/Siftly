@@ -15,6 +15,7 @@ interface ProductRowProps {
   visibleGroups: VisibleColumnGroups;
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
+  onOpenCurrencyConverter?: (productId: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenLightbox: (src: string) => void;
@@ -27,6 +28,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   visibleGroups,
   onUpdate,
   onOpenBreakEven,
+  onOpenCurrencyConverter,
   onDuplicate,
   onDelete,
   onOpenLightbox,
@@ -57,6 +59,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         showCosts={visibleGroups.costs}
         showResults={visibleGroups.results}
         onChange={handleChange}
+        onOpenCurrencyConverter={onOpenCurrencyConverter}
       />
       <ScoreCells
         product={product}

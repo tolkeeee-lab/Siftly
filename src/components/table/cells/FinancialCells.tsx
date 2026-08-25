@@ -11,6 +11,7 @@ interface FinancialCellsProps {
   showCosts?: boolean;
   showResults?: boolean;
   onChange: (field: keyof ProductData, value: any) => void;
+  onOpenCurrencyConverter?: (productId: string) => void;
 }
 
 export const FinancialCells: React.FC<FinancialCellsProps> = ({
@@ -18,6 +19,7 @@ export const FinancialCells: React.FC<FinancialCellsProps> = ({
   showCosts = true,
   showResults = true,
   onChange,
+  onOpenCurrencyConverter,
 }) => {
   const cogs = calculateCOGS(product);
   const margin = calculateMargin(product);
@@ -39,13 +41,25 @@ export const FinancialCells: React.FC<FinancialCellsProps> = ({
             />
           </td>
           <td className="num-col">
-            <input
-              className="cell-in num"
-              type="number"
-              placeholder="0"
-              value={product.sourcing ?? ''}
-              onChange={(e) => onChange('sourcing', e.target.value)}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+              <input
+                className="cell-in num"
+                type="number"
+                placeholder="0"
+                value={product.sourcing ?? ''}
+                onChange={(e) => onChange('sourcing', e.target.value)}
+              />
+              {onOpenCurrencyConverter && (
+                <button
+                  type="button"
+                  className="currency-btn"
+                  title="Convertir Yuan (¥) ou Dollar ($) en FCFA"
+                  onClick={() => onOpenCurrencyConverter(product.id)}
+                >
+                  ¥/$
+                </button>
+              )}
+            </div>
           </td>
           <td className="num-col">
             <input

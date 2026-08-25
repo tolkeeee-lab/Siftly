@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ChangeEvent } from 'react';
-import { Download, Upload, FileText, Clipboard, Printer, Code, RefreshCw } from 'lucide-react';
+import { Download, Upload, FileText, Clipboard, Printer, Code, RefreshCw, DollarSign } from 'lucide-react';
 import { ProductData } from '../../types/product';
 import { downloadJsonBackup, downloadHtmlReport } from '../../utils/exportHelpers';
 import { parseTextSheet, parseJsonFile } from '../../utils/parsers';
@@ -12,6 +12,7 @@ interface ToolbarProps {
   onLoadProducts: (products: ProductData[]) => void;
   onImportTextRows: (rows: Partial<ProductData>[]) => void;
   onOpenPasteModal: () => void;
+  onOpenCurrencyModal?: () => void;
   onRefreshSupabase?: () => void;
   showAutoSaveToast: boolean;
   isSyncing?: boolean;
@@ -22,6 +23,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onLoadProducts,
   onImportTextRows,
   onOpenPasteModal,
+  onOpenCurrencyModal,
   onRefreshSupabase,
   showAutoSaveToast,
   isSyncing,
@@ -76,6 +78,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
           <span>{isSyncing ? 'Synchro...' : 'Synchro Cloud'}</span>
+        </button>
+      )}
+
+      {onOpenCurrencyModal && (
+        <button
+          className="tbtn load"
+          type="button"
+          onClick={onOpenCurrencyModal}
+          title="Convertisseur de devises (Yuan ¥, Dollar $, Euro € -> FCFA)"
+        >
+          <DollarSign className="w-3.5 h-3.5 text-gold" />
+          <span>Devises (¥ / $)</span>
         </button>
       )}
 
