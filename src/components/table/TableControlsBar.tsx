@@ -1,10 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Filter, Eye, Sparkles, TrendingUp, Ship, Plane, Trophy, LayoutGrid, Check } from 'lucide-react';
+import {
+  Filter,
+  Eye,
+  Sparkles,
+  TrendingUp,
+  Ship,
+  Plane,
+  Trophy,
+  LayoutGrid,
+  Table as TableIcon,
+  Check,
+} from 'lucide-react';
 import { QuickFilterKey, TablePresetView, VisibleColumnGroups } from '../../types/tableFeatures';
 
 interface TableControlsBarProps {
+  layoutMode?: 'table' | 'grid';
+  onSelectLayoutMode?: (mode: 'table' | 'grid') => void;
   activeFilter: QuickFilterKey;
   onSelectFilter: (filter: QuickFilterKey) => void;
   filterCounts: {
@@ -22,6 +35,8 @@ interface TableControlsBarProps {
 }
 
 export const TableControlsBar: React.FC<TableControlsBarProps> = ({
+  layoutMode = 'table',
+  onSelectLayoutMode,
   activeFilter,
   onSelectFilter,
   filterCounts,
@@ -80,61 +95,89 @@ export const TableControlsBar: React.FC<TableControlsBarProps> = ({
         })}
       </div>
 
-      {/* View Presets & Column Customizer */}
+      {/* View Presets & Mode Toggle */}
       <div className="views-control-strip">
-        <div className="preset-views-pills">
-          {views.map((v) => (
+        {/* Layout Switcher (Tableau vs Cartes) */}
+        {onSelectLayoutMode && (
+          <div className="layout-mode-pills">
             <button
-              key={v.key}
               type="button"
-              className={`preset-view-btn ${presetView === v.key ? 'active' : ''}`}
-              onClick={() => onSelectPresetView(v.key)}
+              className={`layout-mode-btn ${layoutMode === 'table' ? 'active' : ''}`}
+              onClick={() => onSelectLayoutMode('table')}
+              title="Affichage sous forme de Tableau Excel complet"
             >
-              {v.label}
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Tableau</span>
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              className={`layout-mode-btn ${layoutMode === 'grid' ? 'active' : ''}`}
+              onClick={() => onSelectLayoutMode('grid')}
+              title="Affichage sous forme de Fiches / Cartes individuelles"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cartes</span>
+            </button>
+          </div>
+        )}
 
-        {/* Column Group Toggle Dropdown */}
-        <div className="relative">
-          <button
-            type="button"
-            className="columns-toggle-btn"
-            onClick={() => setIsColumnsMenuOpen((prev) => !prev)}
-            title="Afficher ou masquer des colonnes"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Colonnes</span>
-          </button>
+        {layoutMode === 'table' && (
+          <>
+            <div className="preset-views-pills">
+              {views.map((v) => (
+                <button
+                  key={v.key}
+                  type="button"
+                  className={`preset-view-btn ${presetView === v.key ? 'active' : ''}`}
+                  onClick={() => onSelectPresetView(v.key)}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
 
-          {isColumnsMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setIsColumnsMenuOpen(false)}
-              />
-              <div className="columns-menu-dropdown z-50">
-                <div className="columns-menu-header">Colonnes affichées</div>
-                {groupLabels.map((g) => {
-                  const isVisible = visibleGroups[g.key];
-                  return (
-                    <button
-                      key={g.key}
-                      type="button"
-                      className="columns-menu-item"
-                      onClick={() => onToggleGroup(g.key)}
-                    >
-                      <div className={`checkbox-box ${isVisible ? 'checked' : ''}`}>
-                        {isVisible && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                      <span>{g.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
+            {/* Column Group Toggle Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                className="columns-toggle-btn"
+                onClick={() => setIsColumnsMenuOpen((prev) => !prev)}
+                title="Afficher ou masquer des colonnes"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Colonnes</span>
+              </button>
+
+              {isColumnsMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsColumnsMenuOpen(false)}
+                  />
+                  <div className="columns-menu-dropdown z-50">
+                    <div className="columns-menu-header">Colonnes affichées</div>
+                    {groupLabels.map((g) => {
+                      const isVisible = visibleGroups[g.key];
+                      return (
+                        <button
+                          key={g.key}
+                          type="button"
+                          className="columns-menu-item"
+                          onClick={() => onToggleGroup(g.key)}
+                        >
+                          <div className={`checkbox-box ${isVisible ? 'checked' : ''}`}>
+                            {isVisible && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <span>{g.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

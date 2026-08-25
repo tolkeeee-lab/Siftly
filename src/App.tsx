@@ -12,6 +12,7 @@ import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
 import { TableControlsBar } from './components/table/TableControlsBar';
 import { ProductTable } from './components/table/ProductTable';
+import { ProductCardGrid } from './components/cards/ProductCardGrid';
 import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
@@ -59,6 +60,7 @@ export function App() {
     processedProducts,
   } = useTableFeatures(displayProducts);
 
+  const [layoutMode, setLayoutMode] = useState<'table' | 'grid'>('table');
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
   const [breakEvenProduct, setBreakEvenProduct] = useState<ProductData | null>(null);
@@ -105,6 +107,8 @@ export function App() {
       />
 
       <TableControlsBar
+        layoutMode={layoutMode}
+        onSelectLayoutMode={setLayoutMode}
         activeFilter={activeFilter}
         onSelectFilter={setActiveFilter}
         filterCounts={filterCounts}
@@ -114,21 +118,36 @@ export function App() {
         onToggleGroup={toggleGroup}
       />
 
-      <ProductTable
-        products={processedProducts}
-        isRankingActive={isRankingActive}
-        visibleGroups={visibleGroups}
-        sortConfig={sortConfig}
-        onToggleSort={toggleSort}
-        onUpdateProduct={updateProduct}
-        onOpenBreakEven={(p) => setBreakEvenProduct(p)}
-        onOpenOnePager={(p, rankIndex) => setOnePagerData({ product: p, rankIndex })}
-        onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
-        onDuplicateProduct={duplicateProduct}
-        onDeleteProduct={deleteProduct}
-        onAddProduct={() => addProduct()}
-        onOpenLightbox={(src) => setLightboxSrc(src)}
-      />
+      {layoutMode === 'table' ? (
+        <ProductTable
+          products={processedProducts}
+          isRankingActive={isRankingActive}
+          visibleGroups={visibleGroups}
+          sortConfig={sortConfig}
+          onToggleSort={toggleSort}
+          onUpdateProduct={updateProduct}
+          onOpenBreakEven={(p) => setBreakEvenProduct(p)}
+          onOpenOnePager={(p, rankIndex) => setOnePagerData({ product: p, rankIndex })}
+          onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
+          onDuplicateProduct={duplicateProduct}
+          onDeleteProduct={deleteProduct}
+          onAddProduct={() => addProduct()}
+          onOpenLightbox={(src) => setLightboxSrc(src)}
+        />
+      ) : (
+        <ProductCardGrid
+          products={processedProducts}
+          isRankingActive={isRankingActive}
+          onUpdateProduct={updateProduct}
+          onOpenBreakEven={(p) => setBreakEvenProduct(p)}
+          onOpenOnePager={(p, rankIndex) => setOnePagerData({ product: p, rankIndex })}
+          onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
+          onDuplicateProduct={duplicateProduct}
+          onDeleteProduct={deleteProduct}
+          onAddProduct={() => addProduct()}
+          onOpenLightbox={(src) => setLightboxSrc(src)}
+        />
+      )}
 
       <LightboxModal imageSrc={lightboxSrc} onClose={() => setLightboxSrc(null)} />
 
