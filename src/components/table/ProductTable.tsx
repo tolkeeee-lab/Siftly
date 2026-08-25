@@ -3,12 +3,16 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { ProductData } from '../../types/product';
+import { SortConfig, SortFieldKey, VisibleColumnGroups } from '../../types/tableFeatures';
 import { TableHeader } from './TableHeader';
 import { ProductRow } from './ProductRow';
 
 interface ProductTableProps {
   products: ProductData[];
   isRankingActive?: boolean;
+  visibleGroups: VisibleColumnGroups;
+  sortConfig: SortConfig | null;
+  onToggleSort: (key: SortFieldKey) => void;
   onUpdateProduct: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
   onDuplicateProduct: (id: string) => void;
@@ -20,6 +24,9 @@ interface ProductTableProps {
 export const ProductTable: React.FC<ProductTableProps> = ({
   products,
   isRankingActive = true,
+  visibleGroups,
+  sortConfig,
+  onToggleSort,
   onUpdateProduct,
   onOpenBreakEven,
   onDuplicateProduct,
@@ -30,7 +37,11 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   return (
     <div className="panel">
       <table id="eaa-table">
-        <TableHeader />
+        <TableHeader
+          visibleGroups={visibleGroups}
+          sortConfig={sortConfig}
+          onToggleSort={onToggleSort}
+        />
         <tbody>
           {products.map((p, index) => (
             <ProductRow
@@ -38,6 +49,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               index={index}
               product={p}
               isRankingActive={isRankingActive}
+              visibleGroups={visibleGroups}
               onUpdate={onUpdateProduct}
               onOpenBreakEven={onOpenBreakEven}
               onDuplicate={onDuplicateProduct}

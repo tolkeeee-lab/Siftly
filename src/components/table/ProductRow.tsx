@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ProductData } from '../../types/product';
+import { VisibleColumnGroups } from '../../types/tableFeatures';
 import { IdentificationCells } from './cells/IdentificationCells';
 import { FinancialCells } from './cells/FinancialCells';
 import { ScoreCells } from './cells/ScoreCells';
@@ -11,6 +12,7 @@ interface ProductRowProps {
   index: number;
   product: ProductData;
   isRankingActive?: boolean;
+  visibleGroups: VisibleColumnGroups;
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
   onDuplicate: (id: string) => void;
@@ -22,6 +24,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   index,
   product,
   isRankingActive = true,
+  visibleGroups,
   onUpdate,
   onOpenBreakEven,
   onDuplicate,
@@ -45,13 +48,24 @@ export const ProductRow: React.FC<ProductRowProps> = ({
       <td className="rownum">{renderRankBadge()}</td>
       <IdentificationCells
         product={product}
+        showLinks={visibleGroups.identification}
         onChange={handleChange}
         onOpenLightbox={onOpenLightbox}
       />
-      <FinancialCells product={product} onChange={handleChange} />
-      <ScoreCells product={product} onChange={handleChange} />
+      <FinancialCells
+        product={product}
+        showCosts={visibleGroups.costs}
+        showResults={visibleGroups.results}
+        onChange={handleChange}
+      />
+      <ScoreCells
+        product={product}
+        showScoring={visibleGroups.scoring}
+        onChange={handleChange}
+      />
       <MarketingCells
         product={product}
+        showMarketing={visibleGroups.marketing}
         onChange={handleChange}
         onOpenBreakEven={() => onOpenBreakEven(product)}
         onDuplicate={() => onDuplicate(product.id)}

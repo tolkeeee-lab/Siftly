@@ -7,12 +7,14 @@ import { compressImage } from '../../../utils/imageCompressor';
 
 interface IdentificationCellsProps {
   product: ProductData;
+  showLinks?: boolean;
   onChange: (field: keyof ProductData, value: any) => void;
   onOpenLightbox: (src: string) => void;
 }
 
 export const IdentificationCells: React.FC<IdentificationCellsProps> = ({
   product,
+  showLinks = true,
   onChange,
   onOpenLightbox,
 }) => {
@@ -54,71 +56,75 @@ export const IdentificationCells: React.FC<IdentificationCellsProps> = ({
           onChange={(e) => onChange('produit', e.target.value)}
         />
       </td>
-      <td>
-        <div
-          className={`img-cell ${product.imgSrc ? 'has-img' : ''}`}
-          onClick={handleCellClick}
-        >
-          {product.imgSrc ? (
-            <img src={product.imgSrc} alt={product.produit || 'Produit'} />
-          ) : (
-            <span className="plus">+</span>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleImageFile}
-          />
-          {product.imgSrc && (
-            <button
-              type="button"
-              className="img-edit-btn"
-              title="Changer l'image"
-              onClick={handleEditClick}
+      {showLinks && (
+        <>
+          <td>
+            <div
+              className={`img-cell ${product.imgSrc ? 'has-img' : ''}`}
+              onClick={handleCellClick}
             >
-              <Edit2 className="w-3 h-3 text-white" />
-            </button>
-          )}
-        </div>
-      </td>
-      <td>
-        <input
-          className="cell-in wide"
-          type="text"
-          placeholder="Lien creative"
-          value={product.creative || ''}
-          onChange={(e) => onChange('creative', e.target.value)}
-        />
-      </td>
-      <td>
-        <input
-          className="cell-in wide"
-          type="text"
-          placeholder="Lien Alibaba"
-          value={product.alibaba || ''}
-          onChange={(e) => onChange('alibaba', e.target.value)}
-        />
-      </td>
-      <td className="group-end">
-        <input
-          className="cell-in wide"
-          type="text"
-          placeholder="Site web"
-          value={product.siteweb || ''}
-          onChange={(e) => onChange('siteweb', e.target.value)}
-        />
-      </td>
-      <td>
-        <input
-          className="cell-in"
-          type="text"
-          placeholder="Marché"
-          value={product.marche || ''}
-          onChange={(e) => onChange('marche', e.target.value)}
-        />
-      </td>
+              {product.imgSrc ? (
+                <img src={product.imgSrc} alt={product.produit || 'Produit'} />
+              ) : (
+                <span className="plus">+</span>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleImageFile}
+              />
+              {product.imgSrc && (
+                <button
+                  type="button"
+                  className="img-edit-btn"
+                  title="Changer l'image"
+                  onClick={handleEditClick}
+                >
+                  <Edit2 className="w-3 h-3 text-white" />
+                </button>
+              )}
+            </div>
+          </td>
+          <td>
+            <input
+              className="cell-in wide"
+              type="text"
+              placeholder="Lien creative"
+              value={product.creative || ''}
+              onChange={(e) => onChange('creative', e.target.value)}
+            />
+          </td>
+          <td>
+            <input
+              className="cell-in wide"
+              type="text"
+              placeholder="Lien Alibaba"
+              value={product.alibaba || ''}
+              onChange={(e) => onChange('alibaba', e.target.value)}
+            />
+          </td>
+          <td className="group-end">
+            <input
+              className="cell-in wide"
+              type="text"
+              placeholder="Site web"
+              value={product.siteweb || ''}
+              onChange={(e) => onChange('siteweb', e.target.value)}
+            />
+          </td>
+          <td className="group-end">
+            <input
+              className="cell-in"
+              type="text"
+              placeholder="Marché"
+              value={product.marche || ''}
+              onChange={(e) => onChange('marche', e.target.value)}
+            />
+          </td>
+        </>
+      )}
     </>
   );
 };

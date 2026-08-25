@@ -1,57 +1,190 @@
-import React from 'react';
+'use client';
 
-export const TableHeader: React.FC = () => {
+import React from 'react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { SortConfig, SortFieldKey, VisibleColumnGroups } from '../../types/tableFeatures';
+
+interface TableHeaderProps {
+  visibleGroups: VisibleColumnGroups;
+  sortConfig: SortConfig | null;
+  onToggleSort: (key: SortFieldKey) => void;
+}
+
+export const TableHeader: React.FC<TableHeaderProps> = ({
+  visibleGroups,
+  sortConfig,
+  onToggleSort,
+}) => {
+  const renderSortIndicator = (key: SortFieldKey) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ArrowUpDown className="w-3 h-3 opacity-30 group-hover:opacity-70 inline ml-1" />;
+    }
+    return sortConfig.direction === 'asc' ? (
+      <ArrowUp className="w-3 h-3 text-amber-500 inline ml-1 font-bold" />
+    ) : (
+      <ArrowDown className="w-3 h-3 text-amber-500 inline ml-1 font-bold" />
+    );
+  };
+
+  const sortHeaderClass = (key: SortFieldKey, extraClass = '') => {
+    const isSorted = sortConfig?.key === key;
+    return `cursor-pointer select-none group transition-colors hover:text-amber-600 ${isSorted ? 'text-amber-700 font-semibold' : ''} ${extraClass}`.trim();
+  };
+
   return (
     <thead>
       <tr className="grp">
         <th colSpan={2}></th>
-        <th colSpan={4} className="group-block">
-          Identification
-        </th>
-        <th colSpan={7} className="group-block">
-          Coût de revient
-        </th>
-        <th colSpan={4} className="group-block">
-          Résultat commercial
-        </th>
-        <th colSpan={9} className="group-block">
-          Score de validation
-        </th>
+        {visibleGroups.identification && (
+          <th colSpan={5} className="group-block">
+            Identification & Liens
+          </th>
+        )}
+        {visibleGroups.costs && (
+          <th colSpan={6} className="group-block">
+            Coût de revient
+          </th>
+        )}
+        {visibleGroups.results && (
+          <th colSpan={4} className="group-block">
+            Résultat commercial
+          </th>
+        )}
+        {visibleGroups.scoring && (
+          <th colSpan={9} className="group-block">
+            Score de validation
+          </th>
+        )}
         <th colSpan={1} className="group-block">
           Note
         </th>
-        <th colSpan={3}></th>
+        {visibleGroups.marketing && <th colSpan={2} className="group-block">Marketing</th>}
+        <th></th>
       </tr>
+
       <tr className="cols">
         <th>#</th>
-        <th>Produit</th>
-        <th>Image apparente</th>
-        <th>Creative</th>
-        <th>Lien Alibaba</th>
-        <th className="group-end">Site web</th>
-        <th>Marché d'origine</th>
-        <th className="num-col">Prix concurrent</th>
-        <th className="num-col">Prix sourcing brut</th>
-        <th className="num-col">Poids (kg)</th>
-        <th className="num-col">Frais import (bateau/avion)</th>
-        <th className="num-col">Coût acquisition client (CAC)</th>
-        <th className="num-col group-end">Livraison offerte (coût)</th>
-        <th className="num-col group-end">Coût revient (COGS)</th>
-        <th className="num-col">Prix de vente</th>
-        <th className="num-col group-end">Marges brutes</th>
-        <th className="num-col group-end">Marge %</th>
-        <th className="num-col">Douleur problème</th>
-        <th className="num-col">Coût non-résolution</th>
-        <th className="num-col">Étendue marché cible</th>
-        <th className="num-col">Impact avant/après</th>
-        <th className="num-col">Effet waouh</th>
-        <th className="num-col">Caractère innovant</th>
-        <th className="num-col">Non-saisonnalité</th>
-        <th className="num-col">Habitudes conso.</th>
-        <th className="num-col group-end">Facteur poids</th>
-        <th className="num-col group-end">Note finale /5</th>
-        <th>Cible</th>
-        <th>Angle d'attaque</th>
+        <th
+          className={sortHeaderClass('produit')}
+          onClick={() => onToggleSort('produit')}
+          title="Trier par Nom de produit"
+        >
+          Produit {renderSortIndicator('produit')}
+        </th>
+
+        {visibleGroups.identification && (
+          <>
+            <th>Image</th>
+            <th>Creative</th>
+            <th>Lien Alibaba</th>
+            <th>Site web</th>
+            <th className="group-end">Marché</th>
+          </>
+        )}
+
+        {visibleGroups.costs && (
+          <>
+            <th
+              className={sortHeaderClass('concurrent', 'num-col')}
+              onClick={() => onToggleSort('concurrent')}
+              title="Trier par Prix concurrent"
+            >
+              Prix concurrent {renderSortIndicator('concurrent')}
+            </th>
+            <th
+              className={sortHeaderClass('sourcing', 'num-col')}
+              onClick={() => onToggleSort('sourcing')}
+              title="Trier par Prix sourcing"
+            >
+              Prix sourcing brut {renderSortIndicator('sourcing')}
+            </th>
+            <th
+              className={sortHeaderClass('poids', 'num-col')}
+              onClick={() => onToggleSort('poids')}
+              title="Trier par Poids"
+            >
+              Poids (kg) {renderSortIndicator('poids')}
+            </th>
+            <th className="num-col">Frais import (bateau/avion)</th>
+            <th
+              className={sortHeaderClass('cac', 'num-col')}
+              onClick={() => onToggleSort('cac')}
+              title="Trier par CAC"
+            >
+              CAC {renderSortIndicator('cac')}
+            </th>
+            <th
+              className={sortHeaderClass('livraison', 'num-col group-end')}
+              onClick={() => onToggleSort('livraison')}
+              title="Trier par Livraison"
+            >
+              Livraison offerte {renderSortIndicator('livraison')}
+            </th>
+          </>
+        )}
+
+        {visibleGroups.results && (
+          <>
+            <th
+              className={sortHeaderClass('cogs', 'num-col group-end')}
+              onClick={() => onToggleSort('cogs')}
+              title="Trier par Coût de revient (COGS)"
+            >
+              Coût revient (COGS) {renderSortIndicator('cogs')}
+            </th>
+            <th
+              className={sortHeaderClass('vente', 'num-col')}
+              onClick={() => onToggleSort('vente')}
+              title="Trier par Prix de vente"
+            >
+              Prix de vente {renderSortIndicator('vente')}
+            </th>
+            <th
+              className={sortHeaderClass('marge', 'num-col group-end')}
+              onClick={() => onToggleSort('marge')}
+              title="Trier par Marge brute"
+            >
+              Marges brutes {renderSortIndicator('marge')}
+            </th>
+            <th
+              className={sortHeaderClass('margepct', 'num-col group-end')}
+              onClick={() => onToggleSort('margepct')}
+              title="Trier par Marge %"
+            >
+              Marge % {renderSortIndicator('margepct')}
+            </th>
+          </>
+        )}
+
+        {visibleGroups.scoring && (
+          <>
+            <th className="num-col">Douleur</th>
+            <th className="num-col">Non-résolution</th>
+            <th className="num-col">Étendue</th>
+            <th className="num-col">Impact</th>
+            <th className="num-col">Waouh</th>
+            <th className="num-col">Innovant</th>
+            <th className="num-col">Non-saison</th>
+            <th className="num-col">Habitudes</th>
+            <th className="num-col group-end">Facteur poids</th>
+          </>
+        )}
+
+        <th
+          className={sortHeaderClass('note', 'num-col group-end')}
+          onClick={() => onToggleSort('note')}
+          title="Trier par Note finale"
+        >
+          Note finale /5 {renderSortIndicator('note')}
+        </th>
+
+        {visibleGroups.marketing && (
+          <>
+            <th>Cible</th>
+            <th>Angle d'attaque</th>
+          </>
+        )}
+
         <th></th>
       </tr>
     </thead>

@@ -3,12 +3,14 @@
 import React, { useState, useMemo } from 'react';
 import { useProducts } from './hooks/useProducts';
 import { useProductRanking } from './hooks/useProductRanking';
+import { useTableFeatures } from './hooks/useTableFeatures';
 import { calculateAppStats } from './utils/calculations';
 import { ProductData } from './types/product';
 import { Masthead } from './components/header/Masthead';
 import { Toolbar } from './components/header/Toolbar';
 import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
+import { TableControlsBar } from './components/table/TableControlsBar';
 import { ProductTable } from './components/table/ProductTable';
 import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
@@ -42,6 +44,19 @@ export function App() {
     displayProducts,
   } = useProductRanking(products);
 
+  const {
+    activeFilter,
+    setActiveFilter,
+    sortConfig,
+    toggleSort,
+    presetView,
+    applyPresetView,
+    visibleGroups,
+    toggleGroup,
+    filterCounts,
+    processedProducts,
+  } = useTableFeatures(displayProducts);
+
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
   const [breakEvenProduct, setBreakEvenProduct] = useState<ProductData | null>(null);
@@ -55,7 +70,7 @@ export function App() {
       <StorageBanner storageInfo={storageInfo} />
 
       <Toolbar
-        products={displayProducts}
+        products={processedProducts}
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
@@ -76,9 +91,22 @@ export function App() {
         onResetRanking={resetRanking}
       />
 
+      <TableControlsBar
+        activeFilter={activeFilter}
+        onSelectFilter={setActiveFilter}
+        filterCounts={filterCounts}
+        presetView={presetView}
+        onSelectPresetView={applyPresetView}
+        visibleGroups={visibleGroups}
+        onToggleGroup={toggleGroup}
+      />
+
       <ProductTable
-        products={displayProducts}
+        products={processedProducts}
         isRankingActive={isRankingActive}
+        visibleGroups={visibleGroups}
+        sortConfig={sortConfig}
+        onToggleSort={toggleSort}
         onUpdateProduct={updateProduct}
         onOpenBreakEven={(p) => setBreakEvenProduct(p)}
         onDuplicateProduct={duplicateProduct}

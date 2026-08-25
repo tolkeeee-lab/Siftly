@@ -6,6 +6,7 @@ import { ProductData } from '../../../types/product';
 
 interface MarketingCellsProps {
   product: ProductData;
+  showMarketing?: boolean;
   onChange: (field: keyof ProductData, value: any) => void;
   onOpenBreakEven: () => void;
   onDuplicate: () => void;
@@ -14,6 +15,7 @@ interface MarketingCellsProps {
 
 export const MarketingCells: React.FC<MarketingCellsProps> = ({
   product,
+  showMarketing = true,
   onChange,
   onOpenBreakEven,
   onDuplicate,
@@ -21,24 +23,28 @@ export const MarketingCells: React.FC<MarketingCellsProps> = ({
 }) => {
   return (
     <>
-      <td>
-        <input
-          className="cell-in"
-          type="text"
-          placeholder="Cible"
-          value={product.cible || ''}
-          onChange={(e) => onChange('cible', e.target.value)}
-        />
-      </td>
-      <td>
-        <input
-          className="cell-in wide"
-          type="text"
-          placeholder="Angle d'attaque"
-          value={product.angle || ''}
-          onChange={(e) => onChange('angle', e.target.value)}
-        />
-      </td>
+      {showMarketing && (
+        <>
+          <td>
+            <input
+              className="cell-in"
+              type="text"
+              placeholder="Cible"
+              value={product.cible || ''}
+              onChange={(e) => onChange('cible', e.target.value)}
+            />
+          </td>
+          <td>
+            <input
+              className="cell-in wide"
+              type="text"
+              placeholder="Angle d'attaque"
+              value={product.angle || ''}
+              onChange={(e) => onChange('angle', e.target.value)}
+            />
+          </td>
+        </>
+      )}
       <td>
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
           <button
