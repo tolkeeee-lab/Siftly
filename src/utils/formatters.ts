@@ -37,3 +37,20 @@ export function escapeHtml(str: string | number | null | undefined): string {
       }[c] || c)
   );
 }
+
+export function getScoreColorStyle(val: any): { backgroundColor: string; color: string; fontWeight: number } | undefined {
+  const n = parseFloat(String(val));
+  if (isNaN(n) || String(val).trim() === '') return undefined;
+  if (n <= 1.5) return { backgroundColor: '#F9D4C8', color: '#8B2E1A', fontWeight: 600 };
+  if (n <= 2.5) return { backgroundColor: '#FDEBD6', color: '#7A4E1E', fontWeight: 600 };
+  if (n <= 3.5) return { backgroundColor: '#FFF8E0', color: '#7A6220', fontWeight: 600 };
+  if (n <= 4.5) return { backgroundColor: '#DCF0DA', color: '#2D6B2A', fontWeight: 600 };
+  return { backgroundColor: '#B8E6B5', color: '#1A5218', fontWeight: 700 };
+}
+
+export function getMarginColorStyle(pct: number, hasSalePrice: boolean): { color: string; fontWeight: number } | undefined {
+  if (!hasSalePrice) return undefined;
+  if (pct < 20) return { color: '#C0392B', fontWeight: 600 };
+  if (pct < 40) return { color: '#D35400', fontWeight: 600 };
+  return { color: '#27AE60', fontWeight: 600 };
+}

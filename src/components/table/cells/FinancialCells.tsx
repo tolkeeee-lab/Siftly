@@ -1,7 +1,9 @@
+'use client';
+
 import React from 'react';
 import { ProductData } from '../../../types/product';
 import { calculateCOGS, calculateMargin, calculateMarginPct } from '../../../utils/calculations';
-import { formatFCFA, formatPercent } from '../../../utils/formatters';
+import { formatFCFA, formatPercent, getMarginColorStyle } from '../../../utils/formatters';
 
 interface FinancialCellsProps {
   product: ProductData;
@@ -13,6 +15,7 @@ export const FinancialCells: React.FC<FinancialCellsProps> = ({ product, onChang
   const margin = calculateMargin(product);
   const marginPct = calculateMarginPct(product);
   const hasSalePrice = Number(product.vente) > 0;
+  const marginStyle = getMarginColorStyle(marginPct, hasSalePrice);
 
   return (
     <>
@@ -73,7 +76,7 @@ export const FinancialCells: React.FC<FinancialCellsProps> = ({ product, onChang
         />
       </td>
       <td className="num-col group-end computed">{formatFCFA(margin)}</td>
-      <td className="num-col group-end computed">
+      <td className="num-col group-end computed" style={marginStyle}>
         {hasSalePrice ? formatPercent(marginPct) : '—'}
       </td>
     </>
