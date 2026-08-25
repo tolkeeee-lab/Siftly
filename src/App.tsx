@@ -55,7 +55,7 @@ export function App() {
       <StorageBanner storageInfo={storageInfo} />
 
       <Toolbar
-        products={products}
+        products={displayProducts}
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
