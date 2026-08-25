@@ -15,6 +15,7 @@ interface ProductRowProps {
   visibleGroups: VisibleColumnGroups;
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
+  onOpenOnePager?: (product: ProductData, rankIndex: number) => void;
   onOpenCurrencyConverter?: (productId: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
@@ -28,6 +29,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   visibleGroups,
   onUpdate,
   onOpenBreakEven,
+  onOpenOnePager,
   onOpenCurrencyConverter,
   onDuplicate,
   onDelete,
@@ -71,6 +73,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         showMarketing={visibleGroups.marketing}
         onChange={handleChange}
         onOpenBreakEven={() => onOpenBreakEven(product)}
+        onOpenOnePager={onOpenOnePager ? () => onOpenOnePager(product, index) : undefined}
         onDuplicate={() => onDuplicate(product.id)}
         onDelete={() => onDelete(product.id)}
       />

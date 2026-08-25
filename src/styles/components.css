@@ -335,3 +335,40 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
     font-size: 15px;
   }
 }
+
+/* Print Optimization */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #1E1B14 !important;
+    padding: 0 !important;
+  }
+  .no-print,
+  .toolbar,
+  .rank-panel,
+  .table-controls-wrap,
+  .addrow-wrap,
+  .storage-banner,
+  .masthead-right,
+  .rowdel {
+    display: none !important;
+  }
+  .sheet {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .one-pager-overlay {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    display: block !important;
+    inset: auto !important;
+  }
+  .one-pager-container {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+}

@@ -19,6 +19,186 @@ export function downloadJsonBackup(products: ProductData[]): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export function downloadCsvExport(products: ProductData[]): void {
+  const headers = [
+    'Rang',
+    'Produit',
+    'Creative',
+    'Lien Alibaba',
+    'Site Web',
+    'Marché d\'origine',
+    'Prix Concurrent (FCFA)',
+    'Prix Sourcing (FCFA)',
+    'Poids (kg)',
+    'Mode Import',
+    'Tarif Bateau (F/kg)',
+    'Tarif Avion (F/kg)',
+    'Frais Import Unitaire (FCFA)',
+    'CAC (FCFA)',
+    'Livraison Offerte (FCFA)',
+    'Coût Revient COGS (FCFA)',
+    'Prix de Vente (FCFA)',
+    'Marge Brute (FCFA)',
+    'Marge %',
+    'Douleur problème (/5)',
+    'Coût non-résolution (/5)',
+    'Étendue marché (/5)',
+    'Impact avant/après (/5)',
+    'Effet waouh (/5)',
+    'Caractère innovant (/5)',
+    'Non-saisonnalité (/5)',
+    'Habitudes conso (/5)',
+    'Facteur poids (/5)',
+    'Note Finale (/5)',
+    'Cible Marketing',
+    'Angle d\'attaque',
+  ];
+
+  const escapeCsv = (val: any) => {
+    const s = String(val ?? '').replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = products.map((p, idx) => {
+    const frais = calculateFreightCost(p);
+    const cogs = calculateCOGS(p);
+    const marge = calculateMargin(p);
+    const margePct = calculateMarginPct(p);
+    const { noteText } = calculateNoteFinale(p);
+
+    return [
+      idx + 1,
+      p.produit || '',
+      p.creative || '',
+      p.alibaba || '',
+      p.siteweb || '',
+      p.marche || '',
+      p.concurrent || 0,
+      p.sourcing || 0,
+      p.poids || 0,
+      p.modeimport || 'bateau',
+      p.tarifbateau || 0,
+      p.tarifavion || 0,
+      frais,
+      p.cac || 0,
+      p.livraison || 0,
+      cogs,
+      p.vente || 0,
+      marge,
+      Number(p.vente) > 0 ? margePct.toFixed(1) + '%' : '0%',
+      p.douleur || '',
+      p.nonres || '',
+      p.etendue || '',
+      p.impact || '',
+      p.waouh || '',
+      p.innovant || '',
+      p.nonsaison || '',
+      p.habitudes || '',
+      p.poidsfacteur || '',
+      noteText,
+      p.cible || '',
+      p.angle || '',
+    ].map(escapeCsv).join(';');
+  });
+
+  const csvContent = '\uFEFF' + [headers.map(escapeCsv).join(';'), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `siftly-analyse-produits-${stamp}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export function downloadExcelXml(products: ProductData[]): void {
+  const stamp = new Date().toISOString().slice(0, 10);
+  const headers = [
+    '#', 'Produit', 'Creative', 'Alibaba', 'Site Web', 'Marché',
+    'Prix Concurrent', 'Sourcing Brut', 'Poids (kg)', 'Mode Import',
+    'Tarif Bateau', 'Tarif Avion', 'Frais Import', 'CAC', 'Livraison',
+    'COGS (Coût Revient)', 'Prix Vente', 'Marge Brute', 'Marge %',
+    'Douleur', 'Non-résolution', 'Étendue', 'Impact', 'Waouh', 'Innovant',
+    'Non-saison', 'Habitudes', 'Facteur Poids', 'Note Finale', 'Cible', 'Angle'
+  ];
+
+  const rowsXml = products.map((p, idx) => {
+    const frais = calculateFreightCost(p);
+    const cogs = calculateCOGS(p);
+    const marge = calculateMargin(p);
+    const margePct = calculateMarginPct(p);
+    const { noteText } = calculateNoteFinale(p);
+
+    const cells = [
+      `<Cell><Data ss:Type="Number">${idx + 1}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.produit || '')}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.creative || '')}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.alibaba || '')}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.siteweb || '')}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.marche || '')}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.concurrent || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.sourcing || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.poids || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.modeimport === 'avion' ? 'Avion' : 'Bateau'}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.tarifbateau || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.tarifavion || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${frais}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.cac || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.livraison || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${cogs}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${p.vente || 0}</Data></Cell>`,
+      `<Cell><Data ss:Type="Number">${marge}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${Number(p.vente) > 0 ? margePct.toFixed(1) + '%' : '—'}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.douleur || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.nonres || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.etendue || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.impact || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.waouh || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.innovant || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.nonsaison || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.habitudes || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${p.poidsfacteur || ''}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${noteText}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.cible || '')}</Data></Cell>`,
+      `<Cell><Data ss:Type="String">${escapeHtml(p.angle || '')}</Data></Cell>`,
+    ].join('');
+
+    return `<Row>${cells}</Row>`;
+  }).join('\n');
+
+  const headerCells = headers.map((h) => `<Cell ss:StyleID="Header"><Data ss:Type="String">${escapeHtml(h)}</Data></Cell>`).join('');
+
+  const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#141B32" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Produits Siftly">
+  <Table>
+   <Row>${headerCells}</Row>
+   ${rowsXml}
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+  const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `siftly-analyse-produits-${stamp}.xls`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function scoreColor(val: any): string {
   const n = parseFloat(String(val));
   if (isNaN(n) || String(val).trim() === '') return '';

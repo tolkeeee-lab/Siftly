@@ -17,6 +17,7 @@ import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
 import { BreakEvenModal } from './components/modals/BreakEvenModal';
 import { CurrencyConverterModal } from './components/modals/CurrencyConverterModal';
+import { ProductOnePagerModal } from './components/modals/ProductOnePagerModal';
 
 export function App() {
   const {
@@ -61,6 +62,7 @@ export function App() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
   const [breakEvenProduct, setBreakEvenProduct] = useState<ProductData | null>(null);
+  const [onePagerData, setOnePagerData] = useState<{ product: ProductData; rankIndex: number } | null>(null);
   const [currencyModalProductId, setCurrencyModalProductId] = useState<string | null>(null);
   const [isGlobalCurrencyModalOpen, setIsGlobalCurrencyModalOpen] = useState(false);
 
@@ -120,6 +122,7 @@ export function App() {
         onToggleSort={toggleSort}
         onUpdateProduct={updateProduct}
         onOpenBreakEven={(p) => setBreakEvenProduct(p)}
+        onOpenOnePager={(p, rankIndex) => setOnePagerData({ product: p, rankIndex })}
         onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
         onDuplicateProduct={duplicateProduct}
         onDeleteProduct={deleteProduct}
@@ -139,6 +142,13 @@ export function App() {
         product={breakEvenProduct}
         isOpen={!!breakEvenProduct}
         onClose={() => setBreakEvenProduct(null)}
+      />
+
+      <ProductOnePagerModal
+        product={onePagerData?.product || null}
+        rankIndex={onePagerData?.rankIndex || 0}
+        isOpen={!!onePagerData}
+        onClose={() => setOnePagerData(null)}
       />
 
       {/* Row-level sourcing currency converter */}

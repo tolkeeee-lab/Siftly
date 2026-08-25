@@ -15,6 +15,7 @@ interface ProductTableProps {
   onToggleSort: (key: SortFieldKey) => void;
   onUpdateProduct: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
+  onOpenOnePager?: (product: ProductData, rankIndex: number) => void;
   onOpenCurrencyConverter?: (productId: string) => void;
   onDuplicateProduct: (id: string) => void;
   onDeleteProduct: (id: string) => void;
@@ -30,6 +31,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onToggleSort,
   onUpdateProduct,
   onOpenBreakEven,
+  onOpenOnePager,
   onOpenCurrencyConverter,
   onDuplicateProduct,
   onDeleteProduct,
@@ -54,6 +56,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               visibleGroups={visibleGroups}
               onUpdate={onUpdateProduct}
               onOpenBreakEven={onOpenBreakEven}
+              onOpenOnePager={onOpenOnePager}
               onOpenCurrencyConverter={onOpenCurrencyConverter}
               onDuplicate={onDuplicateProduct}
               onDelete={onDeleteProduct}

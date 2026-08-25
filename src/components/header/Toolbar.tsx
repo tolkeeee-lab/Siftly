@@ -1,9 +1,24 @@
 'use client';
 
 import React, { ChangeEvent } from 'react';
-import { Download, Upload, FileText, Clipboard, Printer, Code, RefreshCw, DollarSign } from 'lucide-react';
+import {
+  Download,
+  Upload,
+  FileText,
+  Clipboard,
+  Printer,
+  Code,
+  RefreshCw,
+  DollarSign,
+  FileSpreadsheet,
+} from 'lucide-react';
 import { ProductData } from '../../types/product';
-import { downloadJsonBackup, downloadHtmlReport } from '../../utils/exportHelpers';
+import {
+  downloadJsonBackup,
+  downloadHtmlReport,
+  downloadCsvExport,
+  downloadExcelXml,
+} from '../../utils/exportHelpers';
 import { parseTextSheet, parseJsonFile } from '../../utils/parsers';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 
@@ -98,6 +113,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         Télécharger (.json)
       </button>
 
+      <button
+        className="tbtn export"
+        type="button"
+        onClick={() => downloadExcelXml(products)}
+        title="Exporter vers Microsoft Excel (.xls)"
+      >
+        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+        Excel (.xls)
+      </button>
+
+      <button
+        className="tbtn export"
+        type="button"
+        onClick={() => downloadCsvExport(products)}
+        title="Exporter fichier CSV universel (Google Sheets, Numbers)"
+      >
+        <FileText className="w-3.5 h-3.5 text-sky-400" />
+        CSV (.csv)
+      </button>
+
       <label className="tbtn load">
         <Upload className="w-3.5 h-3.5" />
         Restaurer (.json)
@@ -113,11 +148,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <button className="tbtn load" type="button" onClick={onOpenPasteModal}>
         <Clipboard className="w-3.5 h-3.5" />
         Coller une fiche
-      </button>
-
-      <button className="tbtn export" type="button" onClick={() => window.print()}>
-        <Printer className="w-3.5 h-3.5" />
-        Exporter PDF
       </button>
 
       <button className="tbtn export" type="button" onClick={() => downloadHtmlReport(products)}>
