@@ -3,7 +3,6 @@
 import React from 'react';
 import { ProductData } from '../../types/product';
 import { IdentificationCells } from './cells/IdentificationCells';
-import { ShippingWidgetCell } from './cells/ShippingWidgetCell';
 import { FinancialCells } from './cells/FinancialCells';
 import { ScoreCells } from './cells/ScoreCells';
 import { MarketingCells } from './cells/MarketingCells';
@@ -49,7 +48,6 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         onChange={handleChange}
         onOpenLightbox={onOpenLightbox}
       />
-      <ShippingWidgetCell product={product} onChange={handleChange} />
       <FinancialCells product={product} onChange={handleChange} />
       <ScoreCells product={product} onChange={handleChange} />
       <MarketingCells

@@ -4,6 +4,7 @@ import React from 'react';
 import { ProductData } from '../../../types/product';
 import { calculateCOGS, calculateMargin, calculateMarginPct } from '../../../utils/calculations';
 import { formatFCFA, formatPercent, getMarginColorStyle } from '../../../utils/formatters';
+import { ShippingWidgetCell } from './ShippingWidgetCell';
 
 interface FinancialCellsProps {
   product: ProductData;
@@ -47,6 +48,7 @@ export const FinancialCells: React.FC<FinancialCellsProps> = ({ product, onChang
           onChange={(e) => onChange('poids', e.target.value)}
         />
       </td>
+      <ShippingWidgetCell product={product} onChange={onChange} />
       <td className="num-col">
         <input
           className="cell-in num"
