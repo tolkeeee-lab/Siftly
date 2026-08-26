@@ -12,7 +12,6 @@ import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
 import { ProductTable } from './components/table/ProductTable';
 import { ProductCardGrid } from './components/cards/ProductCardGrid';
-import { StorageBanner } from './components/common/StorageBanner';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
 import { BreakEvenModal } from './components/modals/BreakEvenModal';
@@ -79,8 +78,6 @@ export function App() {
   return (
     <div className="sheet">
       <Masthead />
-
-      <StorageBanner storageInfo={storageInfo} />
 
       <Toolbar
         products={processedProducts}
