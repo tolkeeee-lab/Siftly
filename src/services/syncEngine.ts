@@ -116,21 +116,35 @@ export async function syncWorkspaceProducts(
     cloudProducts = await fetchProductsFromSupabase(ctx.workspaceOwnerId);
   }
 
-  // MERGE DECISION MATRIX
+  // UNION MERGE: Combine Cloud and Local products by ID so no newly added product is ever lost!
+  const mergedMap = new Map<string, ProductData>();
+
+  // 1. Add Cloud products
   if (cloudProducts && cloudProducts.length > 0) {
-    // A. Cloud has data: use Cloud data as source of truth and update local cache
+    cloudProducts.forEach((p) => mergedMap.set(p.id, p));
+  }
+
+  // 2. Preserve Local products (adds newly created local items that Cloud hasn't received yet)
+  localProducts.forEach((p) => {
+    if (p.id && !mergedMap.has(p.id)) {
+      mergedMap.set(p.id, p);
+    }
+  });
+
+  const finalProducts = Array.from(mergedMap.values());
+
+  if (finalProducts.length > 0) {
+    // If local had new products missing from Cloud, auto-sync the merged list to Supabase
+    if (ctx.workspaceOwnerId !== 'guest' && finalProducts.length > (cloudProducts?.length || 0)) {
+      saveAllProductsToSupabase(finalProducts, ctx.workspaceOwnerId);
+    }
+
     if (typeof window !== 'undefined') {
-      try { localStorage.setItem(cacheKey, JSON.stringify(cloudProducts)); } catch { /* ignore */ }
+      try { localStorage.setItem(cacheKey, JSON.stringify(finalProducts)); } catch { /* ignore */ }
     }
-    return { products: cloudProducts, isCloudSynced: true };
-  } else if (localProducts.length > 0) {
-    // B. Cloud is empty but local storage has data: keep local data AND auto-upload to cloud!
-    if (ctx.workspaceOwnerId !== 'guest') {
-      await saveAllProductsToSupabase(localProducts, ctx.workspaceOwnerId);
-    }
-    return { products: localProducts, isCloudSynced: true };
+    return { products: finalProducts, isCloudSynced: true };
   } else if (!ctx.isCollaborator) {
-    // C. Both Cloud & Local are empty for an Owner: seed default initial products & push to cloud
+    // Both Cloud & Local are empty for an Owner: seed default initial products & push to cloud
     if (typeof window !== 'undefined') {
       try { localStorage.setItem(cacheKey, JSON.stringify(INITIAL_PRODUCTS)); } catch { /* ignore */ }
     }
@@ -140,7 +154,7 @@ export async function syncWorkspaceProducts(
     return { products: INITIAL_PRODUCTS, isCloudSynced: true };
   }
 
-  // D. Collaborator with 0 products on cloud yet
+  // Collaborator with 0 products on cloud yet
   return { products: [], isCloudSynced: false };
 }
 
