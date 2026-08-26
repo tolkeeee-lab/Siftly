@@ -49,11 +49,10 @@ export const NavigationTabs: React.FC = () => {
     },
     {
       id: 'ads',
-      href: '#',
+      href: '/ads',
       label: 'Ads Studio & Scripts',
       icon: <Video className="w-3.5 h-3.5" />,
-      isAvailable: false,
-      badge: 'Bientôt',
+      isAvailable: true,
     },
     {
       id: 'cod',
