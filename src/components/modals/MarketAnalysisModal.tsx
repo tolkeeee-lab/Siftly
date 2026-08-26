@@ -47,15 +47,17 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
   onSaveAnalysis,
 }) => {
   const [activeTab, setActiveTab] = useState<'pillars' | 'persona' | 'projections' | 'ads' | 'spy'>('pillars');
-
-  if (!isOpen || !product) return null;
-
-  const defaultAnalysis = getProductMarketAnalysis(product);
-  const [analysis, setAnalysis] = useState<MarketAnalysisData>(defaultAnalysis);
+  const [analysis, setAnalysis] = useState<MarketAnalysisData>(() =>
+    product ? getProductMarketAnalysis(product) : ({} as MarketAnalysisData)
+  );
 
   useEffect(() => {
-    setAnalysis(getProductMarketAnalysis(product));
+    if (product) {
+      setAnalysis(getProductMarketAnalysis(product));
+    }
   }, [product]);
+
+  if (!isOpen || !product) return null;
 
   const handleUpdate = (field: keyof MarketAnalysisData, value: any) => {
     setAnalysis((prev) => ({ ...prev, [field]: value }));
