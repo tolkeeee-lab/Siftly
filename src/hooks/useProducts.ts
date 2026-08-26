@@ -23,6 +23,11 @@ export function useProducts() {
     isCollaborator: false,
   });
 
+  const workspaceCtxRef = useRef<WorkspaceContext>(workspaceCtx);
+  useEffect(() => {
+    workspaceCtxRef.current = workspaceCtx;
+  }, [workspaceCtx]);
+
   const { user } = useAuth();
   const [storageInfo, setStorageInfo] = useState<StorageUsageInfo>({
     usedBytes: 0,
@@ -34,14 +39,15 @@ export function useProducts() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateStorageMetrics = useCallback(() => {
-    setStorageInfo(checkLocalStorageUsage('siftly_products_ws_' + workspaceCtx.workspaceOwnerId));
-  }, [workspaceCtx.workspaceOwnerId]);
+    setStorageInfo(checkLocalStorageUsage('siftly_products_ws_' + workspaceCtxRef.current.workspaceOwnerId));
+  }, []);
 
   const loadFromSupabase = useCallback(async (forceUpload: boolean = false) => {
     setIsSyncing(true);
     try {
       const ctx = await resolveWorkspaceContext(user?.email ?? undefined, user?.id ?? undefined);
       setWorkspaceCtx(ctx);
+      workspaceCtxRef.current = ctx;
 
       const { products: syncedList } = await syncWorkspaceProducts(ctx, forceUpload);
       setProducts(syncedList);
@@ -69,7 +75,7 @@ export function useProducts() {
         setTimeout(() => setShowAutoSaveToast(false), 1500);
 
         setIsSyncing(true);
-        await persistProductChange(workspaceCtx, data, updatedProduct);
+        await persistProductChange(workspaceCtxRef.current, data, updatedProduct);
         updateStorageMetrics();
       } catch (err) {
         console.warn('SyncEngine persist error:', err);
@@ -77,7 +83,7 @@ export function useProducts() {
         setIsSyncing(false);
       }
     }, 300);
-  }, [workspaceCtx, updateStorageMetrics]);
+  }, [updateStorageMetrics]);
 
   const updateProduct = useCallback((id: string, field: keyof ProductData, value: any) => {
     setProducts((prev) => {

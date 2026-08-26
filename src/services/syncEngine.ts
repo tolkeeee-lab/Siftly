@@ -152,26 +152,28 @@ export async function persistProductChange(
   allProducts: ProductData[],
   updatedProduct?: ProductData
 ): Promise<boolean> {
-  const cacheKey = getStorageKey(ctx.workspaceOwnerId);
+  const targetId = (ctx && ctx.workspaceOwnerId && ctx.workspaceOwnerId !== 'guest')
+    ? ctx.workspaceOwnerId
+    : undefined;
+
+  const cacheKey = getStorageKey(targetId || 'guest');
 
   // 1. Immediately update Local Storage
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(cacheKey, JSON.stringify(allProducts));
+      localStorage.setItem('eaa-produits-benin', JSON.stringify(allProducts));
     } catch (e) {
       console.warn('SyncEngine: LocalStorage save notice:', e);
     }
   }
 
   // 2. Persist to Supabase Cloud
-  if (ctx.workspaceOwnerId !== 'guest') {
-    if (updatedProduct) {
-      return await saveProductToSupabase(updatedProduct, ctx.workspaceOwnerId);
-    } else {
-      return await saveAllProductsToSupabase(allProducts, ctx.workspaceOwnerId);
-    }
+  if (updatedProduct) {
+    return await saveProductToSupabase(updatedProduct, targetId);
+  } else {
+    return await saveAllProductsToSupabase(allProducts, targetId);
   }
-  return true;
 }
 
 /**
@@ -182,16 +184,18 @@ export async function persistProductDeletion(
   allProducts: ProductData[],
   deletedId: string
 ): Promise<boolean> {
-  const cacheKey = getStorageKey(ctx.workspaceOwnerId);
+  const targetId = (ctx && ctx.workspaceOwnerId && ctx.workspaceOwnerId !== 'guest')
+    ? ctx.workspaceOwnerId
+    : undefined;
+
+  const cacheKey = getStorageKey(targetId || 'guest');
 
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(cacheKey, JSON.stringify(allProducts));
+      localStorage.setItem('eaa-produits-benin', JSON.stringify(allProducts));
     } catch { /* ignore */ }
   }
 
-  if (ctx.workspaceOwnerId !== 'guest') {
-    return await deleteProductFromSupabase(deletedId);
-  }
-  return true;
+  return await deleteProductFromSupabase(deletedId);
 }
