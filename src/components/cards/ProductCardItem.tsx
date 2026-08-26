@@ -331,8 +331,20 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               </div>
 
               <div className="fin-card">
-                <div className="fin-lbl">Frais Fret (FCFA)</div>
-                <div className="fin-val">{formatFCFA(frais)}</div>
+                <div className="fin-lbl">
+                  Tarif Fret {product.modeimport === 'avion' ? '✈️ Avion' : '🚢 Bateau'} (F/kg)
+                </div>
+                <input
+                  type="number"
+                  className="fin-in font-bold"
+                  placeholder={product.modeimport === 'avion' ? '9000' : '3500'}
+                  value={product.modeimport === 'avion' ? (product.tarifavion ?? '') : (product.tarifbateau ?? '')}
+                  onChange={(e) => onUpdate(product.id, product.modeimport === 'avion' ? 'tarifavion' : 'tarifbateau', e.target.value)}
+                  title="Modifier le tarif du fret par kg (ex: 3500 FCFA pour Bateau, 9000 FCFA pour Avion)"
+                />
+                <div style={{ fontSize: '10.5px', color: 'var(--ink-soft)', marginTop: '3px', fontWeight: 600 }}>
+                  Frais Fret : <span style={{ fontFamily: 'IBM Plex Mono, monospace', color: 'var(--gold-deep)', fontWeight: 800 }}>{formatFCFA(frais)}</span>
+                </div>
               </div>
 
               <div className="fin-card">
