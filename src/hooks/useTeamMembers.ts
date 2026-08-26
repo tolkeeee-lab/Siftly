@@ -3,28 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { TeamMember, UserRole } from '../types/teamRoles';
 
-const TEAM_MEMBERS_KEY = 'siftly_team_members_v1';
-
-const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
-  {
-    id: 'member-1',
-    name: 'Propriétaire (Vous)',
-    email: 'admin@siftly.app',
-    phone: '+229 97 00 00 00',
-    role: 'admin',
-    addedDate: '2026-08-01',
-    isActive: true,
-  },
-  {
-    id: 'member-2',
-    name: 'Assistant de Direction',
-    email: 'assistant@siftly.app',
-    phone: '+229 96 11 22 33',
-    role: 'assistant',
-    addedDate: '2026-08-15',
-    isActive: true,
-  },
-];
+const TEAM_MEMBERS_KEY = 'siftly_team_members_v2';
 
 export function useTeamMembers() {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -36,12 +15,11 @@ export function useTeamMembers() {
       if (saved) {
         setMembers(JSON.parse(saved));
       } else {
-        setMembers(DEFAULT_TEAM_MEMBERS);
-        localStorage.setItem(TEAM_MEMBERS_KEY, JSON.stringify(DEFAULT_TEAM_MEMBERS));
+        setMembers([]);
       }
     } catch (e) {
       console.warn('Could not load team members', e);
-      setMembers(DEFAULT_TEAM_MEMBERS);
+      setMembers([]);
     }
     setIsLoaded(true);
   }, []);
@@ -58,28 +36,31 @@ export function useTeamMembers() {
   const addMember = useCallback((data: { name: string; email: string; phone: string; role: UserRole }) => {
     const newMember: TeamMember = {
       ...data,
-      id: crypto.randomUUID(),
+      id: 'member-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
       addedDate: new Date().toISOString().split('T')[0],
       isActive: true,
     };
-    saveMembers([...members, newMember]);
-  }, [members, saveMembers]);
+    setMembers((prev) => {
+      const next = [...prev, newMember];
+      saveMembers(next);
+      return next;
+    });
+    return newMember;
+  }, [saveMembers]);
 
   const removeMember = useCallback((id: string) => {
-    saveMembers(members.filter((m) => m.id !== id));
-  }, [members, saveMembers]);
-
-  const toggleMemberActive = useCallback((id: string) => {
-    saveMembers(
-      members.map((m) => (m.id === id ? { ...m, isActive: !m.isActive } : m))
-    );
-  }, [members, saveMembers]);
+    setMembers((prev) => {
+      const next = prev.filter((m) => m.id !== id);
+      saveMembers(next);
+      return next;
+    });
+  }, [saveMembers]);
 
   return {
     members,
-    isLoaded,
     addMember,
     removeMember,
-    toggleMemberActive,
+    saveMembers,
+    isLoaded,
   };
 }

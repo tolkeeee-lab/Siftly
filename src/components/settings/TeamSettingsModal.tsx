@@ -22,12 +22,13 @@ import {
   KeyRound,
   Link,
   CheckCircle2,
+  Loader2,
+  Send,
 } from 'lucide-react';
 import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
 import { useCODOrders } from '../../hooks/useCODOrders';
 import { useAuth } from '../../hooks/useAuth';
-import { getSupabaseClient } from '../../lib/supabaseClient';
 import { formatFCFA } from '../../utils/formatters';
 
 interface TeamSettingsModalProps {
@@ -46,6 +47,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [newMemberPhone, setNewMemberPhone] = useState('');
   const [newMemberRole, setNewMemberRole] = useState<UserRole>('assistant');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // New livreur form
   const [newLivreurName, setNewLivreurName] = useState('');
@@ -64,23 +66,29 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 4000);
+    setTimeout(() => setToastMsg(null), 4500);
   };
 
   if (!isOpen) return null;
+
+  const ownerName = user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'Propriétaire (Vous)');
+  const ownerEmail = user?.email || 'Non connecté (Session Locale)';
+  const ownerPhone = user?.user_metadata?.phone || '';
 
   const generateInviteLink = (name: string, role: string, email: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://siftly-iota.vercel.app';
     return `${origin}/?join=team&name=${encodeURIComponent(name)}&role=${encodeURIComponent(role)}&email=${encodeURIComponent(email)}`;
   };
 
-  const handleAddMemberSubmit = (e: React.FormEvent) => {
+  const handleAddMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim()) return;
     const name = newMemberName.trim();
     const email = newMemberEmail.trim() || `${name.toLowerCase().replace(/\s+/g, '')}@siftly.app`;
-    const phone = newMemberPhone.trim() || '+229 00 00 00 00';
+    const phone = newMemberPhone.trim() || '';
     const role = newMemberRole;
+
+    setIsSendingEmail(true);
 
     addMember({
       name,
@@ -97,7 +105,25 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       phone,
     });
 
-    showToast(`🎉 Collaborateur "${name}" ajouté avec succès !`);
+    // Send direct email via Supabase API
+    try {
+      const res = await fetch('/api/invite-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, role }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✉️ ${data.message || `Email d'invitation officiel envoyé à ${email} !`}`);
+      } else {
+        showToast(`⚠️ ${data.message || "Erreur lors de l'envoi de l'invitation"}`);
+      }
+    } catch (err: any) {
+      showToast(`🎉 Collaborateur "${name}" ajouté ! Lien d'accès généré.`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+
     setNewMemberName('');
     setNewMemberEmail('');
     setNewMemberPhone('');
@@ -163,7 +189,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           >
             <Users className="w-3.5 h-3.5" />
             <span>Collaborateurs</span>
-            <span className="tab-count-pill">{members.length}</span>
+            <span className="tab-count-pill">{members.length + 1}</span>
           </button>
           <button
             type="button"
@@ -192,7 +218,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
               <div className="settings-guide-card">
                 <Shield className="w-4 h-4 text-gold flex-shrink-0" />
                 <p>
-                  <strong>Gestion d'Équipe Infaillible :</strong> Ajoutez vos collaborateurs et donnez-leur accès instantanément en 1 clic grâce à leur <strong>Lien d'Accès Magique</strong> sans mot de passe !
+                  <strong>Gestion d'Équipe :</strong> Ajoutez vos collaborateurs pour leur envoyer automatiquement leur invitation par email Supabase ou leur transmettre leur lien d'accès en 1 clic !
                 </p>
               </div>
 
@@ -203,7 +229,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                       <strong className="text-sm text-ink font-bold">
-                        Lien d'accès prêt pour : {lastCreatedInvite.name} ({lastCreatedInvite.role})
+                        Lien d'accès généré pour : {lastCreatedInvite.name} ({lastCreatedInvite.role})
                       </strong>
                     </div>
                     <button
@@ -215,7 +241,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     </button>
                   </div>
                   <p className="text-xs text-ink-muted my-1">
-                    Transmettez ce lien unique à votre collaborateur pour qu'il se connecte directement à votre espace de travail :
+                    L'email d'invitation a été envoyé. Vous pouvez aussi lui transmettre ce lien direct WhatsApp / SMS :
                   </p>
                   <div className="invite-link-row">
                     <input
@@ -271,9 +297,10 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Email Collaborateur</label>
+                    <label>Email Collaborateur *</label>
                     <input
                       type="email"
+                      required
                       placeholder="marc@entreprise.com"
                       className="premium-input"
                       value={newMemberEmail}
@@ -282,7 +309,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Numéro WhatsApp (Pour envoi direct)</label>
+                    <label>Numéro WhatsApp (Pour dispatch)</label>
                     <input
                       type="tel"
                       placeholder="+229 97 00 00 00"
@@ -307,19 +334,57 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
                 </div>
 
-                <button type="submit" className="btn-submit-premium-gold">
-                  <UserPlus className="w-4 h-4" />
-                  <span>Enregistrer & Générer le Lien d'Accès</span>
+                <button
+                  type="submit"
+                  disabled={isSendingEmail}
+                  className="btn-submit-premium-gold"
+                >
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Envoi de l'invitation par email...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Enregistrer & Envoyer l'Invitation par Email</span>
+                    </>
+                  )}
                 </button>
               </form>
 
               {/* Members List */}
               <div className="members-directory">
-                <h4 className="directory-heading">Membres Actifs ({members.length})</h4>
+                <h4 className="directory-heading">Membres Actifs ({members.length + 1})</h4>
                 <div className="members-stack">
+                  {/* Real Dynamic Owner Row */}
+                  <div className="premium-member-row owner-pinned">
+                    <div className="member-avatar-badge">
+                      👑
+                    </div>
+
+                    <div className="member-details-col">
+                      <div className="member-name-row">
+                        <strong className="member-fullname">{ownerName}</strong>
+                        <span className="premium-role-tag admin">
+                          👑 Propriétaire (Fondateur)
+                        </span>
+                      </div>
+                      <div className="member-contact-row">
+                        <span><Mail className="w-3 h-3 inline mr-1" />{ownerEmail}</span>
+                        {ownerPhone && (
+                          <>
+                            <span>·</span>
+                            <span><Phone className="w-3 h-3 inline mr-1" />{ownerPhone}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Real Collaborators */}
                   {members.map((member) => {
                     const perm = ROLE_PERMISSIONS[member.role];
-                    const isOwner = member.role === 'admin';
                     const cleanPhone = (member.phone || '').replace(/[^0-9]/g, '');
                     const magicLink = generateInviteLink(member.name, member.role, member.email);
                     const inviteMsg = `Bonjour ${member.name},\n\nVoici votre lien d'accès direct à notre espace de travail Siftly (${perm?.label || member.role}) :\n👉 ${magicLink}\n\nCliquez sur ce lien pour vous connecter immédiatement !`;
@@ -328,7 +393,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     return (
                       <div key={member.id} className="premium-member-row">
                         <div className="member-avatar-badge">
-                          {isOwner ? '👑' : getInitials(member.name)}
+                          {getInitials(member.name)}
                         </div>
 
                         <div className="member-details-col">
@@ -340,8 +405,12 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                           </div>
                           <div className="member-contact-row">
                             <span><Mail className="w-3 h-3 inline mr-1" />{member.email}</span>
-                            <span>·</span>
-                            <span><Phone className="w-3 h-3 inline mr-1" />{member.phone}</span>
+                            {member.phone && (
+                              <>
+                                <span>·</span>
+                                <span><Phone className="w-3 h-3 inline mr-1" />{member.phone}</span>
+                              </>
+                            )}
                           </div>
                         </div>
 
@@ -372,51 +441,21 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                             </a>
                           )}
 
-                          {!isOwner && (
-                            <button
-                              type="button"
-                              className="btn-trash-member"
-                              title="Retirer ce membre"
-                              onClick={() => {
-                                removeMember(member.id);
-                                showToast(`Membre "${member.name}" retiré de l'équipe.`);
-                              }}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="btn-trash-member"
+                            title="Retirer ce membre"
+                            onClick={() => {
+                              removeMember(member.id);
+                              showToast(`Membre "${member.name}" retiré de l'équipe.`);
+                            }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     );
                   })}
-                </div>
-              </div>
-
-              {/* Step-by-Step Connection Instructions */}
-              <div className="member-login-how-to">
-                <div className="how-to-header">
-                  <KeyRound className="w-4 h-4 text-gold-deep" />
-                  <span className="how-to-title">🔑 Comment votre collaborateur se connecte-t-il ? (Simple & Garanti à 100%)</span>
-                </div>
-                <div className="how-to-steps-grid">
-                  <div className="how-to-step-card">
-                    <span className="step-num">1</span>
-                    <p className="step-txt">
-                      <strong>Copiez son lien magique</strong> en cliquant sur <em>« Copier Lien »</em> ou <em>« WhatsApp »</em>.
-                    </p>
-                  </div>
-                  <div className="how-to-step-card">
-                    <span className="step-num">2</span>
-                    <p className="step-txt">
-                      <strong>Il clique sur le lien</strong> depuis son téléphone ou son ordinateur.
-                    </p>
-                  </div>
-                  <div className="how-to-step-card">
-                    <span className="step-num">3</span>
-                    <p className="step-txt">
-                      <strong>Accès Immédiat :</strong> L'application le reconnaît automatiquement et lui ouvre l'espace de travail avec son rôle !
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -564,28 +603,32 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                 <div className="account-details-box">
                   <div className="account-status-badge">
                     <Check className="w-3.5 h-3.5 text-emerald-400 inline mr-1" />
-                    <span>SESSION ACTIVE</span>
+                    <span>{user ? 'COMPTE AUTHENTIFIÉ ACTIF' : 'SESSION LOCALE ACTIVE'}</span>
                   </div>
-                  <h3 className="account-email-text">{user?.email || 'admin@siftly.app'}</h3>
+                  <h3 className="account-email-text">{ownerEmail}</h3>
                   <p className="account-sub-text">
-                    Connecté en tant que Propriétaire (Fondateur). Toutes vos données sont synchronisées en temps réel.
+                    {user
+                      ? `Connecté en tant que Propriétaire (${user.email}). Vos données sont synchronisées en temps réel avec Supabase Cloud.`
+                      : "Vous êtes actuellement en mode local. Connectez-vous avec Google ou Email pour synchroniser vos données sur le Cloud."}
                   </p>
                 </div>
               </div>
 
-              <div className="account-actions-box">
-                <button
-                  type="button"
-                  className="btn-logout-premium"
-                  onClick={() => {
-                    signOut();
-                    onClose();
-                  }}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Se Déconnecter de la Session</span>
-                </button>
-              </div>
+              {user && (
+                <div className="account-actions-box">
+                  <button
+                    type="button"
+                    className="btn-logout-premium"
+                    onClick={() => {
+                      signOut();
+                      onClose();
+                    }}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Se Déconnecter de la Session</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
