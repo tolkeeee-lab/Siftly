@@ -8,6 +8,7 @@ import {
   Package,
   Scale,
   Video,
+  Gift,
   Store,
   Truck,
   Boxes,
@@ -54,6 +55,14 @@ export const NavigationTabs: React.FC = () => {
       label: 'Ads Studio & Scripts',
       icon: <Video className="w-3.5 h-3.5" />,
       isAvailable: true,
+    },
+    {
+      id: 'offers',
+      href: '/offers',
+      label: 'Offres & Packs Irrésistibles',
+      icon: <Gift className="w-3.5 h-3.5" />,
+      isAvailable: true,
+      badge: 'Nouveau',
     },
     {
       id: 'landing',
