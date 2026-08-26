@@ -10,6 +10,7 @@ import {
   Video,
   Store,
   Truck,
+  Boxes,
   TrendingUp,
 } from 'lucide-react';
 
@@ -66,6 +67,13 @@ export const NavigationTabs: React.FC = () => {
       href: '/cod',
       label: 'Suivi COD & Livreurs',
       icon: <Truck className="w-3.5 h-3.5" />,
+      isAvailable: true,
+    },
+    {
+      id: 'stock',
+      href: '/stock',
+      label: 'Stock Magasin & Alertes',
+      icon: <Boxes className="w-3.5 h-3.5" />,
       isAvailable: true,
     },
     {
