@@ -16,6 +16,9 @@ import {
   Tag,
   Scale,
   DollarSign,
+  Copy,
+  Check,
+  Lightbulb,
 } from 'lucide-react';
 import { ProductData, PRODUCT_CATEGORIES } from '../../types/product';
 import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
@@ -41,8 +44,23 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
   const [sellingPrice, setSellingPrice] = useState<number | ''>(15000);
   const [weight, setWeight] = useState<number | ''>(0.4);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
 
   if (!isOpen) return null;
+
+  const isGenericFilename = (name: string): boolean => {
+    const lower = name.toLowerCase();
+    return (
+      lower.startsWith('img') ||
+      lower.startsWith('screenshot') ||
+      lower.startsWith('capture') ||
+      lower.startsWith('download') ||
+      lower.startsWith('photo') ||
+      lower.startsWith('image') ||
+      lower.startsWith('whatsapp') ||
+      /^\d+$/.test(lower.replace(/[-_.]/g, ''))
+    );
+  };
 
   const handleFileUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -53,9 +71,10 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
     reader.onload = () => {
       const base64 = reader.result as string;
       setImageSrc(base64);
-      if (!productName) {
-        // Guess a default name from filename
-        const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+
+      // Only set filename if it's meaningful, NOT generic like IMG_0023.jpg
+      const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').trim();
+      if (!isGenericFilename(cleanName) && cleanName.length > 3) {
         setProductName(cleanName);
       }
     };
@@ -73,6 +92,14 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
   const handleApplyUrl = () => {
     if (imageUrlInput.trim()) {
       setImageSrc(imageUrlInput.trim());
+    }
+  };
+
+  const handleCopySearchText = () => {
+    if (productName.trim()) {
+      navigator.clipboard.writeText(productName.trim());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -99,14 +126,29 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
     }, 100);
   };
 
-  const querySearch = encodeURIComponent(productName || 'produit e-commerce');
+  const effectiveSearchText = productName.trim() || 'gadget e-commerce';
+  const querySearch = encodeURIComponent(effectiveSearchText);
+
+  // 1. Google Lens: If it's a web URL use uploadbyurl, otherwise open Google Lens universal search
   const googleLensUrl = imageSrc && imageSrc.startsWith('http')
     ? `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(imageSrc)}`
-    : `https://www.google.com/search?tbm=isch&q=${querySearch}`;
+    : `https://lens.google.com/`;
 
+  // 2. Direct E-commerce search links
+  const googleImagesUrl = `https://www.google.com/search?tbm=isch&q=${querySearch}`;
   const alibabaVisualUrl = `https://www.alibaba.com/trade/search?fsb=y&IndexArea=product_en&SearchText=${querySearch}`;
   const aliexpressUrl = `https://www.aliexpress.com/wholesale?SearchText=${querySearch}`;
   const tiktokUrl = `https://www.tiktok.com/search?q=${querySearch}`;
+  const amazonUrl = `https://www.amazon.com/s?k=${querySearch}`;
+
+  const sampleQuickSuggestions = [
+    'Mini Hachoir Sans Fil',
+    'Correcteur de Posture',
+    'Lampe Solaire LED',
+    'Diffuseur Flamme Arôme',
+    'Épilateur Cristal Magique',
+    'Support Téléphone Voiture',
+  ];
 
   return (
     <div className="paste-modal open" onClick={onClose}>
@@ -116,9 +158,9 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
           <div className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-gold" />
             <div>
-              <h2 className="image-sourcing-title">📸 Sourcer par Image & Intelligence Visuelle</h2>
+              <h2 className="image-sourcing-title">📸 Sourcing par Image & Reconnaissance Visuelle</h2>
               <p className="image-sourcing-subtitle">
-                Importez la photo d'un produit pour trouver les usines, les vidéos publicitaires et lancer l'analyse de marché en 1 clic.
+                Importez votre photo, nommez le type de produit, et lancez la recherche usine (Alibaba, Lens, AliExpress, TikTok).
               </p>
             </div>
           </div>
@@ -129,7 +171,7 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
 
         {/* Body Content Grid */}
         <div className="image-sourcing-body">
-          {/* Left Column: Image Upload & Dropzone */}
+          {/* Left Column: Image Upload & Visual Search */}
           <div className="image-sourcing-left">
             {!imageSrc ? (
               <div
@@ -143,7 +185,7 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
               >
                 <ImageIcon className="w-10 h-10 text-gold-deep mb-2 opacity-80" />
                 <h4 className="dropzone-title">Glissez votre photo ici</h4>
-                <p className="dropzone-sub">ou cliquez pour parcourir vos fichiers</p>
+                <p className="dropzone-sub">ou cliquez pour parcourir vos fichiers (JPG, PNG, WebP)</p>
                 <label className="btn-browse-file">
                   <Upload className="w-3.5 h-3.5" />
                   <span>Choisir une Image</span>
@@ -193,16 +235,30 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
 
             {/* 1-Click Reverse Image & Sourcing Search Buttons */}
             <div className="visual-search-shortcuts">
-              <span className="shortcuts-label">🔍 Rechercher ce produit sur le web :</span>
+              <div className="flex items-center justify-between">
+                <span className="shortcuts-label">🔍 Moteurs de Sourcing pour : « {effectiveSearchText} »</span>
+                {productName && (
+                  <button
+                    type="button"
+                    className="text-xs text-gold-deep hover:underline flex items-center gap-1"
+                    onClick={handleCopySearchText}
+                  >
+                    {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    <span>{copied ? 'Copié !' : 'Copier nom'}</span>
+                  </button>
+                )}
+              </div>
+
               <div className="shortcuts-grid">
                 <a
                   href={googleLensUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="v-search-btn lens-btn"
+                  title="Rechercher avec Google Lens (Glissez-y votre image)"
                 >
                   <Globe className="w-3.5 h-3.5" />
-                  <span>Google Lens (Recherche Visuelle)</span>
+                  <span>Google Lens (Image)</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
 
@@ -211,9 +267,10 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="v-search-btn ali-btn"
+                  title="Rechercher les fabricants sur Alibaba / 1688"
                 >
                   <Search className="w-3.5 h-3.5" />
-                  <span>Alibaba / 1688 (Usines Chine)</span>
+                  <span>Alibaba (Usines Chine)</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
 
@@ -222,6 +279,7 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="v-search-btn express-btn"
+                  title="Rechercher sur AliExpress"
                 >
                   <Search className="w-3.5 h-3.5" />
                   <span>AliExpress (Prix & Avis)</span>
@@ -233,6 +291,7 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="v-search-btn tt-btn"
+                  title="Rechercher les vidéos sur TikTok"
                 >
                   <Search className="w-3.5 h-3.5" />
                   <span>TikTok (Vidéos Virales)</span>
@@ -244,18 +303,42 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
 
           {/* Right Column: Fast Product Details Setup */}
           <div className="image-sourcing-right">
-            <h3 className="setup-title">✨ Fiche Express & Création Produit</h3>
+            <h3 className="setup-title">✨ Détails du Produit & Analyse</h3>
 
             <div className="setup-fields-list">
-              <div className="setup-field">
-                <label>Nom du Produit Détecté</label>
+              {/* Product Name Input */}
+              <div className="setup-field highlight-field">
+                <label className="text-gold-deep flex items-center gap-1 font-bold">
+                  <Tag className="w-3.5 h-3.5" />
+                  <span>Nom / Mots-clés du Produit (Ce qui est recherché) :</span>
+                </label>
                 <input
                   type="text"
-                  placeholder="Ex : Hachoir Électrique Multifonction Sans Fil"
-                  className="setup-input font-bold"
+                  placeholder="👉 Tapez le nom ou type d'objet (ex: Mini Hachoir sans fil)"
+                  className="setup-input font-bold text-ink"
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                 />
+              </div>
+
+              {/* Quick suggestions pills */}
+              <div className="quick-suggestions-box">
+                <span className="text-[11px] text-ink-soft flex items-center gap-1 mb-1">
+                  <Lightbulb className="w-3 h-3 text-amber-500" />
+                  <span>Exemples de recherche rapide en 1 clic :</span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {sampleQuickSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      className="quick-sugg-pill"
+                      onClick={() => setProductName(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="setup-field">
