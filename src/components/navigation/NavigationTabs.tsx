@@ -8,6 +8,7 @@ import {
   Package,
   Scale,
   Video,
+  Store,
   Truck,
   TrendingUp,
 } from 'lucide-react';
@@ -51,6 +52,13 @@ export const NavigationTabs: React.FC = () => {
       href: '/ads',
       label: 'Ads Studio & Scripts',
       icon: <Video className="w-3.5 h-3.5" />,
+      isAvailable: true,
+    },
+    {
+      id: 'landing',
+      href: '/landing',
+      label: 'Pages de Vente (Landing COD)',
+      icon: <Store className="w-3.5 h-3.5" />,
       isAvailable: true,
     },
     {
