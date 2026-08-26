@@ -19,6 +19,7 @@ import {
   Store,
   Save,
   Building2,
+  UserCheck,
 } from 'lucide-react';
 import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
@@ -46,6 +47,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const [editCountry, setEditCountry] = useState(profile.country || 'Bénin / Côte d\'Ivoire / Sénégal');
 
   const [shopCode, setShopCode] = useState('SIFT-8820');
+  const [pendingEmployees, setPendingEmployees] = useState<any[]>([]);
 
   useEffect(() => {
     setEditOwnerName(profile.ownerName || '');
@@ -55,10 +57,16 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
     if (user?.id) {
       import('../../utils/shopCodeUtils').then(({ getOrCreateShopCode }) => {
-        getOrCreateShopCode(user.id, profile.shopName).then(setShopCode);
+        getOrCreateShopCode(user.id, profile.shopName).then((code) => {
+          setShopCode(code);
+          fetch(`/api/employee/list?ownerId=${user.id}&shopCode=${code}`)
+            .then((res) => res.json())
+            .then((data) => setPendingEmployees(data.pending || []))
+            .catch(() => {});
+        });
       });
     }
-  }, [profile, user]);
+  }, [profile, user, isOpen]);
 
   // New member form
   const [newMemberName, setNewMemberName] = useState('');
@@ -327,10 +335,10 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
                     <Building2 className="w-4 h-4 text-amber-400" />
-                    <span>Code Boutique Officiel</span>
+                    <span>Code Boutique Officiel (À transmettre à vos employés)</span>
                   </div>
                   <p className="text-slate-300 text-xs leading-relaxed m-0">
-                    Vos employés s'inscrivent sur la page d'accueil avec ce code. Vous n'avez qu'à valider leur profil ci-dessous pour leur donner accès.
+                    Vos employés s'inscrivent sur la page d'accueil avec ce code. Vous n'avez aucun email à taper : leur demande apparaît ci-dessous pour validation immédiate.
                   </p>
                 </div>
                 <div className="flex items-center gap-3 bg-slate-950/80 border border-amber-500/40 px-4 py-2.5 rounded-xl shrink-0 shadow-inner">
@@ -349,58 +357,92 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                 </div>
               </div>
 
-              {/* Direct Quick Add / Associate Card */}
-              <form onSubmit={handleAddMemberSubmit} className="p-4 mb-6 rounded-xl bg-white border border-slate-200/80 shadow-sm space-y-3">
-                <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                  <UserPlus className="w-4 h-4 text-amber-600" />
-                  <span>Associer un Collaborateur par Email</span>
+              {/* Pending Employee Requests (NO TYPING NEEDED!) */}
+              {pendingEmployees.length > 0 ? (
+                <div className="p-4 mb-6 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+                      <UserCheck className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <span>📥 Demandes d'Employés en Attente ({pendingEmployees.length})</span>
+                    </div>
+                    <span className="text-[11px] text-amber-800 font-medium">Sélectionnez le rôle et validez</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {pendingEmployees.map((emp) => (
+                      <div key={emp.id || emp.email} className="p-3.5 rounded-xl bg-white border border-amber-300 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-900 font-bold text-xs flex items-center justify-center border border-amber-300">
+                            {getInitials(emp.name || emp.email)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-slate-900">{emp.name || 'Employé'}</div>
+                            <div className="text-xs text-amber-800 font-mono font-medium">{emp.email}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                          <select
+                            className="premium-select text-xs py-1.5"
+                            defaultValue={emp.role || 'assistant'}
+                            id={`role-select-${emp.email}`}
+                          >
+                            <option value="assistant">🤝 Assistant (Accès 100% Total)</option>
+                            <option value="media_buyer">🎬 Média Buyer (Ads & Pages Vente)</option>
+                            <option value="logistics">🚚 Responsable Logistique (Suivi COD)</option>
+                            <option value="inventory">📦 Magasinier (Stocks & Arrivages)</option>
+                          </select>
+
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition shrink-0 flex items-center gap-1 shadow-sm"
+                            onClick={async () => {
+                              const sel = document.getElementById(`role-select-${emp.email}`) as HTMLSelectElement;
+                              const roleVal = sel?.value || 'assistant';
+
+                              const res = await fetch('/api/employee/approve', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: emp.email, role: roleVal, action: 'approve' }),
+                              });
+                              const data = await res.json();
+                              if (data.success) {
+                                showToast(data.message);
+                                addMember({ name: emp.name || emp.email, email: emp.email, phone: '', role: roleVal as UserRole });
+                                setPendingEmployees((prev) => prev.filter((p) => p.email !== emp.email));
+                              }
+                            }}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Autoriser</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-xs rounded-lg transition shrink-0"
+                            onClick={async () => {
+                              await fetch('/api/employee/approve', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: emp.email, action: 'reject' }),
+                              });
+                              showToast(`Demande refusée pour ${emp.email}`);
+                              setPendingEmployees((prev) => prev.filter((p) => p.email !== emp.email));
+                            }}
+                          >
+                            Refuser
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nom complet (ex: Marc KOFFI)"
-                    className="premium-input text-xs"
-                    value={newMemberName}
-                    onChange={(e) => setNewMemberName(e.target.value)}
-                  />
-                  <input
-                    type="email"
-                    required
-                    placeholder="Adresse email du compte"
-                    className="premium-input text-xs"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                  />
-                  <select
-                    className="premium-select text-xs"
-                    value={newMemberRole}
-                    onChange={(e) => setNewMemberRole(e.target.value as UserRole)}
-                  >
-                    <option value="assistant">🤝 Assistant (Accès 100% Total)</option>
-                    <option value="media_buyer">🎬 Média Buyer (Ads & Pages Vente)</option>
-                    <option value="logistics">🚚 Responsable Logistique (Suivi COD)</option>
-                    <option value="inventory">📦 Magasinier (Stocks & Arrivages)</option>
-                  </select>
+              ) : (
+                <div className="p-3 mb-6 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Aucune demande d'employé en attente. Lorsqu'un employé entre votre Code Boutique, son adresse email apparaîtra ici automatiquement.</span>
                 </div>
-                <button
-                  type="submit"
-                  disabled={isSendingEmail}
-                  className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs rounded-lg shadow-sm transition flex items-center justify-center gap-2"
-                >
-                  {isSendingEmail ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Association en cours...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>✅ Valider & Autoriser cet Employé</span>
-                    </>
-                  )}
-                </button>
-              </form>
+              )}
 
               {/* Active Team Directory */}
               <div className="space-y-3">
