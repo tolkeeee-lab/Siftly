@@ -2673,6 +2673,53 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
   }
 }
 
+.auth-mode-segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.auth-mode-btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748B;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.auth-mode-btn.active {
+  background: #ffffff;
+  color: #0F172A;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.auth-help-box {
+  margin-top: 16px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.35;
+}
+
+.auth-help-box p {
+  margin: 0;
+}
+
 .masthead-shop-badge {
   display: inline-flex;
   align-items: center;

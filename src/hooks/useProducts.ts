@@ -11,7 +11,7 @@ import {
   deleteProductFromSupabase,
   saveAllProductsToSupabase,
 } from '../services/supabaseService';
-import { getStoredSupabaseConfig } from '../lib/supabaseClient';
+import { getStoredSupabaseConfig, getSupabaseClient } from '../lib/supabaseClient';
 
 const STORAGE_KEY = 'eaa-produits-benin';
 
@@ -51,17 +51,29 @@ export function useProducts() {
     setIsSyncing(true);
 
     try {
+      const client = getSupabaseClient();
+      const { data: { user } } = client ? await client.auth.getUser() : { data: { user: null } };
+      
+      let targetOwnerId: string | undefined = undefined;
+      if (user?.email) {
+        const { checkCollaboratorMembership } = await import('../services/teamService');
+        const membership = await checkCollaboratorMembership(user.email);
+        if (membership.isCollaborator && membership.ownerId) {
+          targetOwnerId = membership.ownerId;
+        }
+      }
+
       if (forceUpload && typeof window !== 'undefined') {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            await saveAllProductsToSupabase(parsed);
+            await saveAllProductsToSupabase(parsed, targetOwnerId);
           }
         }
       }
 
-      const dbProducts = await fetchProductsFromSupabase();
+      const dbProducts = await fetchProductsFromSupabase(targetOwnerId);
       if (dbProducts !== null && dbProducts.length > 0) {
         setProducts(dbProducts);
         if (typeof window !== 'undefined') {
@@ -71,32 +83,17 @@ export function useProducts() {
             console.warn('LocalStorage quota warning during Supabase load', e);
           }
         }
-      } else {
-        // If Supabase has 0 products for user but local storage has products, upload them to Supabase cloud!
+      } else if (!user) {
+        // Only initialize from localStorage for anonymous / local offline users
         if (typeof window !== 'undefined') {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
             try {
               const parsed = JSON.parse(saved);
               if (Array.isArray(parsed) && parsed.length > 0) {
-                const sanitized = parsed.map((p: any, idx: number) => ({
-                  ...p,
-                  id: p.id && typeof p.id === 'string' && p.id.trim() !== ''
-                    ? p.id
-                    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-                        const r = (Math.random() * 16) | 0;
-                        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-                        return v.toString(16);
-                      }),
-                  seq: p.seq ?? idx + 1,
-                }));
-                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized)); } catch { /* quota */ }
-                await saveAllProductsToSupabase(sanitized);
-                setProducts(sanitized);
+                setProducts(parsed);
               }
-            } catch (e) {
-              console.warn('Could not sync local products to Supabase cloud', e);
-            }
+            } catch { /* ignore */ }
           }
         }
       }

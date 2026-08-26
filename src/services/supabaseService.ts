@@ -100,10 +100,16 @@ async function getActiveUserId(): Promise<string | undefined> {
   }
 }
 
-export async function fetchProductsFromSupabase(): Promise<ProductData[] | null> {
+export async function fetchProductsFromSupabase(targetUserId?: string): Promise<ProductData[] | null> {
   const client = getSupabaseClient();
   if (!client) return null;
-  const { data, error } = await client.from('products').select('*').order('seq', { ascending: true });
+  
+  let query = client.from('products').select('*');
+  if (targetUserId) {
+    query = query.eq('user_id', targetUserId);
+  }
+  
+  const { data, error } = await query.order('seq', { ascending: true });
   if (error) {
     console.warn('Error fetching products from Supabase:', error);
     return null;
@@ -111,10 +117,10 @@ export async function fetchProductsFromSupabase(): Promise<ProductData[] | null>
   return (data || []).map(mapDbToProduct);
 }
 
-export async function saveProductToSupabase(product: ProductData): Promise<boolean> {
+export async function saveProductToSupabase(product: ProductData, targetUserId?: string): Promise<boolean> {
   const client = getSupabaseClient();
   if (!client) return false;
-  const userId = await getActiveUserId();
+  const userId = targetUserId || (await getActiveUserId());
   const row = mapProductToDb(product, userId);
   let { error } = await client.from('products').upsert(row, { onConflict: 'id' });
   
@@ -142,10 +148,10 @@ export async function deleteProductFromSupabase(id: string): Promise<boolean> {
   return true;
 }
 
-export async function saveAllProductsToSupabase(products: ProductData[]): Promise<boolean> {
+export async function saveAllProductsToSupabase(products: ProductData[], targetUserId?: string): Promise<boolean> {
   const client = getSupabaseClient();
   if (!client || products.length === 0) return false;
-  const userId = await getActiveUserId();
+  const userId = targetUserId || (await getActiveUserId());
   const rows = products.map((p) => mapProductToDb(p, userId));
   let { error } = await client.from('products').upsert(rows, { onConflict: 'id' });
 

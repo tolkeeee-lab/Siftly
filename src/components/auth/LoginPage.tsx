@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Lock, Mail, Sparkles, UserCheck, Shield } from 'lucide-react';
 
 interface LoginPageProps {
   onSignInWithGoogle: () => void;
@@ -35,7 +36,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         await onSignInWithEmail(email.trim(), password);
       } else {
         await onSignUpWithEmail(email.trim(), password);
-        setSuccessMsg('Compte créé ! Vous pouvez maintenant vous connecter.');
+        setSuccessMsg('✨ Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+        setMode('login');
       }
     } catch (err: any) {
       setErrorMsg(err?.message || 'Erreur d\'authentification');
@@ -47,11 +49,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="auth-logo">Siftly EAA</div>
+        <div className="auth-logo">Siftly <em>EAA</em></div>
         <p className="auth-subtitle">
-          Passez au tamis les tendances du marché et isolez les produits EAA à fort potentiel.
+          Espace de Travail E-Commerce & Recherche Produits Gagnants
         </p>
 
+        {/* Segmented Auth Mode Switch */}
+        <div className="auth-mode-segmented">
+          <button
+            type="button"
+            className={`auth-mode-btn ${mode === 'login' ? 'active' : ''}`}
+            onClick={() => {
+              setMode('login');
+              setErrorMsg(null);
+              setSuccessMsg(null);
+            }}
+          >
+            🔑 J'ai déjà un compte (Se Connecter)
+          </button>
+          <button
+            type="button"
+            className={`auth-mode-btn ${mode === 'signup' ? 'active' : ''}`}
+            onClick={() => {
+              setMode('signup');
+              setErrorMsg(null);
+              setSuccessMsg(null);
+            }}
+          >
+            ✨ Créer un Compte
+          </button>
+        </div>
+
+        {/* Google 1-Click Button */}
         <button type="button" className="google-btn" onClick={onSignInWithGoogle}>
           <svg className="w-5 h-5" viewBox="0 0 24 24" width="20" height="20">
             <path
@@ -71,7 +100,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          Continuer avec Google
+          <span>Continuer avec Google</span>
         </button>
 
         <div className="auth-divider">
@@ -83,11 +112,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {successMsg && <div className="auth-success-msg">{successMsg}</div>}
 
           <div className="auth-input-group">
-            <label className="auth-label">Adresse E-mail</label>
+            <label className="auth-label">
+              <Mail className="w-3.5 h-3.5 inline mr-1 text-gold-deep" />
+              Adresse E-mail
+            </label>
             <input
               type="email"
               className="auth-input"
-              placeholder="votre.email@exemple.com"
+              placeholder="votre.email@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -95,7 +127,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
 
           <div className="auth-input-group">
-            <label className="auth-label">Mot de passe</label>
+            <label className="auth-label">
+              <Lock className="w-3.5 h-3.5 inline mr-1 text-gold-deep" />
+              Mot de passe
+            </label>
             <input
               type="password"
               className="auth-input"
@@ -108,26 +143,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
           <button type="submit" className="auth-submit-btn" disabled={submitting}>
             {submitting
-              ? 'Traitement...'
+              ? 'Connexion en cours...'
               : mode === 'login'
-              ? 'Se connecter'
-              : 'Créer mon compte'}
+              ? 'Se Connecter à mon Espace'
+              : 'Créer mon Compte'}
           </button>
         </form>
 
-        <button
-          type="button"
-          className="auth-toggle-link"
-          onClick={() => {
-            setMode(mode === 'login' ? 'signup' : 'login');
-            setErrorMsg(null);
-            setSuccessMsg(null);
-          }}
-        >
-          {mode === 'login'
-            ? "Vous n'avez pas de compte ? S'inscrire"
-            : 'Déjà un compte ? Se connecter'}
-        </button>
+        <div className="auth-help-box">
+          <Shield className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
+          <p>
+            <strong>Collaborateurs & Équipe :</strong> Connectez-vous simplement avec l'adresse email enregistrée par votre responsable pour accéder directement à la boutique.
+          </p>
+        </div>
       </div>
     </div>
   );
