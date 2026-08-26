@@ -4,7 +4,7 @@ export interface LandingOffer {
   quantity: number;
   priceFCFA: number;
   originalPriceFCFA: number;
-  badge?: string;        // ex: "Le Plus Populaire"
+  badge?: string;        // ex: "🔥 OFFRE RECOMMANDÉE (-20%)"
   isRecommended?: boolean;
 }
 
@@ -23,9 +23,14 @@ export interface LandingPageConfig {
   hookHeadline: string;
   subHeadline: string;
   heroImage: string;
+  videoUrl?: string;     // Lien vidéo YouTube ou MP4
   sellingPriceFCFA: number;
   originalPriceFCFA: number;
   guaranteeDays: number;
+  whatsappSupportNumber?: string; // ex: "+229 97 00 00 00"
+  urgencyText?: string;
+  showCountdown?: boolean;
+  showStockAlert?: boolean;
   offers: LandingOffer[];
   keyBenefits: string[];
   reviews: CustomerReview[];

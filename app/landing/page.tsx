@@ -3,17 +3,20 @@
 import React, { useState, useMemo } from 'react';
 import { useProducts } from '../../src/hooks/useProducts';
 import { useCODOrders } from '../../src/hooks/useCODOrders';
-import { generateLandingConfig } from '../../src/utils/landingTemplates';
+import { useLandingPageConfigs } from '../../src/hooks/useLandingPageConfigs';
 import { Masthead } from '../../src/components/header/Masthead';
 import { NavigationTabs } from '../../src/components/navigation/NavigationTabs';
 import { LandingHeader } from '../../src/components/landing/LandingHeader';
 import { LandingPagePreview } from '../../src/components/landing/LandingPagePreview';
+import { LandingCustomizerDrawer } from '../../src/components/landing/editor/LandingCustomizerDrawer';
 import { ShareLinkModal } from '../../src/components/landing/modals/ShareLinkModal';
 import { CODStatus } from '../../src/types/codLogistics';
+import { LandingPageConfig } from '../../src/types/landingTypes';
 
 export default function LandingPageBuilder() {
   const { products } = useProducts();
   const { addOrder } = useCODOrders();
+  const { getConfigForProduct, updateConfig, resetConfig } = useLandingPageConfigs();
 
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [previewMode, setPreviewMode] = useState<'mobile' | 'full'>('mobile');
@@ -28,10 +31,22 @@ export default function LandingPageBuilder() {
     return products[0] || null;
   }, [products, selectedProductId]);
 
-  // Landing config
+  // Landing config for active product
   const config = useMemo(() => {
-    return generateLandingConfig(activeProduct);
-  }, [activeProduct]);
+    return getConfigForProduct(activeProduct);
+  }, [activeProduct, getConfigForProduct]);
+
+  const handleConfigChange = (newConfig: LandingPageConfig) => {
+    if (activeProduct) {
+      updateConfig(activeProduct.id, newConfig);
+    }
+  };
+
+  const handleResetConfig = () => {
+    if (activeProduct) {
+      resetConfig(activeProduct);
+    }
+  };
 
   const handleOrderSuccess = (orderData: {
     customerName: string;
@@ -43,7 +58,6 @@ export default function LandingPageBuilder() {
     productName: string;
     productId?: string;
   }) => {
-    // Automatically register order into COD Logistics!
     addOrder({
       productId: orderData.productId,
       productName: orderData.productName,
@@ -72,6 +86,13 @@ export default function LandingPageBuilder() {
           previewMode={previewMode}
           onTogglePreviewMode={setPreviewMode}
           onOpenShareModal={() => setIsShareModalOpen(true)}
+        />
+
+        {/* Live Visual Editor */}
+        <LandingCustomizerDrawer
+          config={config}
+          onChangeConfig={handleConfigChange}
+          onReset={handleResetConfig}
         />
 
         {/* Preview Container */}

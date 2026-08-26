@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useProducts } from '../../../src/hooks/useProducts';
 import { useCODOrders } from '../../../src/hooks/useCODOrders';
-import { generateLandingConfig } from '../../../src/utils/landingTemplates';
+import { useLandingPageConfigs } from '../../../src/hooks/useLandingPageConfigs';
 import { LandingPagePreview } from '../../../src/components/landing/LandingPagePreview';
 import { CODStatus } from '../../../src/types/codLogistics';
 
@@ -13,14 +13,15 @@ export default function PublicProductLandingPage() {
   const productId = params?.id as string;
   const { products } = useProducts();
   const { addOrder } = useCODOrders();
+  const { getConfigForProduct } = useLandingPageConfigs();
 
   const product = useMemo(() => {
     return products.find((p) => p.id === productId) || products[0] || null;
   }, [products, productId]);
 
   const config = useMemo(() => {
-    return generateLandingConfig(product);
-  }, [product]);
+    return getConfigForProduct(product);
+  }, [product, getConfigForProduct]);
 
   const handleOrderSuccess = (orderData: {
     customerName: string;

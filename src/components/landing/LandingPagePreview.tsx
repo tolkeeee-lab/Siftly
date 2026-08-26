@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Star, ShieldCheck, Truck, Award, ArrowDown, Zap, Clock, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Star, ShieldCheck, Truck, Award, ArrowDown, Zap, Clock, MessageCircle, Play } from 'lucide-react';
 import { LandingPageConfig } from '../../types/landingTypes';
 import { CODOrderForm } from './CODOrderForm';
 import { formatFCFA } from '../../utils/formatters';
@@ -32,6 +32,30 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
     document.getElementById('commande-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Video embed helper
+  const videoEmbedUrl = useMemo(() => {
+    if (!config.videoUrl) return null;
+    const url = config.videoUrl.trim();
+    if (url.includes('youtube.com/watch?v=')) {
+      const vidId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${vidId}`;
+    }
+    if (url.includes('youtu.be/')) {
+      const vidId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${vidId}`;
+    }
+    return url;
+  }, [config.videoUrl]);
+
+  // WhatsApp support link
+  const whatsappNumberClean = config.whatsappSupportNumber
+    ? config.whatsappSupportNumber.replace(/\D/g, '')
+    : '';
+
+  const whatsappHref = whatsappNumberClean
+    ? `https://wa.me/${whatsappNumberClean}?text=${encodeURIComponent(`Bonjour, j'ai une question sur l'offre *${config.title}*`)}`
+    : `https://wa.me/?text=${encodeURIComponent(`Bonjour, j'ai une question sur l'offre *${config.title}*`)}`;
+
   return (
     <div className="landing-page-root">
       {/* Top Banner Notice with Flash Sale Countdown */}
@@ -55,6 +79,23 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
 
           <h1 className="landing-hero-title">{config.title}</h1>
           <p className="landing-hero-subtitle">{config.subHeadline}</p>
+
+          {/* Video Player if provided */}
+          {videoEmbedUrl && (
+            <div className="landing-video-box">
+              {videoEmbedUrl.includes('youtube.com') ? (
+                <iframe
+                  src={videoEmbedUrl}
+                  title={config.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="landing-video-iframe"
+                />
+              ) : (
+                <video controls src={videoEmbedUrl} className="landing-video-element" />
+              )}
+            </div>
+          )}
 
           {/* Hero Image with Price Badge */}
           <div className="landing-hero-img-box">
@@ -153,7 +194,7 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
 
       {/* Floating WhatsApp support */}
       <a
-        href="https://wa.me/?text=Bonjour,%20j'ai%20une%20question%20sur%20le%20produit"
+        href={whatsappHref}
         target="_blank"
         rel="noopener noreferrer"
         className="floating-whatsapp-btn"
