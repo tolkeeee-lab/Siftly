@@ -20,6 +20,8 @@ import {
   Copy,
   ExternalLink,
   KeyRound,
+  Send,
+  Loader2,
 } from 'lucide-react';
 import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
@@ -52,27 +54,57 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
   // Feedback toast
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [sendingEmailTarget, setSendingEmailTarget] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
+    setTimeout(() => setToastMsg(null), 4000);
+  };
+
+  const sendDirectEmailInvite = async (name: string, email: string, role: string) => {
+    setSendingEmailTarget(email);
+    try {
+      const res = await fetch('/api/invite-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, role }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✉️ ${data.message || `Email d'invitation officiel envoyé à ${email} !`}`);
+      } else {
+        showToast(`⚠️ ${data.message || "Erreur lors de l'envoi de l'invitation"}`);
+      }
+    } catch (err: any) {
+      showToast(`⚠️ Erreur réseau : ${err?.message || 'Serveur injoignable'}`);
+    } finally {
+      setSendingEmailTarget(null);
+    }
   };
 
   if (!isOpen) return null;
 
-  const handleAddMemberSubmit = (e: React.FormEvent) => {
+  const handleAddMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim() || !newMemberEmail.trim()) return;
+    const name = newMemberName.trim();
+    const email = newMemberEmail.trim();
+    const phone = newMemberPhone.trim() || '+229 00 00 00 00';
+    const role = newMemberRole;
+
     addMember({
-      name: newMemberName.trim(),
-      email: newMemberEmail.trim(),
-      phone: newMemberPhone.trim() || '+229 00 00 00 00',
-      role: newMemberRole,
+      name,
+      email,
+      phone,
+      role,
     });
-    showToast(`🎉 Collaborateur "${newMemberName.trim()}" enregistré avec succès !`);
+
     setNewMemberName('');
     setNewMemberEmail('');
     setNewMemberPhone('');
+
+    // Trigger automated Supabase email send in background
+    await sendDirectEmailInvite(name, email, role);
   };
 
   const handleAddLivreurSubmit = (e: React.FormEvent) => {
@@ -226,9 +258,22 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
                 </div>
 
-                <button type="submit" className="btn-submit-premium-gold">
-                  <UserPlus className="w-4 h-4" />
-                  <span>Enregistrer Collaborateur</span>
+                <button
+                  type="submit"
+                  disabled={!!sendingEmailTarget}
+                  className="btn-submit-premium-gold"
+                >
+                  {sendingEmailTarget ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Envoi de l'invitation par email...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Enregistrer & Envoyer l'Invitation par Email</span>
+                    </>
+                  )}
                 </button>
               </form>
 
@@ -270,14 +315,20 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
                         <div className="member-actions-group">
                           {member.email && (
-                            <a
-                              href={mailtoLink}
+                            <button
+                              type="button"
                               className="btn-action-invite-mail"
-                              title="Envoyer un email d'invitation direct"
+                              disabled={sendingEmailTarget === member.email}
+                              title="Envoyer un email d'invitation automatique via Supabase"
+                              onClick={() => sendDirectEmailInvite(member.name, member.email, member.role)}
                             >
-                              <Mail className="w-3.5 h-3.5" />
-                              <span>Email Direct</span>
-                            </a>
+                              {sendingEmailTarget === member.email ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Send className="w-3.5 h-3.5" />
+                              )}
+                              <span>{sendingEmailTarget === member.email ? 'Envoi...' : 'Envoyer Email'}</span>
+                            </button>
                           )}
 
                           {waLink && (
