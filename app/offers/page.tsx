@@ -6,6 +6,8 @@ import { useProducts } from '../../src/hooks/useProducts';
 import { useLandingPageConfigs } from '../../src/hooks/useLandingPageConfigs';
 import { calculateOfferStructures } from '../../src/utils/offerCalculations';
 import { OfferStructure, OfferTier } from '../../src/types/offerTypes';
+import { Masthead } from '../../src/components/header/Masthead';
+import { NavigationTabs } from '../../src/components/navigation/NavigationTabs';
 import { OffersHeader } from '../../src/components/offers/OffersHeader';
 import { OfferStructureCards } from '../../src/components/offers/OfferStructureCards';
 import { OfferSimulatorBreakdown } from '../../src/components/offers/OfferSimulatorBreakdown';
@@ -114,6 +116,8 @@ export default function OffersPage() {
 
   return (
     <div className="sheet">
+      <Masthead />
+      <NavigationTabs />
       <div className="offers-page-layout">
         {/* Header & Controls */}
         <OffersHeader
