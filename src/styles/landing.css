@@ -1063,3 +1063,90 @@
   object-fit: cover;
 }
 
+/* Section Order Reordering UI */
+.section-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-order-item {
+  background: #FAF8F2;
+  border: 1.5px solid var(--panel-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s ease;
+}
+
+.section-order-item:hover {
+  background: #ffffff;
+  border-color: var(--gold);
+}
+
+.sec-order-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sec-order-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  background: #141B32;
+  color: var(--gold);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sec-order-label {
+  display: block;
+  font-size: 12.5px;
+  color: #0F172A;
+}
+
+.sec-order-desc {
+  display: block;
+  font-size: 10.5px;
+  color: #64748B;
+}
+
+.sec-order-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-order-move {
+  background: #ffffff;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  transition: all 0.15s ease;
+}
+
+.btn-order-move:hover:not(:disabled) {
+  background: var(--gold);
+  color: #141B32;
+  border-color: var(--gold);
+}
+
+.btn-order-move:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+

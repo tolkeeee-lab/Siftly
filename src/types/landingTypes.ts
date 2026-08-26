@@ -1,3 +1,13 @@
+export type LandingSectionId =
+  | 'headline'     // Titre & Note clients
+  | 'video'        // Vidéo démonstration
+  | 'hero_image'   // Photo principale & Badge Promo
+  | 'gallery'      // Galerie photos secondaires
+  | 'cta_button'   // Bouton Commander & Badges Confiance
+  | 'benefits'     // Avantages & Arguments clés
+  | 'reviews'      // Avis clients
+  | 'order_form';  // Formulaire de commande COD
+
 export interface LandingOffer {
   id: string;
   name: string;          // ex: "1 Article (Découverte)" vs "Pack Duo (Populaire)"
@@ -35,4 +45,5 @@ export interface LandingPageConfig {
   offers: LandingOffer[];
   keyBenefits: string[];
   reviews: CustomerReview[];
+  sectionOrder?: LandingSectionId[]; // Ordre d'affichage personnalisable des blocs
 }
