@@ -137,7 +137,7 @@ export function App() {
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
         onOpenCurrencyModal={() => setIsGlobalCurrencyModalOpen(true)}
         onOpenImageSourcingModal={() => setIsImageSourcingOpen(true)}
-        onRefreshSupabase={loadFromSupabase}
+        onRefreshSupabase={() => loadFromSupabase(true)}
         showAutoSaveToast={showAutoSaveToast}
         isSyncing={isSyncing}
       />

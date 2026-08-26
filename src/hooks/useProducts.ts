@@ -46,51 +46,65 @@ export function useProducts() {
     setStorageInfo(checkLocalStorageUsage(STORAGE_KEY));
   }, []);
 
-  const loadFromSupabase = useCallback(async () => {
+  const loadFromSupabase = useCallback(async (forceUpload: boolean = false) => {
     if (!getStoredSupabaseConfig()) return;
     setIsSyncing(true);
-    const dbProducts = await fetchProductsFromSupabase();
-    if (dbProducts !== null && dbProducts.length > 0) {
-      setProducts(dbProducts);
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
-        } catch (e) {
-          console.warn('LocalStorage quota warning during Supabase load', e);
-        }
-      }
-    } else {
-      // If Supabase has 0 products for user but local PC storage has products, upload them to Supabase cloud!
-      if (typeof window !== 'undefined') {
+
+    try {
+      if (forceUpload && typeof window !== 'undefined') {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              // Ensure every product has a valid non-null UUID before uploading
-              const sanitized = parsed.map((p: any, idx: number) => ({
-                ...p,
-                id: p.id && typeof p.id === 'string' && p.id.trim() !== ''
-                  ? p.id
-                  : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-                      const r = (Math.random() * 16) | 0;
-                      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-                      return v.toString(16);
-                    }),
-                seq: p.seq ?? idx + 1,
-              }));
-              // Persist sanitized products back to localStorage so future loads are also clean
-              try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized)); } catch { /* quota */ }
-              await saveAllProductsToSupabase(sanitized);
-              setProducts(sanitized);
-            }
-          } catch (e) {
-            console.warn('Could not sync local products to Supabase cloud', e);
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            await saveAllProductsToSupabase(parsed);
           }
         }
       }
+
+      const dbProducts = await fetchProductsFromSupabase();
+      if (dbProducts !== null && dbProducts.length > 0) {
+        setProducts(dbProducts);
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
+          } catch (e) {
+            console.warn('LocalStorage quota warning during Supabase load', e);
+          }
+        }
+      } else {
+        // If Supabase has 0 products for user but local storage has products, upload them to Supabase cloud!
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                const sanitized = parsed.map((p: any, idx: number) => ({
+                  ...p,
+                  id: p.id && typeof p.id === 'string' && p.id.trim() !== ''
+                    ? p.id
+                    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                        const r = (Math.random() * 16) | 0;
+                        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+                        return v.toString(16);
+                      }),
+                  seq: p.seq ?? idx + 1,
+                }));
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized)); } catch { /* quota */ }
+                await saveAllProductsToSupabase(sanitized);
+                setProducts(sanitized);
+              }
+            } catch (e) {
+              console.warn('Could not sync local products to Supabase cloud', e);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Sync error:', err);
+    } finally {
+      setIsSyncing(false);
     }
-    setIsSyncing(false);
   }, []);
 
   useEffect(() => {

@@ -7,6 +7,7 @@ export function mapProductToDb(p: ProductData, userId?: string): Record<string, 
     id: p.id,
     seq: p.seq,
     produit: p.produit || '',
+    category: p.category || 'Maison & Confort',
     img_src: p.imgSrc || '',
     creative: p.creative || '',
     alibaba: p.alibaba || '',
@@ -32,6 +33,7 @@ export function mapProductToDb(p: ProductData, userId?: string): Record<string, 
     poidsfacteur: p.poidsfacteur === '' ? null : parseNum(p.poidsfacteur),
     cible: p.cible || '',
     angle: p.angle || '',
+    market_analysis: p.marketAnalysis ? JSON.stringify(p.marketAnalysis) : null,
     updated_at: new Date().toISOString(),
   };
 
@@ -43,10 +45,18 @@ export function mapProductToDb(p: ProductData, userId?: string): Record<string, 
 }
 
 export function mapDbToProduct(row: Record<string, any>): ProductData {
+  let marketAnalysis = undefined;
+  if (row.market_analysis) {
+    try {
+      marketAnalysis = typeof row.market_analysis === 'string' ? JSON.parse(row.market_analysis) : row.market_analysis;
+    } catch { /* ignore */ }
+  }
+
   return {
     id: row.id,
     seq: row.seq || 1,
     produit: row.produit || '',
+    category: row.category || 'Maison & Confort',
     imgSrc: row.img_src || '',
     creative: row.creative || '',
     alibaba: row.alibaba || '',
@@ -72,6 +82,7 @@ export function mapDbToProduct(row: Record<string, any>): ProductData {
     poidsfacteur: row.poidsfacteur ?? '',
     cible: row.cible || '',
     angle: row.angle || '',
+    marketAnalysis,
   };
 }
 
