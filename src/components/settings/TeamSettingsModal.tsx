@@ -242,6 +242,11 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     const cleanPhone = (member.phone || '').replace(/[^0-9]/g, '');
                     const inviteMsg = `Bonjour ${member.name},\n\nVous avez été invité(e) sur notre espace de travail Siftly en tant que *${perm?.label || member.role}*.\n\n🔗 Accédez à l'application : https://siftly-iota.vercel.app\n📧 Connectez-vous avec votre email : ${member.email}\n\nBienvenue dans l'équipe !`;
                     const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(inviteMsg)}` : null;
+                    const mailSubject = encodeURIComponent(`Invitation à rejoindre l'équipe Siftly (${perm?.label || member.role})`);
+                    const mailBody = encodeURIComponent(
+                      `Bonjour ${member.name},\n\nVous avez été invité(e) à rejoindre notre espace de travail sur Siftly en tant que ${perm?.label || member.role}.\n\n🔗 Accédez à l'application ici : https://siftly-iota.vercel.app\n📧 Connectez-vous simplement avec votre adresse email : ${member.email}\n\nBienvenue dans l'équipe !`
+                    );
+                    const mailtoLink = `mailto:${member.email}?subject=${mailSubject}&body=${mailBody}`;
 
                     return (
                       <div key={member.id} className="premium-member-row">
@@ -264,6 +269,17 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                         </div>
 
                         <div className="member-actions-group">
+                          {member.email && (
+                            <a
+                              href={mailtoLink}
+                              className="btn-action-invite-mail"
+                              title="Envoyer un email d'invitation direct"
+                            >
+                              <Mail className="w-3.5 h-3.5" />
+                              <span>Email Direct</span>
+                            </a>
+                          )}
+
                           {waLink && (
                             <a
                               href={waLink}
@@ -273,7 +289,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                               title="Envoyer l'accès et les instructions sur WhatsApp"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
-                              <span>Inviter WhatsApp</span>
+                              <span>WhatsApp</span>
                             </a>
                           )}
 
