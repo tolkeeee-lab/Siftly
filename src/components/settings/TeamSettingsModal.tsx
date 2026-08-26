@@ -71,8 +71,8 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   };
 
   return (
-    <div className="paste-modal open" onClick={onClose}>
-      <div className="paste-box settings-modal-premium" onClick={(e) => e.stopPropagation()}>
+    <div className="settings-modal-overlay" onClick={onClose}>
+      <div className="settings-modal-premium" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="settings-modal-top">
           <div className="settings-title-group">
