@@ -1,4 +1,4 @@
-import { ProductData, MarketAnalysisData } from '../types/product';
+import { ProductData, MarketAnalysisData, BuyerPersonaData, MarketProjectionsData, AdBenchmarksData } from '../types/product';
 import { calculateNoteFinale, calculateMargin, calculateCOGS } from './calculations';
 import { formatFCFA } from './formatters';
 
@@ -120,6 +120,67 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
 • 💣 Risque 3 (Guerre des prix locale) : Si des boutiques locales ou concurrents vendent une copie bas de gamme à prix cassé au grand marché (Dantokpa / Adjamé / Sandaga).
 • 💣 Risque 4 (Logistique & Livreurs) : ${weight > 1.5 ? 'Colis trop lourd ou encombrant, refus des livreurs à moto de le transporter' : 'Injoignabilité des clients lors de la confirmation téléphonique des commandes'}.`;
 
+  // 14. BUYER PERSONA AVANCÉ
+  let genderRatio = 'Mixte (50% H / 50% F)';
+  let targetAge = '25 - 50 ans';
+  let professionalCategory = 'Cadres, Commerçants, Fonctionnaires & Salariés urbains';
+  let psychologicalTrigger = 'Soulagement immédiat, Gain de confort & Fierté familiale';
+
+  if (category === 'Beauté & Cosmétique' || category === 'Mode & Accessoires') {
+    genderRatio = 'Femmes (80%) / Hommes (20%)';
+    targetAge = '20 - 45 ans';
+    professionalCategory = 'Femmes actives, Entrepreneures, Étudiantes';
+    psychologicalTrigger = 'Esthétique, Confiance en soi & Séduction';
+  } else if (category === 'Auto & Moto' || category === 'Bricolage & Outillage') {
+    genderRatio = 'Hommes (85%) / Femmes (15%)';
+    targetAge = '28 - 55 ans';
+    professionalCategory = 'Propriétaires de véhicules, Chauffeurs, Artisans';
+    psychologicalTrigger = 'Sécurité, Entretien & Économie de garage';
+  } else if (category === 'Cuisine & Électroménager') {
+    genderRatio = 'Femmes (75%) / Hommes (25%)';
+    targetAge = '25 - 55 ans';
+    professionalCategory = 'Mères de famille, Passionnées de cuisine, Travailleuses';
+    psychologicalTrigger = 'Gain de temps en cuisine & Repas sains';
+  }
+
+  const buyerPersona: BuyerPersonaData = {
+    targetAge,
+    genderRatio,
+    professionalCategory,
+    psychologicalTrigger,
+  };
+
+  // 15. PROJECTIONS FINANCIÈRES & PÉNÉTRATION
+  const conservativeUnits = Math.round(audienceSizeMillion * 1000 * 0.0003); // ~0.03% pénétration
+  const conservativeRevenueFCFA = conservativeUnits * sellingPrice;
+  const conservativeProfitFCFA = conservativeUnits * margin;
+
+  const aggressiveUnits = Math.round(audienceSizeMillion * 1000 * 0.0012); // ~0.12% pénétration
+  const aggressiveRevenueFCFA = aggressiveUnits * sellingPrice;
+  const aggressiveProfitFCFA = aggressiveUnits * margin;
+
+  const marketProjections: MarketProjectionsData = {
+    conservativeUnits: Math.max(150, conservativeUnits),
+    conservativeRevenueFCFA: Math.max(150 * sellingPrice, conservativeRevenueFCFA),
+    conservativeProfitFCFA: Math.max(150 * margin, conservativeProfitFCFA),
+    aggressiveUnits: Math.max(600, aggressiveUnits),
+    aggressiveRevenueFCFA: Math.max(600 * sellingPrice, aggressiveRevenueFCFA),
+    aggressiveProfitFCFA: Math.max(600 * margin, aggressiveProfitFCFA),
+  };
+
+  // 16. BENCHMARKS MÉDIAS PUBS
+  const estimatedCPMFCFA = 1600; // 1 600 FCFA pour 1000 impressions en Afrique de l'Ouest
+  const targetCTR = viralFactorScore >= 7 ? 3.2 : 2.4;
+  const targetConversionRate = 11.5; // 11.5% de conversion sur la Landing Page
+  const maxAllowedCPAFCFA = Math.max(2000, Math.round(margin * 0.45)); // CPA plafond avant risque
+
+  const adBenchmarks: AdBenchmarksData = {
+    estimatedCPMFCFA,
+    targetCTR,
+    targetConversionRate,
+    maxAllowedCPAFCFA,
+  };
+
   return {
     saturationScore,
     competitionLevel,
@@ -136,6 +197,9 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
     whyItsWorthIt,
     criticalAttentionPoints,
     failureRisks,
+    buyerPersona,
+    marketProjections,
+    adBenchmarks,
   };
 }
 

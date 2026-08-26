@@ -18,6 +18,11 @@ import {
   Layers,
   Scale,
   Ban,
+  UserCheck,
+  Target,
+  BarChart3,
+  DollarSign,
+  Tv,
 } from 'lucide-react';
 import { ProductData, MarketAnalysisData } from '../../types/product';
 import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
@@ -36,6 +41,8 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
   product,
   onSaveAnalysis,
 }) => {
+  const [activeTab, setActiveTab] = useState<'pillars' | 'persona' | 'projections' | 'ads'>('pillars');
+
   if (!isOpen || !product) return null;
 
   const defaultAnalysis = getProductMarketAnalysis(product);
@@ -49,11 +56,44 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
     setAnalysis((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePersonaUpdate = (field: string, value: string) => {
+    setAnalysis((prev) => ({
+      ...prev,
+      buyerPersona: {
+        ...(prev.buyerPersona || { targetAge: '', genderRatio: '', professionalCategory: '', psychologicalTrigger: '' }),
+        [field]: value,
+      },
+    }));
+  };
+
   const handleSave = () => {
     if (onSaveAnalysis) {
       onSaveAnalysis(product.id, analysis);
     }
     onClose();
+  };
+
+  const persona = analysis.buyerPersona || {
+    targetAge: '25 - 50 ans',
+    genderRatio: 'Mixte (50% H / 50% F)',
+    professionalCategory: 'Salariés, Cadres & Commerçants urbains',
+    psychologicalTrigger: 'Gain de temps, Confort immédiat & Fierté',
+  };
+
+  const projections = analysis.marketProjections || {
+    conservativeUnits: 250,
+    conservativeRevenueFCFA: 3750000,
+    conservativeProfitFCFA: 1875000,
+    aggressiveUnits: 1200,
+    aggressiveRevenueFCFA: 18000000,
+    aggressiveProfitFCFA: 9000000,
+  };
+
+  const ads = analysis.adBenchmarks || {
+    estimatedCPMFCFA: 1600,
+    targetCTR: 2.8,
+    targetConversionRate: 11.5,
+    maxAllowedCPAFCFA: 3500,
   };
 
   return (
@@ -65,10 +105,10 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
             <Sparkles className="w-5 h-5 text-gold flex-shrink-0" />
             <div>
               <h2 className="market-modal-title">
-                🔬 Dossier d'Intelligence Marché EAA : #{product.seq} {product.produit}
+                🔬 Dossier d'Intelligence Marché Poussé : #{product.seq} {product.produit}
               </h2>
               <p className="market-modal-subtitle">
-                Analyse à 360° : Pourquoi l'utiliser, problèmes résolus, points d'attention logistique et risques d'échec cachés.
+                Radar 360°, Persona Cible, Projections de Chiffre d'Affaires & Benchmarks Médias COD Afrique.
               </p>
             </div>
           </div>
@@ -77,171 +117,332 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
           </button>
         </div>
 
+        {/* Sub-Navigation Tabs */}
+        <div className="market-modal-tabs-nav">
+          <button
+            type="button"
+            className={`market-tab-btn ${activeTab === 'pillars' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pillars')}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>1. Radar & 5 Piliers Stratégiques</span>
+          </button>
+
+          <button
+            type="button"
+            className={`market-tab-btn ${activeTab === 'persona' ? 'active' : ''}`}
+            onClick={() => setActiveTab('persona')}
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>2. Buyer Persona & Cible</span>
+          </button>
+
+          <button
+            type="button"
+            className={`market-tab-btn ${activeTab === 'projections' ? 'active' : ''}`}
+            onClick={() => setActiveTab('projections')}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>3. Projections & Pénétration CA</span>
+          </button>
+
+          <button
+            type="button"
+            className={`market-tab-btn ${activeTab === 'ads' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ads')}
+          >
+            <Tv className="w-3.5 h-3.5" />
+            <span>4. Benchmarks Pubs Facebook/TikTok</span>
+          </button>
+        </div>
+
         {/* Modal Body */}
         <div className="market-modal-body">
-          {/* Strategic Verdict Alert Banner */}
-          <div className="verdict-banner">
-            <div className="verdict-tag">🎯 VERDICT STRATÉGIQUE IA EAA (Éditable) :</div>
-            <textarea
-              className="verdict-textarea"
-              rows={2}
-              value={analysis.strategicVerdict}
-              onChange={(e) => handleUpdate('strategicVerdict', e.target.value)}
-              title="Cliquez pour modifier le verdict"
-            />
-          </div>
-
-          {/* 4 Market KPI Cards */}
-          <div className="market-kpi-grid">
-            <div className="market-kpi-box">
-              <span className="kpi-icon">📊</span>
-              <label>Saturation du Marché</label>
-              <select
-                className="market-select-in"
-                value={analysis.saturationScore}
-                onChange={(e) => handleUpdate('saturationScore', e.target.value)}
-              >
-                <option value="low">🟢 Faible (Océan Bleu)</option>
-                <option value="medium">🟡 Modérée (Quelques Vendeurs)</option>
-                <option value="high">🔴 Forte (Marché Saturé)</option>
-              </select>
-            </div>
-
-            <div className="market-kpi-box">
-              <span className="kpi-icon">👥</span>
-              <label>Taille d'Audience (TAM)</label>
-              <div className="market-num-input-wrap">
-                <input
-                  type="number"
-                  step="0.5"
-                  className="market-num-in"
-                  value={analysis.audienceSizeMillion}
-                  onChange={(e) => handleUpdate('audienceSizeMillion', Number(e.target.value) || 1)}
+          {/* TAB 1: 5 PILIERS */}
+          {activeTab === 'pillars' && (
+            <>
+              {/* Verdict Banner */}
+              <div className="verdict-banner">
+                <div className="verdict-tag">🎯 VERDICT STRATÉGIQUE IA EAA (Éditable) :</div>
+                <textarea
+                  className="verdict-textarea"
+                  rows={2}
+                  value={analysis.strategicVerdict}
+                  onChange={(e) => handleUpdate('strategicVerdict', e.target.value)}
                 />
-                <span>Millions</span>
               </div>
-            </div>
 
-            <div className="market-kpi-box">
-              <span className="kpi-icon">🔥</span>
-              <label>Score Viralité TikTok (/10)</label>
-              <input
-                type="number"
-                min="1"
-                max="10"
-                className="market-num-in text-center font-bold text-amber-500"
-                value={analysis.viralFactorScore}
-                onChange={(e) => handleUpdate('viralFactorScore', Number(e.target.value) || 5)}
-              />
-            </div>
+              {/* 4 Market KPI Cards */}
+              <div className="market-kpi-grid">
+                <div className="market-kpi-box">
+                  <span className="kpi-icon">📊</span>
+                  <label>Saturation du Marché</label>
+                  <select
+                    className="market-select-in"
+                    value={analysis.saturationScore}
+                    onChange={(e) => handleUpdate('saturationScore', e.target.value)}
+                  >
+                    <option value="low">🟢 Faible (Océan Bleu)</option>
+                    <option value="medium">🟡 Modérée (Quelques Vendeurs)</option>
+                    <option value="high">🔴 Forte (Marché Saturé)</option>
+                  </select>
+                </div>
 
-            <div className="market-kpi-box">
-              <span className="kpi-icon">🛵</span>
-              <label>Risque Retour COD (Moto)</label>
-              <select
-                className="market-select-in"
-                value={analysis.codReturnRisk}
-                onChange={(e) => handleUpdate('codReturnRisk', e.target.value)}
-              >
-                <option value="low">🟢 Faible (&lt; 15% retours)</option>
-                <option value="medium">🟡 Moyen (15% - 25%)</option>
-                <option value="high">🔴 Élevé (&gt; 25%)</option>
-              </select>
-            </div>
-          </div>
+                <div className="market-kpi-box">
+                  <span className="kpi-icon">👥</span>
+                  <label>Taille d'Audience (TAM)</label>
+                  <div className="market-num-input-wrap">
+                    <input
+                      type="number"
+                      step="0.5"
+                      className="market-num-in"
+                      value={analysis.audienceSizeMillion}
+                      onChange={(e) => handleUpdate('audienceSizeMillion', Number(e.target.value) || 1)}
+                    />
+                    <span>Millions</span>
+                  </div>
+                </div>
 
-          {/* 5 DEEP-DIVE STRATEGIC PILLARS */}
-          <div className="pillars-grid">
-            {/* PILLAR 1: Pourquoi l'utiliser */}
-            <div className="pillar-box blue-pillar">
-              <div className="pillar-header">
-                <span className="pillar-icon">🎯</span>
-                <div>
-                  <h4 className="pillar-title">1. Pourquoi ce Produit Doit Être Utilisé (Usage & Bénéfices)</h4>
-                  <span className="pillar-hint">Transformation vécue par le client et utilité concrète</span>
+                <div className="market-kpi-box">
+                  <span className="kpi-icon">🔥</span>
+                  <label>Score Viralité TikTok (/10)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    className="market-num-in text-center font-bold text-amber-500"
+                    value={analysis.viralFactorScore}
+                    onChange={(e) => handleUpdate('viralFactorScore', Number(e.target.value) || 5)}
+                  />
+                </div>
+
+                <div className="market-kpi-box">
+                  <span className="kpi-icon">🛵</span>
+                  <label>Risque Retour COD (Moto)</label>
+                  <select
+                    className="market-select-in"
+                    value={analysis.codReturnRisk}
+                    onChange={(e) => handleUpdate('codReturnRisk', e.target.value)}
+                  >
+                    <option value="low">🟢 Faible (&lt; 15% retours)</option>
+                    <option value="medium">🟡 Moyen (15% - 25%)</option>
+                    <option value="high">🔴 Élevé (&gt; 25%)</option>
+                  </select>
                 </div>
               </div>
-              <textarea
-                className="pillar-textarea"
-                rows={4}
-                value={analysis.reasonsToUse}
-                onChange={(e) => handleUpdate('reasonsToUse', e.target.value)}
-                placeholder="Listez les raisons clés pour lesquelles le client doit acheter ce produit..."
-              />
-            </div>
 
-            {/* PILLAR 2: Problèmes résolus */}
-            <div className="pillar-box emerald-pillar">
-              <div className="pillar-header">
-                <span className="pillar-icon">🛑</span>
-                <div>
-                  <h4 className="pillar-title">2. Problèmes & Frustrations Concrètes Résolus</h4>
-                  <span className="pillar-hint">Quelles douleurs profondes ce produit élimine-t-il ?</span>
+              {/* 5 DEEP-DIVE STRATEGIC PILLARS */}
+              <div className="pillars-grid">
+                <div className="pillar-box blue-pillar">
+                  <div className="pillar-header">
+                    <span className="pillar-icon">🎯</span>
+                    <div>
+                      <h4 className="pillar-title">1. Pourquoi ce Produit Doit Être Utilisé</h4>
+                      <span className="pillar-hint">Transformation vécue par le client & utilité concrète</span>
+                    </div>
+                  </div>
+                  <textarea
+                    className="pillar-textarea"
+                    rows={4}
+                    value={analysis.reasonsToUse}
+                    onChange={(e) => handleUpdate('reasonsToUse', e.target.value)}
+                  />
+                </div>
+
+                <div className="pillar-box emerald-pillar">
+                  <div className="pillar-header">
+                    <span className="pillar-icon">🛑</span>
+                    <div>
+                      <h4 className="pillar-title">2. Problèmes & Frustrations Résolus</h4>
+                      <span className="pillar-hint">Quelles douleurs profondes ce produit élimine-t-il ?</span>
+                    </div>
+                  </div>
+                  <textarea
+                    className="pillar-textarea"
+                    rows={4}
+                    value={analysis.problemsSolved}
+                    onChange={(e) => handleUpdate('problemsSolved', e.target.value)}
+                  />
+                </div>
+
+                <div className="pillar-box gold-pillar">
+                  <div className="pillar-header">
+                    <span className="pillar-icon">💎</span>
+                    <div>
+                      <h4 className="pillar-title">3. Pourquoi Il Vaut Vraiment La Peine</h4>
+                      <span className="pillar-hint">Rentabilité unitaire, marge nette & effet waouh</span>
+                    </div>
+                  </div>
+                  <textarea
+                    className="pillar-textarea"
+                    rows={4}
+                    value={analysis.whyItsWorthIt}
+                    onChange={(e) => handleUpdate('whyItsWorthIt', e.target.value)}
+                  />
+                </div>
+
+                <div className="pillar-box amber-pillar">
+                  <div className="pillar-header">
+                    <span className="pillar-icon">⚠️</span>
+                    <div>
+                      <h4 className="pillar-title">4. Points d'Attention Critiques (Logistique / Poids)</h4>
+                      <span className="pillar-hint">Vérifications obligatoires avant commande fournisseur</span>
+                    </div>
+                  </div>
+                  <textarea
+                    className="pillar-textarea"
+                    rows={4}
+                    value={analysis.criticalAttentionPoints}
+                    onChange={(e) => handleUpdate('criticalAttentionPoints', e.target.value)}
+                  />
+                </div>
+
+                <div className="pillar-box red-pillar full-width">
+                  <div className="pillar-header">
+                    <span className="pillar-icon">💣</span>
+                    <div>
+                      <h4 className="pillar-title">5. Pourquoi Il Pourrait Échouer Malgré Tout</h4>
+                      <span className="pillar-hint">Facteurs d'échec : mauvaise qualité usine, retours massifs, saturation</span>
+                    </div>
+                  </div>
+                  <textarea
+                    className="pillar-textarea warning-font"
+                    rows={4}
+                    value={analysis.failureRisks}
+                    onChange={(e) => handleUpdate('failureRisks', e.target.value)}
+                  />
                 </div>
               </div>
-              <textarea
-                className="pillar-textarea"
-                rows={4}
-                value={analysis.problemsSolved}
-                onChange={(e) => handleUpdate('problemsSolved', e.target.value)}
-                placeholder="Listez les problèmes résolus par le produit..."
-              />
-            </div>
+            </>
+          )}
 
-            {/* PILLAR 3: Pourquoi il vaut la peine */}
-            <div className="pillar-box gold-pillar">
-              <div className="pillar-header">
-                <span className="pillar-icon">💎</span>
-                <div>
-                  <h4 className="pillar-title">3. Pourquoi Il Vaut Vraiment La Peine (Proposition de Valeur)</h4>
-                  <span className="pillar-hint">Rentabilité unitaire, marge en poche et effet waouh</span>
+          {/* TAB 2: BUYER PERSONA */}
+          {activeTab === 'persona' && (
+            <div className="persona-section-card">
+              <h3 className="persona-title">👤 Profil Démographique & Persona de l'Acheteur Idéal</h3>
+              <p className="persona-subtitle">
+                Définissez qui achète ce produit en Afrique de l'Ouest pour orienter vos publicités et vos messages de vente.
+              </p>
+
+              <div className="persona-inputs-grid">
+                <div className="persona-field-box">
+                  <label>🎂 Tranche d'Âge Cible</label>
+                  <input
+                    type="text"
+                    className="persona-input"
+                    value={persona.targetAge}
+                    onChange={(e) => handlePersonaUpdate('targetAge', e.target.value)}
+                  />
+                </div>
+
+                <div className="persona-field-box">
+                  <label>⚧ Répartition Genre</label>
+                  <input
+                    type="text"
+                    className="persona-input"
+                    value={persona.genderRatio}
+                    onChange={(e) => handlePersonaUpdate('genderRatio', e.target.value)}
+                  />
+                </div>
+
+                <div className="persona-field-box full-width">
+                  <label>💼 Catégorie Socio-Professionnelle (CSP)</label>
+                  <input
+                    type="text"
+                    className="persona-input"
+                    value={persona.professionalCategory}
+                    onChange={(e) => handlePersonaUpdate('professionalCategory', e.target.value)}
+                  />
+                </div>
+
+                <div className="persona-field-box full-width">
+                  <label>🧠 Déclencheur d'Achat Psychologique Principal</label>
+                  <textarea
+                    className="persona-input"
+                    rows={2}
+                    value={persona.psychologicalTrigger}
+                    onChange={(e) => handlePersonaUpdate('psychologicalTrigger', e.target.value)}
+                  />
                 </div>
               </div>
-              <textarea
-                className="pillar-textarea"
-                rows={4}
-                value={analysis.whyItsWorthIt}
-                onChange={(e) => handleUpdate('whyItsWorthIt', e.target.value)}
-                placeholder="Expliquez pourquoi ce produit est rentable et irrésistible..."
-              />
             </div>
+          )}
 
-            {/* PILLAR 4: Points d'attention & vigilance */}
-            <div className="pillar-box amber-pillar">
-              <div className="pillar-header">
-                <span className="pillar-icon">⚠️</span>
-                <div>
-                  <h4 className="pillar-title">4. Points d'Attention Critiques (Logistique, Poids, Qualité)</h4>
-                  <span className="pillar-hint">Vérifications obligatoires avant commande fournisseur</span>
+          {/* TAB 3: PROJECTIONS FINANCIÈRES */}
+          {activeTab === 'projections' && (
+            <div className="projections-section-card">
+              <h3 className="persona-title">📊 Simulateur de Pénétration de Marché & CA Prévisionnel</h3>
+              <p className="persona-subtitle">
+                Potentiel financier estimé selon la part de l'audience ciblée atteinte en Afrique de l'Ouest.
+              </p>
+
+              <div className="projections-comparison-grid">
+                {/* Conservative */}
+                <div className="proj-card conservative">
+                  <div className="proj-badge">🌱 Hypothèse Prudente (0.03% Cible)</div>
+                  <div className="proj-big-num">{projections.conservativeUnits} pièces</div>
+                  <div className="proj-row">
+                    <span>CA Prévisionnel :</span>
+                    <strong>{formatFCFA(projections.conservativeRevenueFCFA)}</strong>
+                  </div>
+                  <div className="proj-row highlight-green">
+                    <span>Bénéfice Net en Poche :</span>
+                    <strong>+{formatFCFA(projections.conservativeProfitFCFA)}</strong>
+                  </div>
+                </div>
+
+                {/* Aggressive */}
+                <div className="proj-card aggressive">
+                  <div className="proj-badge gold">🚀 Hypothèse Scaling (0.12% Cible)</div>
+                  <div className="proj-big-num text-gold-deep">{projections.aggressiveUnits} pièces</div>
+                  <div className="proj-row">
+                    <span>CA Prévisionnel :</span>
+                    <strong>{formatFCFA(projections.aggressiveRevenueFCFA)}</strong>
+                  </div>
+                  <div className="proj-row highlight-green">
+                    <span>Bénéfice Net en Poche :</span>
+                    <strong>+{formatFCFA(projections.aggressiveProfitFCFA)}</strong>
+                  </div>
                 </div>
               </div>
-              <textarea
-                className="pillar-textarea"
-                rows={4}
-                value={analysis.criticalAttentionPoints}
-                onChange={(e) => handleUpdate('criticalAttentionPoints', e.target.value)}
-                placeholder="Poids, fragilité, normes électriques, tests usine..."
-              />
             </div>
+          )}
 
-            {/* PILLAR 5: Pourquoi il pourrait échouer malgré tout */}
-            <div className="pillar-box red-pillar full-width">
-              <div className="pillar-header">
-                <span className="pillar-icon">💣</span>
-                <div>
-                  <h4 className="pillar-title">5. Pourquoi Il Pourrait Échouer Malgré Tout (Facteurs d'Échec Cachés)</h4>
-                  <span className="pillar-hint">Anticipation des pièges : mauvaise qualité usine, retours massifs, saturation cachée</span>
+          {/* TAB 4: AD BENCHMARKS */}
+          {activeTab === 'ads' && (
+            <div className="ad-benchmarks-section-card">
+              <h3 className="persona-title">📣 Métriques & Benchmarks Publicitaires Recommandés</h3>
+              <p className="persona-subtitle">
+                Objectifs de performance publicitaire (Facebook & TikTok Ads) pour rester rentable en COD.
+              </p>
+
+              <div className="ad-kpi-grid">
+                <div className="ad-kpi-box">
+                  <span className="ad-kpi-lbl">CPM Moyen Estimé (Afrique)</span>
+                  <strong className="ad-kpi-val">{formatFCFA(ads.estimatedCPMFCFA)}</strong>
+                  <span className="ad-kpi-desc">Pour 1 000 impressions vidéo</span>
+                </div>
+
+                <div className="ad-kpi-box">
+                  <span className="ad-kpi-lbl">CTR Cible Attendu</span>
+                  <strong className="ad-kpi-val text-blue-600">{ads.targetCTR}%</strong>
+                  <span className="ad-kpi-desc">Taux de clic sur la créative vidéo</span>
+                </div>
+
+                <div className="ad-kpi-box">
+                  <span className="ad-kpi-lbl">Taux de Conversion Landing</span>
+                  <strong className="ad-kpi-val text-emerald-600">{ads.targetConversionRate}%</strong>
+                  <span className="ad-kpi-desc">Visiteurs ➔ Commandes passées</span>
+                </div>
+
+                <div className="ad-kpi-box highlight-amber">
+                  <span className="ad-kpi-lbl">CPA Plafond Maximum</span>
+                  <strong className="ad-kpi-val text-amber-700">{formatFCFA(ads.maxAllowedCPAFCFA)}</strong>
+                  <span className="ad-kpi-desc">Coût d'acquisition max avant risque de perte</span>
                 </div>
               </div>
-              <textarea
-                className="pillar-textarea warning-font"
-                rows={4}
-                value={analysis.failureRisks}
-                onChange={(e) => handleUpdate('failureRisks', e.target.value)}
-                placeholder="Pourquoi ce produit risquerait d'échouer malgré une bonne note..."
-              />
             </div>
-          </div>
+          )}
 
           {/* Target Countries & Scaling Strategy */}
           <div className="market-detail-section">

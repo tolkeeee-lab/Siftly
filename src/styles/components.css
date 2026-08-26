@@ -1562,5 +1562,212 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* ==========================================================================
+   ADVANCED MARKET ANALYSIS SUB-TABS & SECTIONS
+   ========================================================================== */
+
+.market-modal-tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0F172A;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+}
+
+.market-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94A3B8;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.market-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.market-tab-btn.active {
+  background: var(--gold);
+  color: #141B32;
+  border-color: var(--gold);
+  font-weight: 800;
+}
+
+/* Persona Section Card */
+.persona-section-card,
+.projections-section-card,
+.ad-benchmarks-section-card {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.persona-title {
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  color: #0F172A;
+  margin: 0 0 4px;
+}
+
+.persona-subtitle {
+  font-size: 12px;
+  color: #64748B;
+  margin: 0 0 16px;
+}
+
+.persona-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.persona-field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.persona-field-box.full-width {
+  grid-column: 1 / -1;
+}
+
+.persona-field-box label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.persona-input {
+  background: #ffffff;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #0F172A;
+  outline: none;
+  font-family: inherit;
+}
+
+.persona-input:focus {
+  border-color: var(--gold);
+}
+
+/* Projections Comparison Grid */
+.projections-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.proj-card {
+  background: #ffffff;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.proj-card.conservative {
+  border-color: #3B82F6;
+  background: #F8FAFC;
+}
+
+.proj-card.aggressive {
+  border-color: var(--gold);
+  background: #FFFDF5;
+  box-shadow: 0 4px 16px rgba(255, 184, 0, 0.15);
+}
+
+.proj-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #2563EB;
+}
+
+.proj-badge.gold {
+  color: var(--gold-deep);
+}
+
+.proj-big-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.proj-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  border-top: 1px dashed #E2E8F0;
+  padding-top: 8px;
+}
+
+.proj-row.highlight-green {
+  color: #059669;
+  font-size: 13.5px;
+}
+
+/* Ad KPI Grid */
+.ad-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.ad-kpi-box {
+  background: #ffffff;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ad-kpi-box.highlight-amber {
+  border-color: #F59E0B;
+  background: #FFFBEB;
+}
+
+.ad-kpi-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.ad-kpi-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 19px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.ad-kpi-desc {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+
 
 

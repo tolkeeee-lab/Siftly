@@ -12,6 +12,29 @@ export interface ProductScoreCriteria {
   poidsfacteur: number | '';
 }
 
+export interface BuyerPersonaData {
+  targetAge: string;                               // ex: "25 - 45 ans"
+  genderRatio: string;                             // ex: "Femmes 70% / Hommes 30%"
+  professionalCategory: string;                    // ex: "Employés de bureau, Commerçants, Femmes au foyer"
+  psychologicalTrigger: string;                    // ex: "Soulagement immédiat, Fierté sociale, Confort familial"
+}
+
+export interface MarketProjectionsData {
+  conservativeUnits: number;                       // Hypothèse Prudente (0.05% pénétration)
+  conservativeRevenueFCFA: number;
+  conservativeProfitFCFA: number;
+  aggressiveUnits: number;                         // Hypothèse Scaling Agressif (0.20% pénétration)
+  aggressiveRevenueFCFA: number;
+  aggressiveProfitFCFA: number;
+}
+
+export interface AdBenchmarksData {
+  estimatedCPMFCFA: number;                        // Coût pour 1000 impressions (ex: 1500 FCFA)
+  targetCTR: number;                               // Taux de clic cible vidéo (ex: 2.8%)
+  targetConversionRate: number;                    // Taux de conversion Landing COD (ex: 10.5%)
+  maxAllowedCPAFCFA: number;                       // CPA Plafond avant perte (ex: 3500 FCFA)
+}
+
 export interface MarketAnalysisData {
   saturationScore: 'low' | 'medium' | 'high';       // Saturation du marché
   competitionLevel: 'low' | 'medium' | 'high';      // Niveau de concurrence pub
@@ -30,6 +53,11 @@ export interface MarketAnalysisData {
   whyItsWorthIt: string;                           // 3. Pourquoi il vaut vraiment la peine (Rentabilité & Effet Waouh)
   criticalAttentionPoints: string;                 // 4. Points d'attention & vigilance (Qualité, Fret, Poids)
   failureRisks: string;                            // 5. Pourquoi il pourrait échouer malgré tout (Pièges cachés)
+
+  // Données Ultra-Poussées Avancées
+  buyerPersona?: BuyerPersonaData;                 // Profil Persona & Démographie Cible
+  marketProjections?: MarketProjectionsData;       // Projections Financières & Pénétration
+  adBenchmarks?: AdBenchmarksData;                 // Métriques Médias Publicitaires (Facebook / TikTok)
 }
 
 export interface ProductData extends ProductScoreCriteria {
