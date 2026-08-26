@@ -23,6 +23,7 @@ export interface LandingPageConfig {
   hookHeadline: string;
   subHeadline: string;
   heroImage: string;
+  galleryImages?: string[]; // Photos additionnelles du produit
   videoUrl?: string;     // Lien vidéo YouTube ou MP4
   sellingPriceFCFA: number;
   originalPriceFCFA: number;

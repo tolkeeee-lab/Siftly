@@ -111,6 +111,17 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
             </div>
           </div>
 
+          {/* Additional Gallery Photos if present */}
+          {config.galleryImages && config.galleryImages.length > 0 && (
+            <div className="landing-gallery-strip">
+              {config.galleryImages.map((img, i) => (
+                <div key={i} className="gallery-thumb-item">
+                  <img src={img} alt={`${config.title} vue ${i + 1}`} />
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Scarcity Bar */}
           <div className="stock-countdown-bar">
             <Clock className="w-4 h-4 text-amber-600 inline mr-1" />
