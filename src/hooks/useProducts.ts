@@ -2,37 +2,28 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ProductData } from '../types/product';
-import { INITIAL_PRODUCTS } from '../constants/defaultData';
 import { checkLocalStorageUsage, StorageUsageInfo } from '../utils/storageCheck';
 import { compressImage } from '../utils/imageCompressor';
 import {
-  fetchProductsFromSupabase,
-  saveProductToSupabase,
-  deleteProductFromSupabase,
-  saveAllProductsToSupabase,
-} from '../services/supabaseService';
-import { getStoredSupabaseConfig, getSupabaseClient } from '../lib/supabaseClient';
-
-const STORAGE_KEY = 'eaa-produits-benin';
+  resolveWorkspaceContext,
+  syncWorkspaceProducts,
+  persistProductChange,
+  persistProductDeletion,
+  WorkspaceContext,
+} from '../services/syncEngine';
+import { useAuth } from './useAuth';
 
 export function useProducts() {
-  const [products, setProducts] = useState<ProductData[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) return parsed;
-        }
-      } catch (e) {
-        console.warn('Could not read saved products from localStorage', e);
-      }
-    }
-    return INITIAL_PRODUCTS;
-  });
-
+  const [products, setProducts] = useState<ProductData[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showAutoSaveToast, setShowAutoSaveToast] = useState(false);
+  const [workspaceCtx, setWorkspaceCtx] = useState<WorkspaceContext>({
+    workspaceOwnerId: 'guest',
+    role: 'admin',
+    isCollaborator: false,
+  });
+
+  const { user } = useAuth();
   const [storageInfo, setStorageInfo] = useState<StorageUsageInfo>({
     usedBytes: 0,
     quotaBytes: 5 * 1024 * 1024,
@@ -43,102 +34,23 @@ export function useProducts() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateStorageMetrics = useCallback(() => {
-    setStorageInfo(checkLocalStorageUsage(STORAGE_KEY));
-  }, []);
+    setStorageInfo(checkLocalStorageUsage('siftly_products_ws_' + workspaceCtx.workspaceOwnerId));
+  }, [workspaceCtx.workspaceOwnerId]);
 
   const loadFromSupabase = useCallback(async (forceUpload: boolean = false) => {
-    if (!getStoredSupabaseConfig()) return;
     setIsSyncing(true);
-
     try {
-      const client = getSupabaseClient();
-      const { data: { user } } = client ? await client.auth.getUser() : { data: { user: null } };
-      
-      let targetOwnerId: string | undefined = undefined;
-      if (user?.email) {
-        const { checkCollaboratorMembership } = await import('../services/teamService');
-        const membership = await checkCollaboratorMembership(user.email);
-        if (membership.isCollaborator && membership.ownerId) {
-          targetOwnerId = membership.ownerId;
-        }
-      }
+      const ctx = await resolveWorkspaceContext(user?.email ?? undefined, user?.id ?? undefined);
+      setWorkspaceCtx(ctx);
 
-      if (forceUpload && typeof window !== 'undefined') {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            await saveAllProductsToSupabase(parsed, targetOwnerId);
-          }
-        }
-      }
-
-      let dbProducts: ProductData[] | null = null;
-      if (targetOwnerId) {
-        try {
-          const res = await fetch(`/api/workspace/products?ownerId=${encodeURIComponent(targetOwnerId)}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data.products) && data.products.length > 0) {
-              const { mapDbToProduct } = await import('../services/supabaseService');
-              dbProducts = data.products.map(mapDbToProduct);
-            }
-          }
-        } catch (e) {
-          console.warn('API workspace products fetch error:', e);
-        }
-      }
-
-      if (!dbProducts) {
-        dbProducts = await fetchProductsFromSupabase(targetOwnerId);
-      }
-
-      // Read local storage candidate
-      let localProducts: ProductData[] = [];
-      if (typeof window !== 'undefined') {
-        try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              localProducts = parsed;
-            }
-          }
-        } catch { /* ignore */ }
-      }
-
-      if (dbProducts !== null && dbProducts.length > 0) {
-        // 1. Cloud has products: use cloud products as source of truth
-        setProducts(dbProducts);
-        if (typeof window !== 'undefined') {
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(dbProducts));
-          } catch (e) {
-            console.warn('LocalStorage quota warning during Supabase load', e);
-          }
-        }
-      } else if (localProducts.length > 0) {
-        // 2. Cloud has 0 products BUT local storage has products: keep local products AND upload to cloud!
-        setProducts(localProducts);
-        if (user) {
-          await saveAllProductsToSupabase(localProducts, targetOwnerId);
-        }
-      } else if (!targetOwnerId) {
-        // 3. Both Cloud and localStorage are empty: initialize with default data and upload to cloud
-        setProducts(INITIAL_PRODUCTS);
-        if (typeof window !== 'undefined') {
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS)); } catch { /* ignore */ }
-        }
-        if (user) {
-          await saveAllProductsToSupabase(INITIAL_PRODUCTS, user.id);
-        }
-      }
+      const { products: syncedList } = await syncWorkspaceProducts(ctx, forceUpload);
+      setProducts(syncedList);
     } catch (err) {
-      console.warn('Sync error:', err);
+      console.warn('SyncEngine load error:', err);
     } finally {
       setIsSyncing(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     loadFromSupabase();
@@ -149,37 +61,23 @@ export function useProducts() {
   }, [products, updateStorageMetrics]);
 
   const saveToStorage = useCallback((data: ProductData[], updatedProduct?: ProductData) => {
-    // 1. Immediately write to localStorage (caught if quota exceeded)
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        updateStorageMetrics();
-      } catch (e) {
-        console.warn('LocalStorage quota exceeded (cloud sync will preserve data)', e);
-      }
-    }
-
-    // 2. Debounce Supabase network call
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+
     saveTimerRef.current = setTimeout(async () => {
       try {
         setShowAutoSaveToast(true);
         setTimeout(() => setShowAutoSaveToast(false), 1500);
 
-        if (getStoredSupabaseConfig()) {
-          setIsSyncing(true);
-          if (updatedProduct) {
-            await saveProductToSupabase(updatedProduct);
-          } else {
-            await saveAllProductsToSupabase(data);
-          }
-          setIsSyncing(false);
-        }
+        setIsSyncing(true);
+        await persistProductChange(workspaceCtx, data, updatedProduct);
+        updateStorageMetrics();
       } catch (err) {
-        console.warn('Supabase save failed', err);
+        console.warn('SyncEngine persist error:', err);
+      } finally {
+        setIsSyncing(false);
       }
     }, 300);
-  }, [updateStorageMetrics]);
+  }, [workspaceCtx, updateStorageMetrics]);
 
   const updateProduct = useCallback((id: string, field: keyof ProductData, value: any) => {
     setProducts((prev) => {
@@ -259,13 +157,10 @@ export function useProducts() {
   const deleteProduct = useCallback((id: string) => {
     setProducts((prev) => {
       const next = prev.filter((p) => p.id !== id);
-      saveToStorage(next);
-      if (getStoredSupabaseConfig()) {
-        deleteProductFromSupabase(id);
-      }
+      persistProductDeletion(workspaceCtx, next, id);
       return next;
     });
-  }, [saveToStorage]);
+  }, [workspaceCtx]);
 
   const replaceAllProducts = useCallback(async (data: ProductData[]) => {
     // Compress base64 images if too large
@@ -297,21 +192,10 @@ export function useProducts() {
     }));
 
     setProducts(sanitized);
-
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
-      } catch (e) {
-        console.warn('LocalStorage quota exceeded on import, saving to Supabase cloud', e);
-      }
-    }
-
-    if (getStoredSupabaseConfig()) {
-      setIsSyncing(true);
-      await saveAllProductsToSupabase(sanitized);
-      setIsSyncing(false);
-    }
-  }, []);
+    setIsSyncing(true);
+    await persistProductChange(workspaceCtx, sanitized);
+    setIsSyncing(false);
+  }, [workspaceCtx]);
 
   return {
     products,
