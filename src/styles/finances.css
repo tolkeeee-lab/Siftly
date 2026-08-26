@@ -459,6 +459,225 @@
   font-size: 13px;
 }
 
+/* ==========================================================================
+   PRODUCT REVENUE BREAKDOWN TABLE (PER-PRODUCT CASH COD DELIVERIES)
+   ========================================================================== */
+
+.product-revenue-card {
+  background: #ffffff;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  margin-bottom: 20px;
+}
+
+.product-revenue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.product-revenue-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-revenue-title {
+  font-family: 'Georgia', serif;
+  font-size: 19px;
+  color: #0F172A;
+  margin: 0;
+}
+
+.product-revenue-subtitle {
+  font-size: 12.5px;
+  color: #64748B;
+  margin: 4px 0 0;
+}
+
+.product-revenue-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.prod-search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.prod-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #0F172A;
+  width: 140px;
+}
+
+.prod-filter-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.prod-filter-pill {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.prod-filter-pill.active {
+  background: #141B32;
+  color: #ffffff;
+  border-color: #141B32;
+}
+
+.product-revenue-table-wrap {
+  overflow-x: auto;
+}
+
+.product-revenue-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.product-revenue-table th {
+  background: #F8FAFC;
+  color: #64748B;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  border-bottom: 1.5px solid #CBD5E1;
+}
+
+.product-revenue-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: middle;
+}
+
+.product-revenue-table tr.winner-row {
+  background: #FFFBEB;
+}
+
+.prod-cell-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prod-mini-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #CBD5E1;
+  flex-shrink: 0;
+}
+
+.prod-mini-thumb.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  font-size: 16px;
+}
+
+.prod-table-name {
+  font-size: 13px;
+  color: #0F172A;
+  display: block;
+}
+
+.winner-badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.delivery-rate-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.delivery-rate-pill.good {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.delivery-rate-pill.avg {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.delivery-rate-pill.none {
+  background: #F1F5F9;
+  color: #94A3B8;
+}
+
+.share-gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.share-mini-bar {
+  width: 50px;
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.share-bar-fill {
+  height: 100%;
+  background: #10B981;
+}
+
+.pnl-table-total-row {
+  background: #F8FAFC;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.pnl-table-total-row td {
+  padding: 12px 10px;
+  border-top: 2px solid #CBD5E1;
+  font-size: 13px;
+}
+
+
 @media (max-width: 768px) {
   .fin-header-top {
     flex-direction: column;

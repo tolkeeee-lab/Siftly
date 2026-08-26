@@ -1,6 +1,6 @@
 import { CODOrder } from '../types/codLogistics';
 import { ProductData } from '../types/product';
-import { ExpenseItem, ExpenseCategory, PnLStatement, CashflowBreakdownItem } from '../types/financeTypes';
+import { ExpenseItem, ExpenseCategory, PnLStatement, CashflowBreakdownItem, ProductRevenueItem } from '../types/financeTypes';
 import { calculateCOGS } from './calculations';
 
 export function getExpenseCategoryMeta(cat: ExpenseCategory): { label: string; icon: string; color: string } {
@@ -30,9 +30,11 @@ export function calculatePnLStatement(
   // 1. Revenue & delivered orders
   const deliveredOrders = orders.filter((o) => o.status === 'delivered');
   const cancelledOrders = orders.filter((o) => o.status === 'cancelled');
+  const pendingOrders = orders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled');
 
   const grossRevenue = deliveredOrders.reduce((sum, o) => sum + (o.totalPriceFCFA || 0), 0);
   const totalDeliveredUnits = deliveredOrders.reduce((sum, o) => sum + (o.quantity || 1), 0);
+  const pipelineRevenue = pendingOrders.reduce((sum, o) => sum + (o.totalPriceFCFA || 0), 0);
 
   // 2. COGS (Sourcing + freight per item)
   let cogs = 0;
@@ -69,6 +71,9 @@ export function calculatePnLStatement(
   return {
     grossRevenueFCFA: grossRevenue,
     totalDeliveredUnits,
+    totalDeliveredOrders: deliveredOrders.length,
+    totalPendingOrders: pendingOrders.length,
+    pipelineRevenueFCFA: pipelineRevenue,
     cogsFCFA: cogs,
     grossProfitFCFA: grossProfit,
     grossMarginPct,
@@ -80,6 +85,63 @@ export function calculatePnLStatement(
     netProfitFCFA: netProfit,
     netMarginPct,
   };
+}
+
+export function calculateProductRevenueBreakdown(
+  orders: CODOrder[],
+  products: ProductData[]
+): ProductRevenueItem[] {
+  const globalDeliveredRev = orders
+    .filter((o) => o.status === 'delivered')
+    .reduce((sum, o) => sum + (o.totalPriceFCFA || 0), 0) || 1;
+
+  // Group by product
+  const items: ProductRevenueItem[] = products.map((prod) => {
+    const prodOrders = orders.filter(
+      (o) => o.productId === prod.id || o.productName === prod.produit
+    );
+
+    const totalOrdersCount = prodOrders.length;
+    const deliveredOrders = prodOrders.filter((o) => o.status === 'delivered');
+    const cancelledOrders = prodOrders.filter((o) => o.status === 'cancelled');
+
+    const deliveredOrdersCount = deliveredOrders.length;
+    const cancelledOrdersCount = cancelledOrders.length;
+    const deliveryRatePct = totalOrdersCount > 0
+      ? Math.round((deliveredOrdersCount / totalOrdersCount) * 100)
+      : 0;
+
+    const deliveredRevenueFCFA = deliveredOrders.reduce((sum, o) => sum + (o.totalPriceFCFA || 0), 0);
+    const deliveredUnitsCount = deliveredOrders.reduce((sum, o) => sum + (o.quantity || 1), 0);
+
+    const unitCOGS = calculateCOGS(prod);
+    const cogsFCFA = deliveredUnitsCount * unitCOGS;
+    const deliveryFeesFCFA = deliveredOrders.reduce((sum, o) => sum + (o.deliveryFeeFCFA || 0), 0);
+    const returnLossesFCFA = cancelledOrdersCount * 500;
+
+    const netProfitFCFA = deliveredRevenueFCFA - cogsFCFA - deliveryFeesFCFA - returnLossesFCFA;
+    const pctOfGlobalRevenue = Math.round((deliveredRevenueFCFA / globalDeliveredRev) * 100);
+
+    return {
+      productId: prod.id,
+      productName: prod.produit || 'Sans titre',
+      productImg: prod.imgSrc,
+      totalOrdersCount,
+      deliveredOrdersCount,
+      cancelledOrdersCount,
+      deliveryRatePct,
+      deliveredRevenueFCFA,
+      deliveredUnitsCount,
+      cogsFCFA,
+      deliveryFeesFCFA,
+      returnLossesFCFA,
+      netProfitFCFA,
+      pctOfGlobalRevenue,
+    };
+  });
+
+  // Sort by delivered revenue descending
+  return items.sort((a, b) => b.deliveredRevenueFCFA - a.deliveredRevenueFCFA);
 }
 
 export function calculateCashflowBreakdown(pnl: PnLStatement): CashflowBreakdownItem[] {

@@ -4,11 +4,16 @@ import React, { useState, useMemo } from 'react';
 import { useProducts } from '../../src/hooks/useProducts';
 import { useCODOrders } from '../../src/hooks/useCODOrders';
 import { useFinanceJournal } from '../../src/hooks/useFinanceJournal';
-import { calculatePnLStatement, calculateCashflowBreakdown } from '../../src/utils/financeCalculations';
+import {
+  calculatePnLStatement,
+  calculateCashflowBreakdown,
+  calculateProductRevenueBreakdown,
+} from '../../src/utils/financeCalculations';
 import { Masthead } from '../../src/components/header/Masthead';
 import { NavigationTabs } from '../../src/components/navigation/NavigationTabs';
 import { FinanceHeader } from '../../src/components/finances/FinanceHeader';
 import { PnLSummaryCard } from '../../src/components/finances/PnLSummaryCard';
+import { ProductRevenueBreakdownTable } from '../../src/components/finances/ProductRevenueBreakdownTable';
 import { CashflowBreakdownCard } from '../../src/components/finances/CashflowBreakdownCard';
 import { ExpenseJournalList } from '../../src/components/finances/ExpenseJournalList';
 import { AddExpenseModal } from '../../src/components/finances/modals/AddExpenseModal';
@@ -22,10 +27,15 @@ export default function FinancesPage() {
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isPrintPnLOpen, setIsPrintPnLOpen] = useState(false);
 
-  // Consolidated P&L statement
+  // Consolidated Global P&L statement (Delivered Cash In Hand)
   const pnl = useMemo(() => {
     return calculatePnLStatement(orders, products, expenses);
   }, [orders, products, expenses]);
+
+  // Per-product revenue & delivery breakdown
+  const productBreakdown = useMemo(() => {
+    return calculateProductRevenueBreakdown(orders, products);
+  }, [orders, products]);
 
   // Cashflow percentage breakdown
   const cashflowBreakdown = useMemo(() => {
@@ -38,6 +48,7 @@ export default function FinancesPage() {
       <NavigationTabs />
 
       <div style={{ marginTop: '16px' }}>
+        {/* Global Summary KPI Header */}
         <FinanceHeader
           pnl={pnl}
           onOpenAddExpense={() => setIsAddExpenseOpen(true)}
@@ -47,8 +58,14 @@ export default function FinancesPage() {
         {/* Cashflow Breakdown % Bar */}
         <CashflowBreakdownCard breakdown={cashflowBreakdown} />
 
-        {/* Structured P&L Table */}
+        {/* Global Consolidated P&L Table */}
         <PnLSummaryCard pnl={pnl} />
+
+        {/* Per-Product Delivered Revenue & Profit Breakdown */}
+        <ProductRevenueBreakdownTable
+          productItems={productBreakdown}
+          globalGrossRevenueFCFA={pnl.grossRevenueFCFA}
+        />
 
         {/* Expense Journal */}
         <ExpenseJournalList
