@@ -99,13 +99,15 @@ export const NavigationTabs: React.FC = () => {
     },
   ];
 
-  // Auto-scroll active tab into view when navigating
+  // Scroll active tab into view inside the tab strip ONLY (never scroll window)
   useEffect(() => {
-    if (activeTabRef.current) {
-      activeTabRef.current.scrollIntoView({
+    if (stripRef.current && activeTabRef.current) {
+      const strip = stripRef.current;
+      const tab = activeTabRef.current;
+      const targetScroll = tab.offsetLeft - (strip.clientWidth / 2) + (tab.clientWidth / 2);
+      strip.scrollTo({
+        left: Math.max(0, targetScroll),
         behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
       });
     }
   }, [pathname]);

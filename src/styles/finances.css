@@ -458,3 +458,67 @@
   font-family: 'IBM Plex Mono', monospace;
   font-size: 13px;
 }
+
+@media (max-width: 768px) {
+  .fin-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .fin-title {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .fin-subtitle {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .fin-top-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-print-pnl,
+  .btn-add-expense {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pnl-summary-card,
+  .cashflow-card,
+  .expense-journal-card {
+    padding: 14px 12px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .pnl-statement-table {
+    font-size: 11.5px;
+  }
+
+  .pnl-statement-table td {
+    padding: 8px 6px;
+  }
+
+  .expense-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .exp-right {
+    width: 100%;
+    justify-content: space-between;
+    border-top: 1px dashed #E2E8F0;
+    padding-top: 6px;
+  }
+}
+
