@@ -23,6 +23,11 @@ import {
   BarChart3,
   DollarSign,
   Tv,
+  ExternalLink,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Search,
 } from 'lucide-react';
 import { ProductData, MarketAnalysisData } from '../../types/product';
 import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
@@ -41,7 +46,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
   product,
   onSaveAnalysis,
 }) => {
-  const [activeTab, setActiveTab] = useState<'pillars' | 'persona' | 'projections' | 'ads'>('pillars');
+  const [activeTab, setActiveTab] = useState<'pillars' | 'persona' | 'projections' | 'ads' | 'spy'>('pillars');
 
   if (!isOpen || !product) return null;
 
@@ -64,6 +69,22 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
         [field]: value,
       },
     }));
+  };
+
+  const handleObjectionUpdate = (index: number, field: 'objection' | 'responseScript', value: string) => {
+    setAnalysis((prev) => {
+      const currentList = [...(prev.reviewsAndObjections?.commonObjections || [])];
+      if (currentList[index]) {
+        currentList[index] = { ...currentList[index], [field]: value };
+      }
+      return {
+        ...prev,
+        reviewsAndObjections: {
+          ...(prev.reviewsAndObjections || { topPositiveReviews: '', topNegativeComplaints: '', commonObjections: [] }),
+          commonObjections: currentList,
+        },
+      };
+    });
   };
 
   const handleSave = () => {
@@ -96,6 +117,20 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
     maxAllowedCPAFCFA: 3500,
   };
 
+  const reviewsObj = analysis.reviewsAndObjections || {
+    topPositiveReviews: '',
+    topNegativeComplaints: '',
+    commonObjections: [],
+  };
+
+  const shortcuts = analysis.spyShortcuts || {
+    facebookAdsUrl: `https://www.facebook.com/ads/library/?q=${encodeURIComponent(product.produit || '')}`,
+    tiktokSearchUrl: `https://www.tiktok.com/search?q=${encodeURIComponent(product.produit || '')}`,
+    aliexpressReviewsUrl: `https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(product.produit || '')}`,
+    amazonReviewsUrl: `https://www.amazon.com/s?k=${encodeURIComponent(product.produit || '')}`,
+    googleTrendsUrl: `https://trends.google.com/trends/explore?q=${encodeURIComponent(product.produit || '')}`,
+  };
+
   return (
     <div className="paste-modal open" onClick={onClose}>
       <div className="market-analysis-modal" onClick={(e) => e.stopPropagation()}>
@@ -108,7 +143,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
                 🔬 Dossier d'Intelligence Marché Poussé : #{product.seq} {product.produit}
               </h2>
               <p className="market-modal-subtitle">
-                Radar 360°, Persona Cible, Projections de Chiffre d'Affaires & Benchmarks Médias COD Afrique.
+                Radar 360°, Persona Cible, Projections CA, Benchmarks Pubs & Espionnage Concurrentiel 1-Clic.
               </p>
             </div>
           </div>
@@ -125,7 +160,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
             onClick={() => setActiveTab('pillars')}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>1. Radar & 5 Piliers Stratégiques</span>
+            <span>1. Radar & 5 Piliers</span>
           </button>
 
           <button
@@ -134,7 +169,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
             onClick={() => setActiveTab('persona')}
           >
             <UserCheck className="w-3.5 h-3.5" />
-            <span>2. Buyer Persona & Cible</span>
+            <span>2. Buyer Persona</span>
           </button>
 
           <button
@@ -143,7 +178,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
             onClick={() => setActiveTab('projections')}
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            <span>3. Projections & Pénétration CA</span>
+            <span>3. Projections CA</span>
           </button>
 
           <button
@@ -152,7 +187,16 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
             onClick={() => setActiveTab('ads')}
           >
             <Tv className="w-3.5 h-3.5" />
-            <span>4. Benchmarks Pubs Facebook/TikTok</span>
+            <span>4. Benchmarks Pubs</span>
+          </button>
+
+          <button
+            type="button"
+            className={`market-tab-btn highlight-tab ${activeTab === 'spy' ? 'active' : ''}`}
+            onClick={() => setActiveTab('spy')}
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>5. Avis, Objections & Espionnage 1-Clic</span>
           </button>
         </div>
 
@@ -439,6 +483,143 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
                   <span className="ad-kpi-lbl">CPA Plafond Maximum</span>
                   <strong className="ad-kpi-val text-amber-700">{formatFCFA(ads.maxAllowedCPAFCFA)}</strong>
                   <span className="ad-kpi-desc">Coût d'acquisition max avant risque de perte</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: AVIS, OBJECTIONS & ESPIONNAGE 1-CLIC */}
+          {activeTab === 'spy' && (
+            <div className="spy-section-wrapper">
+              {/* 1-Click Spy Buttons Bar */}
+              <div className="spy-buttons-bar">
+                <div className="spy-bar-title">
+                  <Zap className="w-4 h-4 text-gold" />
+                  <span>Raccourcis d'Espionnage Direct en 1 Clic (Zéro Perte de Temps) :</span>
+                </div>
+                <div className="spy-actions-row">
+                  <a
+                    href={shortcuts.facebookAdsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="spy-btn fb-spy"
+                  >
+                    <span>🔵 Voir Pubs Actives (Facebook Ads)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+
+                  <a
+                    href={shortcuts.tiktokSearchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="spy-btn tt-spy"
+                  >
+                    <span>🎵 Voir Vidéos Virales (TikTok)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+
+                  <a
+                    href={shortcuts.aliexpressReviewsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="spy-btn ali-spy"
+                  >
+                    <span>📦 Avis & Photos (AliExpress)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+
+                  <a
+                    href={shortcuts.amazonReviewsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="spy-btn amz-spy"
+                  >
+                    <span>⭐ Retours Clients (Amazon)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Global Reviews Synthesis */}
+              <div className="reviews-synthesis-grid">
+                <div className="review-box positive-box">
+                  <div className="review-box-header">
+                    <ThumbsUp className="w-4 h-4 text-emerald-600" />
+                    <h4>⭐ Ce Que Les Clients Adorent (Points Forts 5 Étoiles)</h4>
+                  </div>
+                  <textarea
+                    className="review-textarea"
+                    rows={4}
+                    value={reviewsObj.topPositiveReviews}
+                    onChange={(e) =>
+                      setAnalysis((prev) => ({
+                        ...prev,
+                        reviewsAndObjections: {
+                          ...(prev.reviewsAndObjections || { topPositiveReviews: '', topNegativeComplaints: '', commonObjections: [] }),
+                          topPositiveReviews: e.target.value,
+                        },
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="review-box negative-box">
+                  <div className="review-box-header">
+                    <ThumbsDown className="w-4 h-4 text-rose-600" />
+                    <h4>⚠️ Plaintes & Défauts Récurrents (Avis 1 Étoile)</h4>
+                  </div>
+                  <textarea
+                    className="review-textarea"
+                    rows={4}
+                    value={reviewsObj.topNegativeComplaints}
+                    onChange={(e) =>
+                      setAnalysis((prev) => ({
+                        ...prev,
+                        reviewsAndObjections: {
+                          ...(prev.reviewsAndObjections || { topPositiveReviews: '', topNegativeComplaints: '', commonObjections: [] }),
+                          topNegativeComplaints: e.target.value,
+                        },
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* COD Objections & Phone Closing Scripts */}
+              <div className="objections-section-card">
+                <div className="objections-header">
+                  <MessageSquare className="w-4 h-4 text-gold-deep" />
+                  <div>
+                    <h3 className="persona-title">🛡️ Top Objections Clients COD & Scripts de Réponse Immédiate</h3>
+                    <p className="persona-subtitle">
+                      Arguments prêts à l'emploi pour vos téléconseillers et messages WhatsApp pour maximiser le taux de livraison.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="objections-list">
+                  {reviewsObj.commonObjections.map((item, idx) => (
+                    <div key={idx} className="objection-item-card">
+                      <div className="objection-q">
+                        <span className="obj-tag">Objection #{idx + 1} :</span>
+                        <input
+                          type="text"
+                          className="obj-input"
+                          value={item.objection}
+                          onChange={(e) => handleObjectionUpdate(idx, 'objection', e.target.value)}
+                        />
+                      </div>
+                      <div className="objection-r">
+                        <span className="res-tag">Script Réponse WhatsApp / Appel :</span>
+                        <textarea
+                          className="res-textarea"
+                          rows={2}
+                          value={item.responseScript}
+                          onChange={(e) => handleObjectionUpdate(idx, 'responseScript', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

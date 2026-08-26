@@ -1,4 +1,13 @@
-import { ProductData, MarketAnalysisData, BuyerPersonaData, MarketProjectionsData, AdBenchmarksData } from '../types/product';
+import {
+  ProductData,
+  MarketAnalysisData,
+  BuyerPersonaData,
+  MarketProjectionsData,
+  AdBenchmarksData,
+  CustomerObjectionItem,
+  ReviewsAndObjectionsData,
+  SpyShortcutsData,
+} from '../types/product';
 import { calculateNoteFinale, calculateMargin, calculateCOGS } from './calculations';
 import { formatFCFA } from './formatters';
 
@@ -181,6 +190,50 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
     maxAllowedCPAFCFA,
   };
 
+  // 17. SYNTHÈSE AVIS MONDIAUX & OBJECTIONS COD
+  const topPositiveReviews = `• ⭐ Facilité et rapidité d'utilisation : Les clients soulignent la simplicité de prise en main.
+• ⭐ Excellent rapport qualité/prix perçu par rapport aux solutions classiques locales.
+• ⭐ Efficacité visible dès la première utilisation (fort effet waouh avant/après).`;
+
+  const topNegativeComplaints = `• ⚠️ Notice d'utilisation souvent uniquement en anglais ou chinois (fournir un guide WhatsApp en français).
+• ⚠️ Fragilité des petits accessoires en plastique si manipulation brutale par le client.
+• ⚠️ Autonomie ou puissance légèrement inférieure aux attentes si non branché ou rechargé à fond.`;
+
+  const commonObjections: CustomerObjectionItem[] = [
+    {
+      objection: 'Est-ce que ça fonctionne vraiment ou c\'est une arnaque vue sur Internet ?',
+      responseScript: '« Oui rassurez-vous ! Nous sommes une entreprise basée localement. Vous avez la garantie de tester et vérifier l\'article avec notre livreur avant de payer un seul franc (Paiement à la livraison 100% sécurisé). »',
+    },
+    {
+      objection: 'C\'est un peu trop cher, j\'ai vu un modèle ressemblant au marché à moindre coût.',
+      responseScript: '« Attention aux imitations bas de gamme du marché qui grillent après 3 jours sans garantie. Notre modèle est la version d\'origine certifiée avec moteur renforcé et garantie d\'échange express sous 48h. »',
+    },
+    {
+      objection: 'Et si l\'appareil se gâte après quelques jours d\'utilisation ?',
+      responseScript: '« Vous bénéficiez de notre garantie SAV de remplacement immédiat. En cas de moindre souci technique, notre service client basé en ville vous renvoie une pièce neuve gratuitement. »',
+    },
+    {
+      objection: 'Je veux ouvrir le carton et vérifier avant de remettre l\'argent au livreur.',
+      responseScript: '« Absolument ! Nos livreurs ont pour consigne de vous laisser vérifier la conformité du produit avant encaissement. »',
+    },
+  ];
+
+  const reviewsAndObjections: ReviewsAndObjectionsData = {
+    topPositiveReviews,
+    topNegativeComplaints,
+    commonObjections,
+  };
+
+  // 18. RACCOURCIS D'ESPIONNAGE 1-CLIC
+  const queryParam = encodeURIComponent(product.produit || 'gadget');
+  const spyShortcuts: SpyShortcutsData = {
+    facebookAdsUrl: `https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&q=${queryParam}&search_type=keyword_unordered&media_type=all`,
+    tiktokSearchUrl: `https://www.tiktok.com/search?q=${queryParam}`,
+    aliexpressReviewsUrl: `https://www.aliexpress.com/wholesale?SearchText=${queryParam}`,
+    amazonReviewsUrl: `https://www.amazon.com/s?k=${queryParam}`,
+    googleTrendsUrl: `https://trends.google.com/trends/explore?q=${queryParam}`,
+  };
+
   return {
     saturationScore,
     competitionLevel,
@@ -200,6 +253,8 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
     buyerPersona,
     marketProjections,
     adBenchmarks,
+    reviewsAndObjections,
+    spyShortcuts,
   };
 }
 

@@ -35,6 +35,25 @@ export interface AdBenchmarksData {
   maxAllowedCPAFCFA: number;                       // CPA Plafond avant perte (ex: 3500 FCFA)
 }
 
+export interface CustomerObjectionItem {
+  objection: string;                               // ex: "Est-ce que ça fonctionne vraiment ou c'est de l'arnaque ?"
+  responseScript: string;                          // Script prêt à l'emploi pour appel/WhatsApp
+}
+
+export interface ReviewsAndObjectionsData {
+  topPositiveReviews: string;                      // Ce que les acheteurs adorent (Synthèse 5 étoiles)
+  topNegativeComplaints: string;                   // Ce qui énerve les acheteurs (Plaintes & Retours 1 étoile)
+  commonObjections: CustomerObjectionItem[];       // Top Objections & Réponses
+}
+
+export interface SpyShortcutsData {
+  facebookAdsUrl: string;                          // Lien Facebook Ad Library direct
+  tiktokSearchUrl: string;                         // Lien TikTok Creative search direct
+  aliexpressReviewsUrl: string;                    // Lien AliExpress avis photos direct
+  amazonReviewsUrl: string;                        // Lien Amazon reviews direct
+  googleTrendsUrl: string;                         // Lien Google Trends direct
+}
+
 export interface MarketAnalysisData {
   saturationScore: 'low' | 'medium' | 'high';       // Saturation du marché
   competitionLevel: 'low' | 'medium' | 'high';      // Niveau de concurrence pub
@@ -58,6 +77,8 @@ export interface MarketAnalysisData {
   buyerPersona?: BuyerPersonaData;                 // Profil Persona & Démographie Cible
   marketProjections?: MarketProjectionsData;       // Projections Financières & Pénétration
   adBenchmarks?: AdBenchmarksData;                 // Métriques Médias Publicitaires (Facebook / TikTok)
+  reviewsAndObjections?: ReviewsAndObjectionsData; // Synthèse Avis & Objections Clients
+  spyShortcuts?: SpyShortcutsData;                 // Liens d'espionnage 1-clic direct
 }
 
 export interface ProductData extends ProductScoreCriteria {

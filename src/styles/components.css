@@ -1768,6 +1768,240 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
   color: #94A3B8;
 }
 
+/* ==========================================================================
+   TAB 5 : SPY SHORTCUTS, REVIEWS & OBJECTIONS
+   ========================================================================== */
+
+.market-tab-btn.highlight-tab {
+  background: rgba(255, 184, 0, 0.15);
+  border-color: rgba(255, 184, 0, 0.4);
+  color: var(--gold);
+}
+
+.market-tab-btn.highlight-tab.active {
+  background: var(--gold);
+  color: #141B32;
+  border-color: var(--gold);
+}
+
+.spy-section-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Spy Buttons Bar */
+.spy-buttons-bar {
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spy-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.spy-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  color: #ffffff;
+}
+
+.spy-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.spy-btn.fb-spy {
+  background: linear-gradient(135deg, #1877F2 0%, #0D5CB6 100%);
+}
+
+.spy-btn.tt-spy {
+  background: linear-gradient(135deg, #25F4EE 0%, #FE2C55 100%);
+  color: #000000;
+  font-weight: 800;
+}
+
+.spy-btn.ali-spy {
+  background: linear-gradient(135deg, #FF6A00 0%, #EE0979 100%);
+}
+
+.spy-btn.amz-spy {
+  background: linear-gradient(135deg, #FF9900 0%, #E68A00 100%);
+  color: #111111;
+}
+
+/* Reviews Synthesis Grid */
+.reviews-synthesis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.review-box {
+  background: #ffffff;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-box.positive-box {
+  border-color: #10B981;
+  background: #F0FDF4;
+}
+
+.review-box.negative-box {
+  border-color: #EF4444;
+  background: #FEF2F2;
+}
+
+.review-box-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-box-header h4 {
+  font-family: 'Georgia', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.review-textarea {
+  background: #ffffff;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #1E293B;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.review-textarea:focus {
+  border-color: var(--gold);
+}
+
+/* Objections Section Card */
+.objections-section-card {
+  background: #FAF8F2;
+  border: 1.5px solid var(--panel-line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.objections-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.objections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.objection-item-card {
+  background: #ffffff;
+  border: 1px solid #CBD5E1;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.objection-q {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.obj-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #DC2626;
+}
+
+.obj-input {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  outline: none;
+  font-family: inherit;
+}
+
+.objection-r {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.res-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #059669;
+}
+
+.res-textarea {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #14532D;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.res-textarea:focus {
+  border-color: #10B981;
+}
+
+
 
 
 
