@@ -584,6 +584,211 @@
 .angle-meta-line {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 11.5px;
   font-family: 'IBM Plex Mono', monospace;
+  gap: 8px;
 }
+
+/* ==========================================================================
+   EDITABLE FIELDS & PARAMETERS STYLES (ADS STUDIO)
+   ========================================================================== */
+
+.btn-reset-metrics {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--panel-line);
+  color: var(--ink-soft);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-reset-metrics:hover {
+  background: #ffffff;
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.mb-inputs-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.mb-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mb-field-group label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.mb-editable-in {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: #0F172A;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.mb-editable-in:focus {
+  border-color: #10B981;
+  background: #ffffff;
+}
+
+.mb-editable-in.bold {
+  font-weight: 800;
+}
+
+.mb-editable-in.text-gold-deep {
+  color: #B45309;
+}
+
+.mb-field-group.highlight {
+  background: #FEF3C7;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.mb-field-group.highlight label {
+  color: #92400E;
+}
+
+.mb-field-group.highlight .mb-editable-in {
+  border-color: #F59E0B;
+  background: #ffffff;
+  color: #92400E;
+}
+
+.highlight-profit {
+  background: #ECFDF5;
+  border-color: #10B981;
+}
+
+/* Angles Editable Inputs */
+.angle-name-in {
+  background: transparent;
+  border: none;
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  outline: none;
+  flex: 1;
+}
+
+.angle-hook-textarea {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--panel-line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  margin-top: 4px;
+}
+
+.angle-meta-in {
+  background: #ffffff;
+  border: 1px solid var(--panel-line);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--ink);
+  outline: none;
+  flex: 1;
+}
+
+/* Scripts Editable Inputs */
+.script-editable-textarea {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--panel-line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  margin-top: 4px;
+}
+
+.scene-timing-in {
+  background: transparent;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  outline: none;
+  width: 60px;
+}
+
+.scene-editable-in {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--panel-line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+}
+
+.scene-editable-in.highlight {
+  font-weight: 600;
+  color: #0F172A;
+  background: #FFFDF5;
+  border-color: #FCD34D;
+}
+
+.scene-tip-in {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  color: #8A6D3B;
+  outline: none;
+  flex: 1;
+}
+
+.script-cta-in {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+}
+

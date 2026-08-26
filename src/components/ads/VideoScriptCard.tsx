@@ -1,16 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Copy, Check, Sparkles, Clock, Eye, Volume2, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
-import { VideoScript } from '../../types/adsStudio';
+import React, { useState, useEffect } from 'react';
+import { Copy, Check, Clock, Eye, Volume2, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
+import { VideoScript, ScriptScene } from '../../types/adsStudio';
 
 interface VideoScriptCardProps {
   script: VideoScript;
 }
 
-export const VideoScriptCard: React.FC<VideoScriptCardProps> = ({ script }) => {
+export const VideoScriptCard: React.FC<VideoScriptCardProps> = ({ script: initialScript }) => {
+  const [script, setScript] = useState<VideoScript>(initialScript);
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+
+  useEffect(() => {
+    setScript(initialScript);
+  }, [initialScript]);
+
+  const handleUpdateHook = (val: string) => {
+    setScript((prev) => ({ ...prev, hookHeadline: val }));
+  };
+
+  const handleUpdateCTA = (val: string) => {
+    setScript((prev) => ({ ...prev, callToAction: val }));
+  };
+
+  const handleUpdateScene = (idx: number, field: keyof ScriptScene, val: string) => {
+    setScript((prev) => {
+      const updatedScenes = [...prev.scenes];
+      updatedScenes[idx] = { ...updatedScenes[idx], [field]: val };
+      return { ...prev, scenes: updatedScenes };
+    });
+  };
 
   const handleCopyScript = () => {
     let fullText = `🎬 ${script.title.toUpperCase()}\n`;
@@ -56,7 +77,13 @@ export const VideoScriptCard: React.FC<VideoScriptCardProps> = ({ script }) => {
       {/* Hook Banner */}
       <div className="script-hook-banner">
         <span className="hook-tag">🪝 Hook (Les 3 premières secondes) :</span>
-        <p className="hook-text">{script.hookHeadline}</p>
+        <textarea
+          className="script-editable-textarea"
+          rows={2}
+          value={script.hookHeadline}
+          onChange={(e) => handleUpdateHook(e.target.value)}
+          title="Cliquez pour modifier le Hook"
+        />
       </div>
 
       {/* Scenes Timeline */}
@@ -66,24 +93,44 @@ export const VideoScriptCard: React.FC<VideoScriptCardProps> = ({ script }) => {
             <div key={scene.id} className="scene-row">
               <div className="scene-timing-badge">
                 <Clock className="w-3 h-3 inline mr-1" />
-                {scene.timing}
+                <input
+                  type="text"
+                  className="scene-timing-in"
+                  value={scene.timing}
+                  onChange={(e) => handleUpdateScene(idx, 'timing', e.target.value)}
+                />
               </div>
 
               <div className="scene-content-box">
                 <div className="scene-visual-line">
                   <div className="scene-lbl"><Eye className="w-3 h-3 text-sky-400" /> Ce qu'on voit (Visuel) :</div>
-                  <p className="scene-text">{scene.visual}</p>
+                  <textarea
+                    className="scene-editable-in"
+                    rows={2}
+                    value={scene.visual}
+                    onChange={(e) => handleUpdateScene(idx, 'visual', e.target.value)}
+                  />
                 </div>
 
                 <div className="scene-audio-line">
                   <div className="scene-lbl"><Volume2 className="w-3 h-3 text-gold-deep" /> Ce qu'on entend (Voix off / Texte) :</div>
-                  <p className="scene-text highlight">{scene.audio}</p>
+                  <textarea
+                    className="scene-editable-in highlight"
+                    rows={2}
+                    value={scene.audio}
+                    onChange={(e) => handleUpdateScene(idx, 'audio', e.target.value)}
+                  />
                 </div>
 
                 {scene.tip && (
                   <div className="scene-tip-line">
                     <Lightbulb className="w-3 h-3 text-amber-400 shrink-0" />
-                    <span>{scene.tip}</span>
+                    <input
+                      type="text"
+                      className="scene-tip-in"
+                      value={scene.tip}
+                      onChange={(e) => handleUpdateScene(idx, 'tip', e.target.value)}
+                    />
                   </div>
                 )}
               </div>
@@ -93,7 +140,13 @@ export const VideoScriptCard: React.FC<VideoScriptCardProps> = ({ script }) => {
           {/* Call to Action */}
           <div className="script-cta-banner">
             <span className="cta-lbl">🎯 Appel à l'action final (CTA) :</span>
-            <span className="cta-text">{script.callToAction}</span>
+            <input
+              type="text"
+              className="script-cta-in"
+              value={script.callToAction}
+              onChange={(e) => handleUpdateCTA(e.target.value)}
+              title="Cliquez pour modifier le CTA"
+            />
           </div>
         </div>
       )}
