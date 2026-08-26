@@ -93,7 +93,22 @@ export function useProducts() {
         dbProducts = await fetchProductsFromSupabase(targetOwnerId);
       }
 
+      // Read local storage candidate
+      let localProducts: ProductData[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              localProducts = parsed;
+            }
+          }
+        } catch { /* ignore */ }
+      }
+
       if (dbProducts !== null && dbProducts.length > 0) {
+        // 1. Cloud has products: use cloud products as source of truth
         setProducts(dbProducts);
         if (typeof window !== 'undefined') {
           try {
@@ -102,24 +117,20 @@ export function useProducts() {
             console.warn('LocalStorage quota warning during Supabase load', e);
           }
         }
-      } else if (user && !targetOwnerId) {
-        // Authenticated user with 0 products on cloud: start with a fresh empty workspace
-        setProducts([]);
-        if (typeof window !== 'undefined') {
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify([])); } catch { /* ignore */ }
+      } else if (localProducts.length > 0) {
+        // 2. Cloud has 0 products BUT local storage has products: keep local products AND upload to cloud!
+        setProducts(localProducts);
+        if (user) {
+          await saveAllProductsToSupabase(localProducts, targetOwnerId);
         }
-      } else {
-        // Only initialize from localStorage for anonymous / local offline users
+      } else if (!targetOwnerId) {
+        // 3. Both Cloud and localStorage are empty: initialize with default data and upload to cloud
+        setProducts(INITIAL_PRODUCTS);
         if (typeof window !== 'undefined') {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) {
-            try {
-              const parsed = JSON.parse(saved);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                setProducts(parsed);
-              }
-            } catch { /* ignore */ }
-          }
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS)); } catch { /* ignore */ }
+        }
+        if (user) {
+          await saveAllProductsToSupabase(INITIAL_PRODUCTS, user.id);
         }
       }
     } catch (err) {
