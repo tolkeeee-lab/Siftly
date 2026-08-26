@@ -15,7 +15,8 @@ interface ProductTableProps {
   onToggleSort: (key: SortFieldKey) => void;
   onUpdateProduct: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
-  onOpenOnePager?: (product: ProductData, rankIndex: number) => void;
+  onOpenOnePager: (product: ProductData, rankIndex: number) => void;
+  onOpenMarketAnalysis?: (product: ProductData) => void;
   onOpenCurrencyConverter?: (productId: string) => void;
   onDuplicateProduct: (id: string) => void;
   onDeleteProduct: (id: string) => void;
@@ -32,6 +33,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onUpdateProduct,
   onOpenBreakEven,
   onOpenOnePager,
+  onOpenMarketAnalysis,
   onOpenCurrencyConverter,
   onDuplicateProduct,
   onDeleteProduct,
@@ -39,8 +41,8 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onOpenLightbox,
 }) => {
   return (
-    <div className="panel">
-      <table id="eaa-table">
+    <div className="table-wrap">
+      <table className="eval-table">
         <TableHeader
           visibleGroups={visibleGroups}
           sortConfig={sortConfig}
@@ -57,6 +59,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               onUpdate={onUpdateProduct}
               onOpenBreakEven={onOpenBreakEven}
               onOpenOnePager={onOpenOnePager}
+              onOpenMarketAnalysis={onOpenMarketAnalysis}
               onOpenCurrencyConverter={onOpenCurrencyConverter}
               onDuplicate={onDuplicateProduct}
               onDelete={onDeleteProduct}

@@ -128,8 +128,10 @@ export function useTableFeatures(products: ProductData[]) {
           const nb = calculateNoteFinale(b).noteNum ?? -1;
           return mult * (na - nb);
         }
-        const va = parseNum(a[key as keyof ProductData]);
-        const vb = parseNum(b[key as keyof ProductData]);
+        const valA = a[key as keyof ProductData];
+        const valB = b[key as keyof ProductData];
+        const va = typeof valA === 'object' ? 0 : parseNum(valA as string | number | undefined);
+        const vb = typeof valB === 'object' ? 0 : parseNum(valB as string | number | undefined);
         return mult * (va - vb);
       });
     }

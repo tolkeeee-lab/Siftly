@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Copy, Calculator, FileText } from 'lucide-react';
+import { X, Copy, Calculator, FileText, Sparkles } from 'lucide-react';
 import { ProductData } from '../../../types/product';
 
 interface MarketingCellsProps {
@@ -10,6 +10,7 @@ interface MarketingCellsProps {
   onChange: (field: keyof ProductData, value: any) => void;
   onOpenBreakEven: () => void;
   onOpenOnePager?: () => void;
+  onOpenMarketAnalysis?: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }
@@ -20,6 +21,7 @@ export const MarketingCells: React.FC<MarketingCellsProps> = ({
   onChange,
   onOpenBreakEven,
   onOpenOnePager,
+  onOpenMarketAnalysis,
   onDuplicate,
   onDelete,
 }) => {
@@ -49,6 +51,16 @@ export const MarketingCells: React.FC<MarketingCellsProps> = ({
       )}
       <td>
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          {onOpenMarketAnalysis && (
+            <button
+              className="rowdel"
+              type="button"
+              title="🔬 Radar d'Analyse de Marché & Intelligence EAA"
+              onClick={onOpenMarketAnalysis}
+            >
+              <Sparkles className="w-3 h-3 text-amber-500" />
+            </button>
+          )}
           {onOpenOnePager && (
             <button
               className="rowdel"

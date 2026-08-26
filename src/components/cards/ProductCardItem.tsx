@@ -16,8 +16,9 @@ import {
   Link as LinkIcon,
   Globe,
   ShoppingBag,
+  Sparkles,
 } from 'lucide-react';
-import { ProductData } from '../../types/product';
+import { ProductData, PRODUCT_CATEGORIES } from '../../types/product';
 import {
   calculateCOGS,
   calculateMargin,
@@ -36,6 +37,7 @@ interface ProductCardItemProps {
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
   onOpenOnePager: (product: ProductData, rankIndex: number) => void;
+  onOpenMarketAnalysis?: (product: ProductData) => void;
   onOpenCurrencyConverter?: (productId: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
@@ -49,6 +51,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
   onUpdate,
   onOpenBreakEven,
   onOpenOnePager,
+  onOpenMarketAnalysis,
   onOpenCurrencyConverter,
   onDuplicate,
   onDelete,
@@ -119,6 +122,19 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
                 value={product.marche || ''}
                 onChange={(e) => onUpdate(product.id, 'marche', e.target.value)}
               />
+            </div>
+            <span>·</span>
+            <div className="meta-inline-edit">
+              <span>Niche :</span>
+              <select
+                className="meta-input-inline"
+                value={product.category || 'Maison & Confort'}
+                onChange={(e) => onUpdate(product.id, 'category', e.target.value)}
+              >
+                {PRODUCT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
             <span>·</span>
             <div className="mode-switch-inline">
@@ -423,6 +439,18 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
       {/* Footer Actions Bar */}
       <div className="card-frame-footer">
         <div className="frame-actions-left">
+          {onOpenMarketAnalysis && (
+            <button
+              type="button"
+              className="frame-btn secondary"
+              title="🔬 Radar d'Analyse de Marché & Intelligence EAA"
+              onClick={() => onOpenMarketAnalysis(product)}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Analyse Marché</span>
+            </button>
+          )}
+
           <button
             type="button"
             className="frame-btn primary"

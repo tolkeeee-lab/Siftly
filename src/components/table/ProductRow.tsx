@@ -2,20 +2,26 @@
 
 import React from 'react';
 import { ProductData } from '../../types/product';
-import { VisibleColumnGroups } from '../../types/tableFeatures';
 import { IdentificationCells } from './cells/IdentificationCells';
 import { FinancialCells } from './cells/FinancialCells';
 import { ScoreCells } from './cells/ScoreCells';
 import { MarketingCells } from './cells/MarketingCells';
 
 interface ProductRowProps {
-  index: number;
   product: ProductData;
+  index: number;
   isRankingActive?: boolean;
-  visibleGroups: VisibleColumnGroups;
+  visibleGroups: {
+    identification: boolean;
+    costs: boolean;
+    results: boolean;
+    scoring: boolean;
+    marketing: boolean;
+  };
   onUpdate: (id: string, field: keyof ProductData, value: any) => void;
   onOpenBreakEven: (product: ProductData) => void;
   onOpenOnePager?: (product: ProductData, rankIndex: number) => void;
+  onOpenMarketAnalysis?: (product: ProductData) => void;
   onOpenCurrencyConverter?: (productId: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
@@ -23,13 +29,14 @@ interface ProductRowProps {
 }
 
 export const ProductRow: React.FC<ProductRowProps> = ({
-  index,
   product,
+  index,
   isRankingActive = true,
   visibleGroups,
   onUpdate,
   onOpenBreakEven,
   onOpenOnePager,
+  onOpenMarketAnalysis,
   onOpenCurrencyConverter,
   onDuplicate,
   onDelete,
@@ -41,10 +48,10 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
   const renderRankBadge = () => {
     if (!isRankingActive) return index + 1;
-    if (index === 0) return <span style={{ color: '#D4AF37', fontWeight: 600 }} title="Produit #1 Gagnant">🥇 1</span>;
-    if (index === 1) return <span style={{ color: '#C0C0C0', fontWeight: 600 }} title="Produit #2">🥈 2</span>;
-    if (index === 2) return <span style={{ color: '#CD7F32', fontWeight: 600 }} title="Produit #3">🥉 3</span>;
-    return index + 1;
+    if (index === 0) return '🏆 1';
+    if (index === 1) return '🥈 2';
+    if (index === 2) return '🥉 3';
+    return `#${index + 1}`;
   };
 
   return (
@@ -74,6 +81,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         onChange={handleChange}
         onOpenBreakEven={() => onOpenBreakEven(product)}
         onOpenOnePager={onOpenOnePager ? () => onOpenOnePager(product, index) : undefined}
+        onOpenMarketAnalysis={onOpenMarketAnalysis ? () => onOpenMarketAnalysis(product) : undefined}
         onDuplicate={() => onDuplicate(product.id)}
         onDelete={() => onDelete(product.id)}
       />

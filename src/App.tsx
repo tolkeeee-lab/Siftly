@@ -5,10 +5,11 @@ import { useProducts } from './hooks/useProducts';
 import { useProductRanking } from './hooks/useProductRanking';
 import { useTableFeatures } from './hooks/useTableFeatures';
 import { calculateAppStats } from './utils/calculations';
-import { ProductData } from './types/product';
+import { ProductData, MarketAnalysisData } from './types/product';
 import { Masthead } from './components/header/Masthead';
 import { NavigationTabs } from './components/navigation/NavigationTabs';
 import { Toolbar } from './components/header/Toolbar';
+import { CategoryFilterBar } from './components/toolbar/CategoryFilterBar';
 import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
 import { ProductTable } from './components/table/ProductTable';
@@ -18,6 +19,7 @@ import { PasteModal } from './components/modals/PasteModal';
 import { BreakEvenModal } from './components/modals/BreakEvenModal';
 import { CurrencyConverterModal } from './components/modals/CurrencyConverterModal';
 import { ProductOnePagerModal } from './components/modals/ProductOnePagerModal';
+import { MarketAnalysisModal } from './components/modals/MarketAnalysisModal';
 
 export function App() {
   const {
@@ -59,6 +61,9 @@ export function App() {
     processedProducts,
   } = useTableFeatures(displayProducts);
 
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [marketAnalysisProduct, setMarketAnalysisProduct] = useState<ProductData | null>(null);
+
   const [layoutMode, setLayoutMode] = useState<'table' | 'grid'>('table');
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
@@ -69,11 +74,31 @@ export function App() {
 
   const stats = useMemo(() => calculateAppStats(products), [products]);
 
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      const cat = p.category || 'Maison & Confort';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [products]);
+
+  // Filter products by selected category
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'all') return processedProducts;
+    return processedProducts.filter((p) => (p.category || 'Maison & Confort') === selectedCategory);
+  }, [processedProducts, selectedCategory]);
+
   const handleApplyCurrencyToProduct = (fcfaAmount: number) => {
     if (currencyModalProductId) {
       updateProduct(currencyModalProductId, 'sourcing', fcfaAmount);
       setCurrencyModalProductId(null);
     }
+  };
+
+  const handleSaveMarketAnalysis = (productId: string, data: MarketAnalysisData) => {
+    updateProduct(productId, 'marketAnalysis' as any, data);
   };
 
   return (
@@ -90,6 +115,13 @@ export function App() {
         onRefreshSupabase={loadFromSupabase}
         showAutoSaveToast={showAutoSaveToast}
         isSyncing={isSyncing}
+      />
+
+      {/* Category & Niche Selector */}
+      <CategoryFilterBar
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        categoryCounts={categoryCounts}
       />
 
       <StatStrip stats={stats} />
@@ -115,7 +147,7 @@ export function App() {
 
       {layoutMode === 'table' ? (
         <ProductTable
-          products={processedProducts}
+          products={filteredProducts}
           isRankingActive={isRankingActive}
           visibleGroups={visibleGroups}
           sortConfig={sortConfig}
@@ -123,6 +155,7 @@ export function App() {
           onUpdateProduct={updateProduct}
           onOpenBreakEven={(p) => setBreakEvenProduct(p)}
           onOpenOnePager={(p, rankIndex) => setOnePagerData({ product: p, rankIndex })}
+          onOpenMarketAnalysis={(p) => setMarketAnalysisProduct(p)}
           onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
           onDuplicateProduct={duplicateProduct}
           onDeleteProduct={deleteProduct}
@@ -131,11 +164,12 @@ export function App() {
         />
       ) : (
         <ProductCardGrid
-          products={processedProducts}
+          products={filteredProducts}
           isRankingActive={isRankingActive}
           onUpdateProduct={updateProduct}
           onOpenBreakEven={(p) => setBreakEvenProduct(p)}
           onOpenOnePager={(p, rankIndex) => setOnePagerData({ product: p, rankIndex })}
+          onOpenMarketAnalysis={(p) => setMarketAnalysisProduct(p)}
           onOpenCurrencyConverter={(id) => setCurrencyModalProductId(id)}
           onDuplicateProduct={duplicateProduct}
           onDeleteProduct={deleteProduct}
@@ -163,6 +197,14 @@ export function App() {
         rankIndex={onePagerData?.rankIndex || 0}
         isOpen={!!onePagerData}
         onClose={() => setOnePagerData(null)}
+      />
+
+      {/* Cutting-Edge Market Analysis Modal */}
+      <MarketAnalysisModal
+        product={marketAnalysisProduct}
+        isOpen={!!marketAnalysisProduct}
+        onClose={() => setMarketAnalysisProduct(null)}
+        onSaveAnalysis={handleSaveMarketAnalysis}
       />
 
       {/* Row-level sourcing currency converter */}
