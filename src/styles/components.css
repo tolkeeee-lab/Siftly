@@ -230,23 +230,28 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
 @media (max-width: 768px) {
   body {
     padding: 20px 12px 60px;
+  .sheet {
+    padding: 12px 8px 30px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .masthead {
+    margin-bottom: 14px;
     flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .masthead-left h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 26px;
+    margin-bottom: 4px;
   }
 
   .masthead-left p {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .masthead-right {
@@ -256,53 +261,73 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
     justify-content: space-between;
     width: 100%;
     border-top: 1px solid var(--line-on-canvas);
-    padding-top: 12px;
+    padding-top: 10px;
   }
 
   /* Sleek horizontal scrolling toolbar on mobile */
   .toolbar {
+    display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 8px;
-    gap: 8px;
-    margin-bottom: 18px;
+    padding-bottom: 6px;
+    gap: 6px;
+    margin-bottom: 14px;
     scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
   }
 
   .toolbar::-webkit-scrollbar {
-    height: 4px;
+    height: 3px;
   }
   .toolbar::-webkit-scrollbar-thumb {
-    background: rgba(247,242,228,0.2);
-    border-radius: 4px;
+    background: rgba(247,242,228,0.3);
+    border-radius: 3px;
   }
 
   .tbtn {
     flex-shrink: 0;
     white-space: nowrap;
-    font-size: 11.5px;
-    padding: 8px 14px;
+    font-size: 11px;
+    padding: 6px 12px;
     scroll-snap-align: start;
   }
 
-  /* Stat cards grid on mobile */
+  /* Horizontal scrolling Stat cards on mobile */
+  .stats-scroll-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .stats-scroll-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
   .stats {
-    grid-template-columns: repeat(2, 1fr);
-    margin-bottom: 24px;
-    border-radius: 8px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    background: transparent;
+    border: none;
   }
 
   .stat {
-    padding: 14px 16px;
+    flex: 0 0 auto;
+    min-width: 130px;
+    background: var(--canvas-sub);
+    border: 1px solid var(--line-on-canvas);
+    border-radius: 8px;
+    padding: 10px 14px;
   }
 
   .stat .num {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .stat .lbl {
-    font-size: 10px;
+    font-size: 9.5px;
   }
 
   /* Pinned / Sticky Product Name Column on Mobile Table */

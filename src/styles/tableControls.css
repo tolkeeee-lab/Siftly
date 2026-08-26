@@ -828,3 +828,150 @@
   color: rgba(247, 242, 228, 0.6);
   font-family: 'IBM Plex Mono', monospace;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVE OVERRIDES (< 768px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .unified-rank-bar {
+    margin: 8px 0 14px;
+    gap: 8px;
+  }
+
+  .rank-bar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .rank-bar-left {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .rank-bar-right {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .inline-filters {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    gap: 5px;
+    scrollbar-width: none;
+  }
+
+  .inline-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .inline-filter-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 4px 9px;
+  }
+
+  /* Product Card Frame on Mobile */
+  .product-card-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .product-card-frame {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .card-frame-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .card-frame-score-box {
+    align-self: flex-start;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-frame-score-pill {
+    font-size: 16px;
+  }
+
+  .card-frame-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .card-frame-img-box {
+    width: 100%;
+    height: 200px;
+  }
+
+  .financial-mini-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .criteria-mini-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .criteria-chip {
+    padding: 3px 4px;
+    font-size: 9.5px;
+  }
+
+  .criteria-chip-in {
+    width: 20px;
+    font-size: 10px;
+  }
+
+  .cod-mini-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .card-frame-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .frame-actions-left {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+  }
+
+  .frame-actions-left .frame-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 11px;
+    padding: 7px 8px;
+  }
+
+  .frame-actions-right {
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .add-product-card {
+    min-height: 240px;
+    padding: 20px;
+  }
+}
