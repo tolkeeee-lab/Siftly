@@ -147,6 +147,7 @@ export const NavigationTabs: React.FC = () => {
             <Link
               key={tab.id}
               href={tab.href}
+              prefetch={true}
               ref={isActive ? activeTabRef : null}
               className={`nav-tab-item ${isActive ? 'active' : ''}`}
             >

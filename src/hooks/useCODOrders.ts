@@ -13,23 +13,31 @@ const DEFAULT_LIVREURS: Livreur[] = [
 ];
 
 export function useCODOrders() {
-  const [orders, setOrders] = useState<CODOrder[]>([]);
-  const [livreurs, setLivreurs] = useState<Livreur[]>(DEFAULT_LIVREURS);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Load from local storage
-  useEffect(() => {
-    try {
-      const savedOrders = localStorage.getItem(COD_ORDERS_STORAGE_KEY);
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
-
-      const savedLivreurs = localStorage.getItem(COD_LIVREURS_STORAGE_KEY);
-      if (savedLivreurs) setLivreurs(JSON.parse(savedLivreurs));
-    } catch (e) {
-      console.warn('Could not read COD data from storage', e);
+  const [orders, setOrders] = useState<CODOrder[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedOrders = localStorage.getItem(COD_ORDERS_STORAGE_KEY);
+        if (savedOrders) return JSON.parse(savedOrders);
+      } catch (e) {
+        console.warn('Could not read COD data from storage', e);
+      }
     }
-    setIsLoaded(true);
-  }, []);
+    return [];
+  });
+
+  const [livreurs, setLivreurs] = useState<Livreur[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedLivreurs = localStorage.getItem(COD_LIVREURS_STORAGE_KEY);
+        if (savedLivreurs) return JSON.parse(savedLivreurs);
+      } catch (e) {
+        console.warn('Could not read livreurs from storage', e);
+      }
+    }
+    return DEFAULT_LIVREURS;
+  });
+
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
 
   const saveOrders = useCallback((newOrders: CODOrder[]) => {
     setOrders(newOrders);

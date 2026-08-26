@@ -8,20 +8,19 @@ import { generateLandingConfig } from '../utils/landingTemplates';
 const LANDING_CONFIGS_KEY = 'siftly_landing_configs_v1';
 
 export function useLandingPageConfigs() {
-  const [configsMap, setConfigsMap] = useState<Record<string, LandingPageConfig>>({});
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LANDING_CONFIGS_KEY);
-      if (saved) {
-        setConfigsMap(JSON.parse(saved));
+  const [configsMap, setConfigsMap] = useState<Record<string, LandingPageConfig>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(LANDING_CONFIGS_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Could not load landing configs', e);
       }
-    } catch (e) {
-      console.warn('Could not load landing configs', e);
     }
-    setIsLoaded(true);
-  }, []);
+    return {};
+  });
+
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
 
   const saveConfigs = useCallback((newMap: Record<string, LandingPageConfig>) => {
     setConfigsMap(newMap);

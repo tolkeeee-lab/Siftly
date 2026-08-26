@@ -2,27 +2,24 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { PurchaseOrder } from '../types/purchaseOrder';
-import { getSupabaseClient } from '../lib/supabaseClient';
 
 const PO_LOCAL_STORAGE_KEY = 'siftly_purchase_orders_v1';
 
 export function usePurchaseOrders() {
-  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  // Load from local storage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(PO_LOCAL_STORAGE_KEY);
-      if (saved) {
-        setOrders(JSON.parse(saved));
+  const [orders, setOrders] = useState<PurchaseOrder[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(PO_LOCAL_STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Could not read purchase orders from local storage', e);
       }
-    } catch (e) {
-      console.warn('Could not read purchase orders from local storage', e);
     }
-    setIsLoaded(true);
-  }, []);
+    return [];
+  });
+
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Save to local storage
   const saveOrders = useCallback((newOrders: PurchaseOrder[]) => {
@@ -54,7 +51,7 @@ export function usePurchaseOrders() {
     return newOrder;
   }, [orders, saveOrders]);
 
-  // Update existing PO
+  // Update PO
   const updateOrder = useCallback((id: string, updates: Partial<PurchaseOrder>) => {
     const updated = orders.map((o) => {
       if (o.id === id) {

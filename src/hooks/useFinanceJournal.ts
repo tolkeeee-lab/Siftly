@@ -12,22 +12,19 @@ const DEFAULT_EXPENSES: ExpenseItem[] = [
 ];
 
 export function useFinanceJournal() {
-  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(EXPENSES_STORAGE_KEY);
-      if (saved) {
-        setExpenses(JSON.parse(saved));
-      } else {
-        setExpenses(DEFAULT_EXPENSES);
+  const [expenses, setExpenses] = useState<ExpenseItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(EXPENSES_STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Could not read expenses from storage', e);
       }
-    } catch (e) {
-      console.warn('Could not read expenses from storage', e);
     }
-    setIsLoaded(true);
-  }, []);
+    return DEFAULT_EXPENSES;
+  });
+
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
 
   const saveExpenses = useCallback((newExpenses: ExpenseItem[]) => {
     setExpenses(newExpenses);

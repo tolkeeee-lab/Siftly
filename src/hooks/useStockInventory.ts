@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { StockMovement, StockItem, StockSummaryStats } from '../types/stockTypes';
 import { ProductData } from '../types/product';
 import { CODOrder } from '../types/codLogistics';
@@ -10,22 +10,31 @@ const STOCK_MOVEMENTS_KEY = 'siftly_stock_movements_v1';
 const STOCK_MANUAL_OVERRIDES_KEY = 'siftly_stock_manual_v1';
 
 export function useStockInventory(products: ProductData[], orders: CODOrder[]) {
-  const [movements, setMovements] = useState<StockMovement[]>([]);
-  const [manualStockMap, setManualStockMap] = useState<Record<string, number>>({});
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const savedMovements = localStorage.getItem(STOCK_MOVEMENTS_KEY);
-      if (savedMovements) setMovements(JSON.parse(savedMovements));
-
-      const savedManual = localStorage.getItem(STOCK_MANUAL_OVERRIDES_KEY);
-      if (savedManual) setManualStockMap(JSON.parse(savedManual));
-    } catch (e) {
-      console.warn('Could not read stock data from storage', e);
+  const [movements, setMovements] = useState<StockMovement[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedMovements = localStorage.getItem(STOCK_MOVEMENTS_KEY);
+        if (savedMovements) return JSON.parse(savedMovements);
+      } catch (e) {
+        console.warn('Could not read stock data from storage', e);
+      }
     }
-    setIsLoaded(true);
-  }, []);
+    return [];
+  });
+
+  const [manualStockMap, setManualStockMap] = useState<Record<string, number>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedManual = localStorage.getItem(STOCK_MANUAL_OVERRIDES_KEY);
+        if (savedManual) return JSON.parse(savedManual);
+      } catch (e) {
+        console.warn('Could not read manual stock from storage', e);
+      }
+    }
+    return {};
+  });
+
+  const [isLoaded, setIsLoaded] = useState<boolean>(true);
 
   const saveMovements = useCallback((newMovements: StockMovement[]) => {
     setMovements(newMovements);
