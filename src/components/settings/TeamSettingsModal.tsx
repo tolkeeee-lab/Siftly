@@ -13,15 +13,7 @@ import {
   Phone,
   Mail,
   MapPin,
-  DollarSign,
   Sparkles,
-  UserCheck,
-  MessageCircle,
-  Copy,
-  ExternalLink,
-  KeyRound,
-  Link,
-  CheckCircle2,
   Loader2,
   Send,
   Store,
@@ -73,18 +65,12 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const [newLivreurZone, setNewLivreurZone] = useState('Cotonou & Calavi');
   const [newLivreurFee, setNewLivreurFee] = useState(1500);
 
-  // Feedback toast & Last Created Member Link Modal
+  // Feedback toast
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [lastCreatedInvite, setLastCreatedInvite] = useState<{
-    name: string;
-    role: string;
-    link: string;
-    phone: string;
-  } | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 4500);
+    setTimeout(() => setToastMsg(null), 5000);
   };
 
   if (!isOpen) return null;
@@ -101,19 +87,14 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       phone: editPhone.trim(),
       country: editCountry.trim(),
     });
-    showToast(`🏪 Identité de la boutique "${editShopName.trim() || 'Ma Boutique'}" mise à jour avec succès !`);
-  };
-
-  const generateInviteLink = (name: string, role: string, email: string) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://siftly-iota.vercel.app';
-    return `${origin}/?join=team&name=${encodeURIComponent(name)}&role=${encodeURIComponent(role)}&email=${encodeURIComponent(email)}`;
+    showToast(`🏪 Identité de la boutique "${editShopName.trim() || 'Ma Boutique'}" enregistrée avec succès !`);
   };
 
   const handleAddMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMemberName.trim()) return;
+    if (!newMemberName.trim() || !newMemberEmail.trim()) return;
     const name = newMemberName.trim();
-    const email = newMemberEmail.trim() || `${name.toLowerCase().replace(/\s+/g, '')}@siftly.app`;
+    const email = newMemberEmail.trim();
     const phone = newMemberPhone.trim() || '';
     const role = newMemberRole;
 
@@ -124,14 +105,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       email,
       phone,
       role,
-    });
-
-    const magicLink = generateInviteLink(name, role, email);
-    setLastCreatedInvite({
-      name,
-      role: ROLE_PERMISSIONS[role]?.label || role,
-      link: magicLink,
-      phone,
     });
 
     try {
@@ -147,7 +120,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
         showToast(`⚠️ ${data.message || "Erreur lors de l'envoi de l'invitation"}`);
       }
     } catch (err: any) {
-      showToast(`🎉 Collaborateur "${name}" ajouté ! Lien d'accès généré.`);
+      showToast(`⚠️ Erreur réseau : ${err?.message || 'Serveur injoignable'}`);
     } finally {
       setIsSendingEmail(false);
     }
@@ -258,7 +231,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
                   <h3 className="account-email-text">{ownerDisplayName} ({ownerEmail})</h3>
                   <p className="account-sub-text">
-                    Boutique : <strong>{shopDisplayName}</strong> · Vos collaborateurs et vos bons de commande afficheront ce nom.
+                    Boutique : <strong>{shopDisplayName}</strong> · Vos collaborateurs et vos clients verront ce nom.
                   </p>
                 </div>
               </div>
@@ -346,65 +319,11 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           {activeTab === 'team' && (
             <div className="settings-section-pane">
               <div className="settings-guide-card">
-                <Shield className="w-4 h-4 text-gold flex-shrink-0" />
+                <Mail className="w-4 h-4 text-gold flex-shrink-0" />
                 <p>
-                  <strong>Gestion d'Équipe :</strong> Ajoutez vos collaborateurs pour leur donner accès à <strong>{shopDisplayName}</strong> par email officiel Supabase ou via leur lien direct !
+                  <strong>Invitation Automatique Supabase :</strong> Dès que vous enregistrez un collaborateur, Supabase lui expédie son email direct d'invitation avec son bouton de connexion sans mot de passe.
                 </p>
               </div>
-
-              {/* Just Created Member Success Card with Direct Link */}
-              {lastCreatedInvite && (
-                <div className="last-created-invite-card">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      <strong className="text-sm text-ink font-bold">
-                        Lien d'accès généré pour : {lastCreatedInvite.name} ({lastCreatedInvite.role})
-                      </strong>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-xs text-ink-soft hover:text-ink"
-                      onClick={() => setLastCreatedInvite(null)}
-                    >
-                      Fermer ✕
-                    </button>
-                  </div>
-                  <p className="text-xs text-ink-muted my-1">
-                    L'email d'invitation a été envoyé. Vous pouvez aussi lui transmettre ce lien direct WhatsApp / SMS :
-                  </p>
-                  <div className="invite-link-row">
-                    <input
-                      type="text"
-                      readOnly
-                      value={lastCreatedInvite.link}
-                      className="invite-link-input"
-                    />
-                    <button
-                      type="button"
-                      className="btn-copy-magic-link"
-                      onClick={() => {
-                        navigator.clipboard.writeText(lastCreatedInvite.link);
-                        showToast(`📋 Lien d'accès copié pour ${lastCreatedInvite.name} !`);
-                      }}
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copier le Lien</span>
-                    </button>
-                    {lastCreatedInvite.phone && (
-                      <a
-                        href={`https://wa.me/${lastCreatedInvite.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${lastCreatedInvite.name},\n\nVoici votre lien d'accès direct à l'espace de travail ${shopDisplayName} (${lastCreatedInvite.role}) :\n👉 ${lastCreatedInvite.link}\n\nCliquez dessus pour commencer à travailler !`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-action-invite-wa"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>Envoyer WhatsApp</span>
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Form Add */}
               <form onSubmit={handleAddMemberSubmit} className="premium-form-card">
@@ -439,7 +358,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Numéro WhatsApp (Pour dispatch)</label>
+                    <label>Numéro de Téléphone</label>
                     <input
                       type="tel"
                       placeholder="+229 97 00 00 00"
@@ -472,7 +391,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   {isSendingEmail ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Envoi de l'invitation par email...</span>
+                      <span>Envoi de l'invitation par email en cours...</span>
                     </>
                   ) : (
                     <>
@@ -515,10 +434,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   {/* Real Collaborators */}
                   {members.map((member) => {
                     const perm = ROLE_PERMISSIONS[member.role];
-                    const cleanPhone = (member.phone || '').replace(/[^0-9]/g, '');
-                    const magicLink = generateInviteLink(member.name, member.role, member.email);
-                    const inviteMsg = `Bonjour ${member.name},\n\nVoici votre lien d'accès direct à notre boutique ${shopDisplayName} (${perm?.label || member.role}) :\n👉 ${magicLink}\n\nCliquez sur ce lien pour vous connecter immédiatement !`;
-                    const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(inviteMsg)}` : null;
 
                     return (
                       <div key={member.id} className="premium-member-row">
@@ -545,32 +460,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                         </div>
 
                         <div className="member-actions-group">
-                          <button
-                            type="button"
-                            className="btn-action-copy-magic"
-                            title="Copier le lien d'accès magique"
-                            onClick={() => {
-                              navigator.clipboard.writeText(magicLink);
-                              showToast(`📋 Lien d'accès magique copié pour ${member.name} !`);
-                            }}
-                          >
-                            <Link className="w-3.5 h-3.5" />
-                            <span>Copier Lien</span>
-                          </button>
-
-                          {waLink && (
-                            <a
-                              href={waLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="btn-action-invite-wa"
-                              title="Envoyer l'accès et les instructions sur WhatsApp"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              <span>WhatsApp</span>
-                            </a>
-                          )}
-
                           <button
                             type="button"
                             className="btn-trash-member"
@@ -687,19 +576,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                       </div>
 
                       <div className="member-actions-group">
-                        {r.phone && (
-                          <a
-                            href={`https://wa.me/${r.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${r.name}, voici votre contact pour les courses du jour sur ${shopDisplayName}.`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-action-invite-wa"
-                            title="Contacter le livreur sur WhatsApp"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                            <span>WhatsApp</span>
-                          </a>
-                        )}
-
                         <button
                           type="button"
                           className="btn-trash-member"
