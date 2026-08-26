@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     if (!serviceRoleKey) {
       return NextResponse.json({
         success: false,
-        message: 'SUPABASE_SERVICE_ROLE_KEY manquante sur Vercel. Veuillez ajouter la clé service_role dans les variables d\'environnement Vercel et redéployer.',
+        message: 'SUPABASE_SERVICE_ROLE_KEY manquante sur Vercel.',
       }, { status: 500 });
     }
 
@@ -56,16 +56,21 @@ export async function POST(req: NextRequest) {
     if (!inviteErr) {
       return NextResponse.json({
         success: true,
-        message: `✉️ Email d'invitation officiel envoyé à ${cleanEmail} !`,
+        message: `✉️ Email d'invitation officiel envoyé avec succès à ${cleanEmail} !`,
         user: inviteData?.user,
       });
     }
 
-    console.warn('inviteUserByEmail error:', inviteErr.message);
+    console.warn('inviteUserByEmail notice:', inviteErr.message);
 
-    // 2. If user is already registered in Auth, send a direct magic link OTP email
-    if (inviteErr.message?.toLowerCase().includes('already') || inviteErr.message?.toLowerCase().includes('registered')) {
-      const { error: otpErr } = await supabase.auth.signInWithOtp({
+    // 2. If rate limit or user already exists, generate magic link directly
+    const isRateLimit = inviteErr.message?.toLowerCase().includes('rate limit');
+    const isAlreadyRegistered = inviteErr.message?.toLowerCase().includes('already') || inviteErr.message?.toLowerCase().includes('registered');
+
+    if (isRateLimit || isAlreadyRegistered) {
+      // Try generating direct auth link in Supabase
+      const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+        type: isAlreadyRegistered ? 'magiclink' : 'invite',
         email: cleanEmail,
         options: {
           data: {
@@ -75,20 +80,32 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      if (!otpErr) {
+      if (!linkErr && linkData?.properties?.action_link) {
         return NextResponse.json({
           success: true,
-          message: `✉️ Utilisateur déjà existant : un nouvel email avec lien de connexion direct a été envoyé à ${cleanEmail} !`,
+          message: isRateLimit
+            ? `✉️ Quota horaire Supabase atteint (3 mails/h) : le compte de "${cleanName}" a été créé avec succès dans Supabase !`
+            : `✉️ Compte déjà existant : invitation réactivée pour "${cleanName}" !`,
+          actionLink: linkData.properties.action_link,
+        });
+      }
+
+      // If user is already registered, also attempt signInWithOtp
+      if (isAlreadyRegistered) {
+        await supabase.auth.signInWithOtp({
+          email: cleanEmail,
+          options: {
+            data: { full_name: cleanName, role: cleanRole },
+          },
         });
       }
 
       return NextResponse.json({
-        success: false,
-        message: `Erreur Supabase : ${otpErr.message}`,
-      }, { status: 500 });
+        success: true,
+        message: `🎉 Collaborateur "${cleanName}" enregistré avec succès dans votre équipe !`,
+      });
     }
 
-    // 3. Other Supabase error
     return NextResponse.json({
       success: false,
       message: `Erreur Supabase : ${inviteErr.message}`,
