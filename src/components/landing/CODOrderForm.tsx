@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Truck, CheckCircle2, ShieldCheck, Phone, MapPin, User, ArrowRight } from 'lucide-react';
+import { Truck, CheckCircle2, ShieldCheck, Phone, MapPin, User, ArrowRight, Lock } from 'lucide-react';
 import { LandingOffer } from '../../types/landingTypes';
 import { formatFCFA } from '../../utils/formatters';
 
@@ -63,15 +63,15 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
     return (
       <div className="cod-order-success-card">
         <div className="success-icon-wrap">
-          <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+          <CheckCircle2 className="w-14 h-14 text-emerald-500" />
         </div>
-        <h3 className="success-title">🎉 Félicitations ! Votre commande est validée</h3>
+        <h3 className="success-title">🎉 Votre commande est confirmée !</h3>
         <p className="success-desc">
-          Merci <strong>{customerName}</strong>. Notre service client va vous contacter au <strong>{customerPhone}</strong> pour confirmer l'heure de passage de votre livreur à <strong>{customerCity}</strong>.
+          Merci <strong>{customerName}</strong>. Notre service logistique va vous appeler au <strong>{customerPhone}</strong> pour planifier la livraison à <strong>{customerCity}</strong>.
         </p>
         <div className="success-recap-box">
-          <div>📦 Article : <strong>{productName} (x{currentOffer?.quantity})</strong></div>
-          <div>💵 Montant à payer au livreur : <strong className="text-gold-deep">{formatFCFA(currentOffer?.priceFCFA || 0)}</strong></div>
+          <div>📦 Produit : <strong>{productName} (x{currentOffer?.quantity})</strong></div>
+          <div>💵 Montant à régler à la livraison : <strong style={{ color: '#059669', fontSize: '15px' }}>{formatFCFA(currentOffer?.priceFCFA || 0)}</strong></div>
         </div>
       </div>
     );
@@ -79,19 +79,23 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
 
   return (
     <div id="commande-form" className="cod-order-form-container">
+      <div className="form-top-ribbon">
+        <Truck className="w-3.5 h-3.5 inline mr-1" /> PAIEMENT CASH À LA LIVRAISON
+      </div>
+
       <div className="form-header">
-        <div className="form-header-badge">
-          <Truck className="w-4 h-4" />
-          <span>PAIEMENT À LA LIVRAISON (CASH ON DELIVERY)</span>
-        </div>
-        <h3 className="form-title">Remplissez le formulaire pour recevoir votre colis</h3>
-        <p className="form-subtitle">Livraison express en 24h/48h chez vous ou au bureau</p>
+        <h3 className="form-title">Passez votre commande en 10 secondes</h3>
+        <p className="form-subtitle">Ne payez rien maintenant. Payez au livreur après réception !</p>
       </div>
 
       <form onSubmit={handleSubmit} className="landing-checkout-form">
         {/* Step 1: Pack Selection */}
-        <div className="form-step-section">
-          <label className="step-label">Étape 1 : Choisissez votre formule avantageuse</label>
+        <div style={{ marginBottom: '16px' }}>
+          <label className="step-label">
+            <span className="step-badge">1</span>
+            <span>Choisissez votre formule</span>
+          </label>
+
           <div className="offers-picker-grid">
             {offers.map((offer) => {
               const isSelected = selectedOfferId === offer.id;
@@ -106,6 +110,7 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
                     <input
                       type="radio"
                       name="offer"
+                      className="offer-radio"
                       checked={isSelected}
                       onChange={() => setSelectedOfferId(offer.id)}
                     />
@@ -122,11 +127,14 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
         </div>
 
         {/* Step 2: Customer Details */}
-        <div className="form-step-section">
-          <label className="step-label">Étape 2 : Vos coordonnées pour la livraison</label>
+        <div style={{ marginBottom: '16px' }}>
+          <label className="step-label">
+            <span className="step-badge">2</span>
+            <span>Adresse de livraison</span>
+          </label>
 
           <div className="form-input-group">
-            <label><User className="w-3.5 h-3.5 inline mr-1" /> Nom & Prénom *</label>
+            <label><User className="w-3.5 h-3.5 inline mr-1" /> Votre Nom Complet *</label>
             <input
               type="text"
               required
@@ -138,7 +146,7 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
           </div>
 
           <div className="form-input-group">
-            <label><Phone className="w-3.5 h-3.5 inline mr-1" /> Numéro Téléphone WhatsApp (Actif) *</label>
+            <label><Phone className="w-3.5 h-3.5 inline mr-1" /> Numéro WhatsApp (Appel de livraison) *</label>
             <input
               type="tel"
               required
@@ -150,25 +158,25 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
           </div>
 
           <div className="form-input-row">
-            <div className="form-input-group flex-1">
+            <div className="form-input-group" style={{ flex: 1 }}>
               <label>Ville *</label>
               <input
                 type="text"
                 required
                 className="landing-input"
-                placeholder="ex: Cotonou / Abidjan"
+                placeholder="Cotonou / Abidjan"
                 value={customerCity}
                 onChange={(e) => setCustomerCity(e.target.value)}
               />
             </div>
 
-            <div className="form-input-group flex-2">
+            <div className="form-input-group" style={{ flex: 1.5 }}>
               <label><MapPin className="w-3.5 h-3.5 inline mr-1" /> Quartier & Repère *</label>
               <input
                 type="text"
                 required
                 className="landing-input"
-                placeholder="ex: Akpakpa, vers le carrefour"
+                placeholder="ex: Akpakpa, vers l'église"
                 value={customerAddress}
                 onChange={(e) => setCustomerAddress(e.target.value)}
               />
@@ -179,18 +187,18 @@ export const CODOrderForm: React.FC<CODOrderFormProps> = ({
         {/* Total & Submit Button */}
         <div className="checkout-summary-box">
           <div className="summary-line">
-            <span>Total à payer au livreur :</span>
+            <span>Montant à régler au livreur :</span>
             <strong className="summary-price">{formatFCFA(currentOffer?.priceFCFA || 0)}</strong>
           </div>
 
           <button type="submit" className="btn-submit-cod-order">
-            <span>COMMANDER ET PAYER À LA LIVRAISON</span>
+            <span>COMMANDER & PAYER À LA LIVRAISON</span>
             <ArrowRight className="w-5 h-5" />
           </button>
 
           <div className="guarantee-security-line">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 inline mr-1" />
-            <span>Paiement 100% sécurisé à la réception après inspection de votre colis</span>
+            <Lock className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
+            <span>Colis vérifié avant paiement · Garantie 7 jours incluse</span>
           </div>
         </div>
       </form>

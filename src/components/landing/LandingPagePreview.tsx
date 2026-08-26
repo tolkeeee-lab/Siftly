@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Star, ShieldCheck, Truck, Clock, Award, ArrowDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, ShieldCheck, Truck, Award, ArrowDown, Zap, Clock, MessageCircle } from 'lucide-react';
 import { LandingPageConfig } from '../../types/landingTypes';
 import { CODOrderForm } from './CODOrderForm';
 import { formatFCFA } from '../../utils/formatters';
@@ -15,15 +15,29 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
   config,
   onOrderSuccess,
 }) => {
+  const [timeLeft, setTimeLeft] = useState('04h 18m 22s');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      const h = String(23 - now.getHours()).padStart(2, '0');
+      const m = String(59 - now.getMinutes()).padStart(2, '0');
+      const s = String(59 - now.getSeconds()).padStart(2, '0');
+      setTimeLeft(`${h}h ${m}m ${s}s`);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const scrollToForm = () => {
     document.getElementById('commande-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="landing-page-root">
-      {/* Top Banner Notice */}
+      {/* Top Banner Notice with Flash Sale Countdown */}
       <div className="landing-top-announcement">
-        🔥 OFFRE SPÉCIALE AUJOURD'HUI : LIVRAISON RAPIDE & PAIEMENT À LA RÉCEPTION DU COLIS !
+        <span className="urgency-pulse" />
+        <span>🔥 OFFRE FLASH DU JOUR : Se termine dans <strong>{timeLeft}</strong> !</span>
       </div>
 
       {/* Main Container */}
@@ -36,13 +50,13 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
                 <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <span>+2 500 Clients Satisfaits</span>
+            <span>4.9 / 5 (+1 840 clients satisfaits)</span>
           </div>
 
           <h1 className="landing-hero-title">{config.title}</h1>
           <p className="landing-hero-subtitle">{config.subHeadline}</p>
 
-          {/* Hero Image */}
+          {/* Hero Image with Price Badge */}
           <div className="landing-hero-img-box">
             {config.heroImage ? (
               <img src={config.heroImage} alt={config.title} />
@@ -50,31 +64,38 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
               <div className="hero-img-placeholder">Photo HD du Produit</div>
             )}
             <div className="hero-price-badge">
-              <span className="badge-save">PROMO -33%</span>
+              <span className="badge-save">PROMO DU JOUR</span>
               <div className="badge-price">{formatFCFA(config.sellingPriceFCFA)}</div>
               <div className="badge-old-price">{formatFCFA(config.originalPriceFCFA)}</div>
             </div>
           </div>
 
+          {/* Scarcity Bar */}
+          <div className="stock-countdown-bar">
+            <Clock className="w-4 h-4 text-amber-600 inline mr-1" />
+            <span>⚠️ Attention : Plus que <strong>6 pièces disponibles</strong> en stock au tarif promo !</span>
+          </div>
+
           <button type="button" className="btn-hero-cta" onClick={scrollToForm}>
-            <span>COMMANDER MAINTENANT & PAYER À LA LIVRAISON</span>
-            <ArrowDown className="w-4 h-4" />
+            <span>COMMANDER & PAYER À LA LIVRAISON</span>
+            <ArrowDown className="w-5 h-5" />
           </button>
 
           <div className="trust-badges-row">
-            <div className="trust-badge-item"><Truck className="w-4 h-4 text-emerald-400" /> Livraison 24h/48h</div>
-            <div className="trust-badge-item"><ShieldCheck className="w-4 h-4 text-sky-400" /> Paiement à la réception</div>
-            <div className="trust-badge-item"><Award className="w-4 h-4 text-amber-400" /> Garantie 7 Jours</div>
+            <div className="trust-badge-item"><Truck className="w-4 h-4 text-emerald-500" /> Livraison 24h</div>
+            <div className="trust-badge-item"><ShieldCheck className="w-4 h-4 text-sky-500" /> Paiement à réception</div>
+            <div className="trust-badge-item"><Award className="w-4 h-4 text-amber-500" /> Garantie 7 Jours</div>
           </div>
         </div>
 
         {/* Benefits Section */}
-        <div className="landing-section benefits-card">
-          <h2 className="section-title">Pourquoi tout le monde s'arrache cet accessoire ?</h2>
+        <div className="landing-section">
+          <h2 className="section-title">Ce que vous allez adorer avec cet accessoire :</h2>
           <div className="benefits-list">
             {config.keyBenefits.map((benefit, idx) => (
-              <div key={idx} className="benefit-item">
-                <p>{benefit}</p>
+              <div key={idx} className="benefit-card-item">
+                <div className="benefit-icon"><Zap className="w-4 h-4" /></div>
+                <p className="benefit-text">{benefit}</p>
               </div>
             ))}
           </div>
@@ -89,13 +110,13 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
         />
 
         {/* Customer Reviews Section */}
-        <div className="landing-section reviews-section">
-          <h2 className="section-title">Avis de nos clients vérifiés</h2>
+        <div className="landing-section">
+          <h2 className="section-title">Avis vérifiés de nos clients</h2>
           <div className="reviews-grid">
             {config.reviews.map((rev) => (
               <div key={rev.id} className="review-card">
                 <div className="review-header">
-                  <div className="review-author-info">
+                  <div>
                     <strong>{rev.author}</strong>
                     <span className="review-city">{rev.city}</span>
                   </div>
@@ -118,6 +139,28 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
           <p>Service Client WhatsApp 7j/7 · Paiement sécurisé à la livraison.</p>
         </div>
       </div>
+
+      {/* Sticky Bottom CTA Bar */}
+      <div className="sticky-mobile-cta-bar">
+        <div className="sticky-bar-price">
+          <span className="sticky-price-label">Prix Spécial</span>
+          <span className="sticky-price-num">{formatFCFA(config.sellingPriceFCFA)}</span>
+        </div>
+        <button type="button" className="btn-sticky-cta" onClick={scrollToForm}>
+          Commander (COD) ⚡
+        </button>
+      </div>
+
+      {/* Floating WhatsApp support */}
+      <a
+        href="https://wa.me/?text=Bonjour,%20j'ai%20une%20question%20sur%20le%20produit"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="floating-whatsapp-btn"
+        title="Assistance WhatsApp"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </a>
     </div>
   );
 };
