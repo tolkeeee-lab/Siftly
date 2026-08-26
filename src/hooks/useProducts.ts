@@ -88,12 +88,23 @@ export function useProducts() {
     });
   }, [saveToStorage]);
 
+  const generateValidUuid = (): string => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
+
   const addProduct = useCallback((initialData?: Partial<ProductData>): ProductData => {
     let createdProduct: ProductData | null = null;
     setProducts((prev) => {
       const maxSeq = prev.reduce((max, p) => Math.max(max, p.seq || 0), 0);
       const newProduct: ProductData = {
-        id: 'prod-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        id: generateValidUuid(),
         seq: maxSeq + 1,
         produit: initialData?.produit || '',
         category: initialData?.category || 'Maison & Confort',
@@ -139,7 +150,7 @@ export function useProducts() {
       const maxSeq = prev.reduce((max, p) => Math.max(max, p.seq || 0), 0);
       const cloned: ProductData = {
         ...target,
-        id: 'prod-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        id: generateValidUuid(),
         seq: maxSeq + 1,
         produit: target.produit ? `${target.produit} (copie)` : 'Copie produit',
       };

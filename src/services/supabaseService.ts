@@ -2,9 +2,23 @@ import { ProductData } from '../types/product';
 import { getSupabaseClient } from '../lib/supabaseClient';
 import { parseNum } from '../utils/formatters';
 
+function isValidUuid(str?: string): boolean {
+  return !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 export function mapProductToDb(p: ProductData, userId?: string): Record<string, any> {
+  const validProductId = isValidUuid(p.id)
+    ? p.id
+    : typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+
   const row: Record<string, any> = {
-    id: p.id,
+    id: validProductId,
     seq: p.seq,
     produit: p.produit || '',
     category: p.category || 'Maison & Confort',
