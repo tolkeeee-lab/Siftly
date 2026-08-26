@@ -11,6 +11,7 @@ import {
   RefreshCw,
   DollarSign,
   FileSpreadsheet,
+  Camera,
 } from 'lucide-react';
 import { ProductData } from '../../types/product';
 import {
@@ -28,6 +29,7 @@ interface ToolbarProps {
   onImportTextRows: (rows: Partial<ProductData>[]) => void;
   onOpenPasteModal: () => void;
   onOpenCurrencyModal?: () => void;
+  onOpenImageSourcingModal?: () => void;
   onRefreshSupabase?: () => void;
   showAutoSaveToast: boolean;
   isSyncing?: boolean;
@@ -39,6 +41,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onImportTextRows,
   onOpenPasteModal,
   onOpenCurrencyModal,
+  onOpenImageSourcingModal,
   onRefreshSupabase,
   showAutoSaveToast,
   isSyncing,
@@ -105,6 +108,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           <DollarSign className="w-3.5 h-3.5 text-gold" />
           <span>Convertisseur FCFA</span>
+        </button>
+      )}
+
+      {onOpenImageSourcingModal && (
+        <button
+          className="tbtn load image-sourcing-btn"
+          type="button"
+          onClick={onOpenImageSourcingModal}
+          title="Rechercher des fournisseurs et analyser le marché à partir d'une photo de produit"
+        >
+          <Camera className="w-3.5 h-3.5 text-gold-deep" />
+          <span>📸 Sourcer par Image</span>
         </button>
       )}
 

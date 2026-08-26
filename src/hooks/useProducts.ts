@@ -143,13 +143,15 @@ export function useProducts() {
     });
   }, [saveToStorage]);
 
-  const addProduct = useCallback((initialData?: Partial<ProductData>) => {
+  const addProduct = useCallback((initialData?: Partial<ProductData>): ProductData => {
+    let createdProduct: ProductData | null = null;
     setProducts((prev) => {
       const maxSeq = prev.reduce((max, p) => Math.max(max, p.seq || 0), 0);
       const newProduct: ProductData = {
         id: 'prod-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
         seq: maxSeq + 1,
         produit: initialData?.produit || '',
+        category: initialData?.category || 'Maison & Confort',
         imgSrc: initialData?.imgSrc || '',
         creative: initialData?.creative || '',
         alibaba: initialData?.alibaba || '',
@@ -176,10 +178,12 @@ export function useProducts() {
         cible: initialData?.cible || '',
         angle: initialData?.angle || '',
       };
+      createdProduct = newProduct;
       const next = [...prev, newProduct];
       saveToStorage(next, newProduct);
       return next;
     });
+    return createdProduct!;
   }, [saveToStorage]);
 
   const duplicateProduct = useCallback((id: string) => {

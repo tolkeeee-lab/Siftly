@@ -17,11 +17,13 @@ import { ProductCardGrid } from './components/cards/ProductCardGrid';
 import { LightboxModal } from './components/modals/LightboxModal';
 import { PasteModal } from './components/modals/PasteModal';
 import { BreakEvenModal } from './components/modals/BreakEvenModal';
-import { CurrencyConverterModal } from './components/modals/CurrencyConverterModal';
 import { ProductOnePagerModal } from './components/modals/ProductOnePagerModal';
 import { MarketAnalysisModal } from './components/modals/MarketAnalysisModal';
+import { CurrencyConverterModal } from './components/modals/CurrencyConverterModal';
+import { ImageSourcingModal } from './components/modals/ImageSourcingModal';
 
 export function App() {
+  const [isImageSourcingOpen, setIsImageSourcingOpen] = useState(false);
   const {
     products,
     updateProduct,
@@ -112,6 +114,7 @@ export function App() {
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
         onOpenCurrencyModal={() => setIsGlobalCurrencyModalOpen(true)}
+        onOpenImageSourcingModal={() => setIsImageSourcingOpen(true)}
         onRefreshSupabase={loadFromSupabase}
         showAutoSaveToast={showAutoSaveToast}
         isSyncing={isSyncing}
@@ -214,10 +217,12 @@ export function App() {
         onApplyConvertedPrice={handleApplyCurrencyToProduct}
       />
 
-      {/* Global currency converter */}
-      <CurrencyConverterModal
-        isOpen={isGlobalCurrencyModalOpen}
-        onClose={() => setIsGlobalCurrencyModalOpen(false)}
+      {/* Visual Image Sourcing Modal */}
+      <ImageSourcingModal
+        isOpen={isImageSourcingOpen}
+        onClose={() => setIsImageSourcingOpen(false)}
+        onAddProduct={(p) => addProduct(p)}
+        onOpenMarketAnalysis={(p) => setMarketAnalysisProduct(p)}
       />
     </div>
   );
