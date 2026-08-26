@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Users, Truck, UserPlus, Trash2, Shield, LogOut, Check, Phone, Mail, MapPin, DollarSign } from 'lucide-react';
+import { X, Users, Truck, UserPlus, Trash2, Shield, LogOut, Check, Phone, Mail, MapPin, DollarSign, Sparkles, UserCheck } from 'lucide-react';
 import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
 import { useCODOrders } from '../../hooks/useCODOrders';
@@ -63,40 +63,55 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
     setNewLivreurPhone('');
   };
 
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <div className="paste-modal open" onClick={onClose}>
-      <div className="paste-box po-modal-box settings-modal-box" onClick={(e) => e.stopPropagation()}>
-        <div className="po-modal-header">
-          <div className="po-modal-title">
-            <Users className="w-5 h-5 text-gold-deep" />
-            <h2>⚙️ Paramètres, Équipe & Livreurs</h2>
+      <div className="paste-box settings-modal-premium" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="settings-modal-top">
+          <div className="settings-title-group">
+            <div className="settings-header-icon">
+              <Users className="w-5 h-5 text-gold" />
+            </div>
+            <div>
+              <h2 className="settings-main-title">Paramètres & Gestion d'Équipe</h2>
+              <span className="settings-sub-title">Contrôlez les accès de vos collaborateurs et de vos livreurs</span>
+            </div>
           </div>
-          <button type="button" className="rowdel" onClick={onClose}>
+          <button type="button" className="btn-close-settings" onClick={onClose}>
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Navigation Tabs */}
-        <div className="settings-nav-tabs">
+        {/* Segmented Control Tabs */}
+        <div className="settings-tabs-capsule">
           <button
             type="button"
-            className={`settings-tab-btn ${activeTab === 'team' ? 'active' : ''}`}
+            className={`tab-capsule-item ${activeTab === 'team' ? 'active' : ''}`}
             onClick={() => setActiveTab('team')}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>Équipe & Assistant ({members.length})</span>
+            <span>Collaborateurs</span>
+            <span className="tab-count-pill">{members.length}</span>
           </button>
           <button
             type="button"
-            className={`settings-tab-btn ${activeTab === 'riders' ? 'active' : ''}`}
+            className={`tab-capsule-item ${activeTab === 'riders' ? 'active' : ''}`}
             onClick={() => setActiveTab('riders')}
           >
             <Truck className="w-3.5 h-3.5" />
-            <span>Livreurs & Zones ({livreurs.length})</span>
+            <span>Livreurs & Hub</span>
+            <span className="tab-count-pill">{livreurs.length}</span>
           </button>
           <button
             type="button"
-            className={`settings-tab-btn ${activeTab === 'account' ? 'active' : ''}`}
+            className={`tab-capsule-item ${activeTab === 'account' ? 'active' : ''}`}
             onClick={() => setActiveTab('account')}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -104,191 +119,241 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           </button>
         </div>
 
-        <div className="settings-modal-body">
+        {/* Modal Body */}
+        <div className="settings-modal-content">
           {/* TAB 1: TEAM MEMBERS */}
           {activeTab === 'team' && (
-            <div className="settings-pane">
-              <p className="settings-desc">
-                Ajoutez vos collaborateurs et votre assistant. Vous pouvez leur donner un accès total ou restreindre l'accès à certaines pages.
-              </p>
-
-              {/* Add Member Form */}
-              <form onSubmit={handleAddMemberSubmit} className="add-member-form">
-                <div className="form-input-row">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nom complet (ex: Marc KOFFI)"
-                    className="po-text-input flex-1"
-                    value={newMemberName}
-                    onChange={(e) => setNewMemberName(e.target.value)}
-                  />
-                  <input
-                    type="email"
-                    required
-                    placeholder="Email collaborateur"
-                    className="po-text-input flex-1"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                  />
+            <div className="settings-section-pane">
+              {/* Form Add */}
+              <form onSubmit={handleAddMemberSubmit} className="premium-form-card">
+                <div className="form-card-title">
+                  <UserPlus className="w-4 h-4 text-gold-deep" />
+                  <span>Inviter un Nouveau Collaborateur ou Assistant</span>
                 </div>
 
-                <div className="form-input-row" style={{ marginTop: '8px' }}>
-                  <input
-                    type="tel"
-                    placeholder="Numéro WhatsApp"
-                    className="po-text-input flex-1"
-                    value={newMemberPhone}
-                    onChange={(e) => setNewMemberPhone(e.target.value)}
-                  />
-                  <select
-                    className="po-select-input flex-1"
-                    value={newMemberRole}
-                    onChange={(e) => setNewMemberRole(e.target.value as UserRole)}
-                  >
-                    <option value="assistant">🤝 Assistant de Direction (Accès 100% Total)</option>
-                    <option value="media_buyer">🎬 Média Buyer (Ads & Pages de Vente)</option>
-                    <option value="logistics">🚚 Responsable Logistique (Suivi COD)</option>
-                    <option value="inventory">📦 Magasinier (Stocks)</option>
-                  </select>
-                  <button type="submit" className="btn-add-member">
-                    <UserPlus className="w-4 h-4" />
-                    <span>Ajouter</span>
-                  </button>
+                <div className="premium-input-grid">
+                  <div className="form-field">
+                    <label>Nom & Prénom *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: Marc KOFFI"
+                      className="premium-input"
+                      value={newMemberName}
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Email Collaborateur *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="marc@entreprise.com"
+                      className="premium-input"
+                      value={newMemberEmail}
+                      onChange={(e) => setNewMemberEmail(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Numéro WhatsApp</label>
+                    <input
+                      type="tel"
+                      placeholder="+229 97 00 00 00"
+                      className="premium-input"
+                      value={newMemberPhone}
+                      onChange={(e) => setNewMemberPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Rôle & Niveau d'Accès *</label>
+                    <select
+                      className="premium-select"
+                      value={newMemberRole}
+                      onChange={(e) => setNewMemberRole(e.target.value as UserRole)}
+                    >
+                      <option value="assistant">🤝 Assistant (Accès 100% Total)</option>
+                      <option value="media_buyer">🎬 Média Buyer (Ads & Pages Vente)</option>
+                      <option value="logistics">🚚 Responsable Logistique (Suivi COD)</option>
+                      <option value="inventory">📦 Magasinier (Stocks & Arrivages)</option>
+                    </select>
+                  </div>
                 </div>
+
+                <button type="submit" className="btn-submit-premium-gold">
+                  <UserPlus className="w-4 h-4" />
+                  <span>Enregistrer Collaborateur</span>
+                </button>
               </form>
 
               {/* Members List */}
-              <div className="team-members-list">
-                {members.map((member) => {
-                  const perm = ROLE_PERMISSIONS[member.role];
-                  return (
-                    <div key={member.id} className="team-member-card">
-                      <div className="member-info">
-                        <strong className="member-name">{member.name}</strong>
-                        <div className="member-meta">
-                          <span><Mail className="w-3 h-3 inline" /> {member.email}</span>
-                          <span>·</span>
-                          <span><Phone className="w-3 h-3 inline" /> {member.phone}</span>
+              <div className="members-directory">
+                <h4 className="directory-heading">Membres Actifs ({members.length})</h4>
+                <div className="members-stack">
+                  {members.map((member) => {
+                    const perm = ROLE_PERMISSIONS[member.role];
+                    const isOwner = member.role === 'admin';
+                    return (
+                      <div key={member.id} className="premium-member-row">
+                        <div className="member-avatar-badge">
+                          {isOwner ? '👑' : getInitials(member.name)}
                         </div>
-                      </div>
-                      <div className="member-role-actions">
-                        <span className={`role-badge-pill ${member.role}`}>
-                          {perm?.label || member.role}
-                        </span>
-                        {member.role !== 'admin' && (
+
+                        <div className="member-details-col">
+                          <div className="member-name-row">
+                            <strong className="member-fullname">{member.name}</strong>
+                            <span className={`premium-role-tag ${member.role}`}>
+                              {perm?.label || member.role}
+                            </span>
+                          </div>
+                          <div className="member-contact-row">
+                            <span><Mail className="w-3 h-3 inline mr-1" />{member.email}</span>
+                            <span>·</span>
+                            <span><Phone className="w-3 h-3 inline mr-1" />{member.phone}</span>
+                          </div>
+                        </div>
+
+                        {!isOwner && (
                           <button
                             type="button"
-                            className="btn-del-item"
-                            title="Retirer ce collaborateur"
+                            className="btn-trash-member"
+                            title="Retirer ce membre"
                             onClick={() => removeMember(member.id)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: LIVREURS / RIDERS */}
+          {/* TAB 2: LIVREURS */}
           {activeTab === 'riders' && (
-            <div className="settings-pane">
-              <p className="settings-desc">
-                Enregistrez vos livreurs de confiance. Vous pourrez ensuite leur assigner des colis en 1 clic dans l'onglet <strong>🚚 Suivi COD</strong> !
-              </p>
+            <div className="settings-section-pane">
+              {/* Form Add Livreur */}
+              <form onSubmit={handleAddLivreurSubmit} className="premium-form-card">
+                <div className="form-card-title">
+                  <Truck className="w-4 h-4 text-gold-deep" />
+                  <span>Enregistrer un Nouveau Livreur de Confiance</span>
+                </div>
 
-              {/* Add Livreur Form */}
-              <form onSubmit={handleAddLivreurSubmit} className="add-member-form">
-                <div className="form-input-row">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nom du Livreur (ex: Boris Express)"
-                    className="po-text-input flex-1"
-                    value={newLivreurName}
-                    onChange={(e) => setNewLivreurName(e.target.value)}
-                  />
-                  <input
-                    type="tel"
-                    required
-                    placeholder="Numéro WhatsApp Livreur"
-                    className="po-text-input flex-1"
-                    value={newLivreurPhone}
-                    onChange={(e) => setNewLivreurPhone(e.target.value)}
-                  />
+                <div className="premium-input-grid">
+                  <div className="form-field">
+                    <label>Nom du Livreur / Agence *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: Boris Express"
+                      className="premium-input"
+                      value={newLivreurName}
+                      onChange={(e) => setNewLivreurName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Numéro WhatsApp (Pour dispatch) *</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="+229 97 00 00 00"
+                      className="premium-input"
+                      value={newLivreurPhone}
+                      onChange={(e) => setNewLivreurPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Zone(s) Couverte(s)</label>
+                    <input
+                      type="text"
+                      placeholder="Cotonou, Akpakpa, Calavi"
+                      className="premium-input"
+                      value={newLivreurZone}
+                      onChange={(e) => setNewLivreurZone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Commission par Course (FCFA)</label>
+                    <input
+                      type="number"
+                      placeholder="1500"
+                      className="premium-input font-bold"
+                      value={newLivreurFee}
+                      onChange={(e) => setNewLivreurFee(Number(e.target.value) || 1500)}
+                    />
+                  </div>
                 </div>
-                <div className="form-input-row" style={{ marginTop: '8px' }}>
-                  <input
-                    type="text"
-                    placeholder="Zone couverte (ex: Cotonou & Calavi)"
-                    className="po-text-input flex-1"
-                    value={newLivreurZone}
-                    onChange={(e) => setNewLivreurZone(e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Commission / course (FCFA)"
-                    className="po-text-input flex-1"
-                    value={newLivreurFee}
-                    onChange={(e) => setNewLivreurFee(Number(e.target.value) || 1500)}
-                  />
-                  <button type="submit" className="btn-add-member">
-                    <UserPlus className="w-4 h-4" />
-                    <span>Ajouter Livreur</span>
-                  </button>
-                </div>
+
+                <button type="submit" className="btn-submit-premium-gold">
+                  <Truck className="w-4 h-4" />
+                  <span>Enregistrer Livreur</span>
+                </button>
               </form>
 
-              {/* Livreur List */}
-              <div className="team-members-list">
-                {livreurs.map((r) => (
-                  <div key={r.id} className="team-member-card">
-                    <div className="member-info">
-                      <strong className="member-name">{r.name}</strong>
-                      <div className="member-meta">
-                        <span><Phone className="w-3 h-3 inline text-emerald-600" /> {r.phone}</span>
-                        <span>·</span>
-                        <span><MapPin className="w-3 h-3 inline text-sky-600" /> {r.zone}</span>
+              {/* Livreurs Directory */}
+              <div className="members-directory">
+                <h4 className="directory-heading">Livreurs Disponibles ({livreurs.length})</h4>
+                <div className="members-stack">
+                  {livreurs.map((r) => (
+                    <div key={r.id} className="premium-member-row">
+                      <div className="member-avatar-badge rider">
+                        🛵
+                      </div>
+
+                      <div className="member-details-col">
+                        <div className="member-name-row">
+                          <strong className="member-fullname">{r.name}</strong>
+                          <span className="premium-fee-tag">
+                            {formatFCFA(r.deliveryFee)} / course
+                          </span>
+                        </div>
+                        <div className="member-contact-row">
+                          <span><Phone className="w-3 h-3 inline mr-1 text-emerald-600" />{r.phone}</span>
+                          <span>·</span>
+                          <span><MapPin className="w-3 h-3 inline mr-1 text-sky-600" />{r.zone}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="member-role-actions">
-                      <span className="livreur-fee-pill">
-                        {formatFCFA(r.deliveryFee)} / course
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 3: ACCOUNT & SIGNOUT */}
+          {/* TAB 3: ACCOUNT */}
           {activeTab === 'account' && (
-            <div className="settings-pane">
-              <div className="account-info-box">
-                <div className="account-avatar-large">
+            <div className="settings-section-pane">
+              <div className="premium-account-hero">
+                <div className="account-avatar-circle">
                   {user?.user_metadata?.avatar_url ? (
                     <img src={user.user_metadata.avatar_url} alt="Avatar" />
                   ) : (
                     <span>👑</span>
                   )}
                 </div>
-                <div>
-                  <h3 style={{ margin: '0 0 4px', fontSize: '16px' }}>{user?.email || 'Admin Siftly'}</h3>
-                  <span style={{ fontSize: '11.5px', color: '#888', fontFamily: 'IBM Plex Mono' }}>
-                    Compte Propriétaire vérifié · Supabase Sync Connecté ✅
-                  </span>
+                <div className="account-details-box">
+                  <div className="account-status-badge">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 inline mr-1" />
+                    <span>SESSION PROPRIÉTAIRE ACTIVE</span>
+                  </div>
+                  <h3 className="account-email-text">{user?.email || 'admin@siftly.app'}</h3>
+                  <p className="account-sub-text">
+                    Connecté via Supabase Auth & Google Cloud · Base de données synchronisée en temps réel
+                  </p>
                 </div>
               </div>
 
-              <div style={{ marginTop: '24px', textAlign: 'center' }}>
+              <div className="account-action-footer">
                 <button
                   type="button"
-                  className="btn-logout-full"
+                  className="btn-danger-logout"
                   onClick={() => {
                     signOut();
                     onClose();
@@ -302,8 +367,9 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           )}
         </div>
 
-        <div className="po-modal-footer">
-          <button type="button" className="btn-cancel" onClick={onClose}>
+        {/* Footer */}
+        <div className="settings-modal-bottom">
+          <button type="button" className="btn-close-modal-footer" onClick={onClose}>
             Fermer
           </button>
         </div>
