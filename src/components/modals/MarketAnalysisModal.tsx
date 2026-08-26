@@ -40,7 +40,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop-premium" onClick={onClose}>
+    <div className="paste-modal open" onClick={onClose}>
       <div className="market-analysis-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="market-modal-header">
