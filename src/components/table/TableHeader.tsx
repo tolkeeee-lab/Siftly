@@ -89,14 +89,14 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               onClick={() => onToggleSort('concurrent')}
               title="Trier par Prix concurrent"
             >
-              Prix concurrent {renderSortIndicator('concurrent')}
+              Prix concurrent (FCFA) {renderSortIndicator('concurrent')}
             </th>
             <th
               className={sortHeaderClass('sourcing', 'num-col')}
               onClick={() => onToggleSort('sourcing')}
               title="Trier par Prix sourcing"
             >
-              Prix sourcing brut {renderSortIndicator('sourcing')}
+              Prix sourcing brut (FCFA) {renderSortIndicator('sourcing')}
             </th>
             <th
               className={sortHeaderClass('poids', 'num-col')}
@@ -105,20 +105,20 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             >
               Poids (kg) {renderSortIndicator('poids')}
             </th>
-            <th className="num-col">Frais import (bateau/avion)</th>
+            <th className="num-col">Frais import (FCFA)</th>
             <th
               className={sortHeaderClass('cac', 'num-col')}
               onClick={() => onToggleSort('cac')}
               title="Trier par CAC"
             >
-              CAC {renderSortIndicator('cac')}
+              CAC (FCFA) {renderSortIndicator('cac')}
             </th>
             <th
               className={sortHeaderClass('livraison', 'num-col group-end')}
               onClick={() => onToggleSort('livraison')}
               title="Trier par Livraison"
             >
-              Livraison offerte {renderSortIndicator('livraison')}
+              Livraison offerte (FCFA) {renderSortIndicator('livraison')}
             </th>
           </>
         )}
@@ -130,21 +130,21 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
               onClick={() => onToggleSort('cogs')}
               title="Trier par Coût de revient (COGS)"
             >
-              Coût revient (COGS) {renderSortIndicator('cogs')}
+              Coût revient COGS (FCFA) {renderSortIndicator('cogs')}
             </th>
             <th
               className={sortHeaderClass('vente', 'num-col')}
               onClick={() => onToggleSort('vente')}
               title="Trier par Prix de vente"
             >
-              Prix de vente {renderSortIndicator('vente')}
+              Prix de vente (FCFA) {renderSortIndicator('vente')}
             </th>
             <th
               className={sortHeaderClass('marge', 'num-col group-end')}
               onClick={() => onToggleSort('marge')}
               title="Trier par Marge brute"
             >
-              Marges brutes {renderSortIndicator('marge')}
+              Marges brutes (FCFA) {renderSortIndicator('marge')}
             </th>
             <th
               className={sortHeaderClass('margepct', 'num-col group-end')}

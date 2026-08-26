@@ -1,6 +1,6 @@
 export function formatFCFA(n: number): string {
-  if (isNaN(n)) return '0 F';
-  return Math.round(n).toLocaleString('fr-FR') + ' F';
+  if (isNaN(n)) return '0 FCFA';
+  return Math.round(n).toLocaleString('fr-FR') + ' FCFA';
 }
 
 export function formatPercent(val: number): string {

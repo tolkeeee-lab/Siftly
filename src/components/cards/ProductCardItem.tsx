@@ -13,6 +13,9 @@ import {
   DollarSign,
   Layers,
   Truck,
+  Link as LinkIcon,
+  Globe,
+  ShoppingBag,
 } from 'lucide-react';
 import { ProductData } from '../../types/product';
 import {
@@ -73,7 +76,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
     { key: 'innovant', label: 'Innovant', val: product.innovant },
     { key: 'nonsaison', label: 'Saison', val: product.nonsaison },
     { key: 'habitudes', label: 'Habitudes', val: product.habitudes },
-    { key: 'poidsfacteur', label: 'Poids', val: product.poidsfacteur },
+    { key: 'poidsfacteur', label: 'Facteur Poids', val: product.poidsfacteur },
   ];
 
   const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -101,13 +104,22 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           <input
             className="card-frame-title-input"
             type="text"
-            placeholder="Nom du produit"
+            placeholder="Nom du produit..."
             value={product.produit}
             onChange={(e) => onUpdate(product.id, 'produit', e.target.value)}
           />
 
           <div className="card-frame-meta-line">
-            <span>Marché : <strong>{product.marche || 'Chine'}</strong></span>
+            <div className="meta-inline-edit">
+              <span>Marché :</span>
+              <input
+                className="meta-input-inline"
+                type="text"
+                placeholder="Chine"
+                value={product.marche || ''}
+                onChange={(e) => onUpdate(product.id, 'marche', e.target.value)}
+              />
+            </div>
             <span>·</span>
             <div className="mode-switch-inline">
               <span>Mode :</span>
@@ -140,7 +152,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
 
       {/* Main 2-Column Grid */}
       <div className="card-frame-grid">
-        {/* Left Column: Image, Target, Angle, Links */}
+        {/* Left Column: Image, Target, Angle, Editable Links */}
         <div className="card-frame-left">
           {/* Photo */}
           <div
@@ -150,7 +162,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
             {product.imgSrc ? (
               <img src={product.imgSrc} alt={product.produit} />
             ) : (
-              <div className="card-frame-img-placeholder">+ Photo</div>
+              <div className="card-frame-img-placeholder">+ Ajouter Photo</div>
             )}
             <input
               ref={fileInputRef}
@@ -183,7 +195,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               <input
                 className="mkt-input"
                 type="text"
-                placeholder="Cible marketing..."
+                placeholder="Cible visée..."
                 value={product.cible || ''}
                 onChange={(e) => onUpdate(product.id, 'cible', e.target.value)}
               />
@@ -196,44 +208,76 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               <input
                 className="mkt-input"
                 type="text"
-                placeholder="Angle d'attaque..."
+                placeholder="Angle de vente..."
                 value={product.angle || ''}
                 onChange={(e) => onUpdate(product.id, 'angle', e.target.value)}
               />
             </div>
           </div>
 
-          {/* Links */}
-          <div className="card-frame-links">
-            {product.creative && (
-              <a href={product.creative} target="_blank" rel="noopener noreferrer" className="frame-link">
-                <ExternalLink className="w-2.5 h-2.5" /> Creative Ad
-              </a>
-            )}
-            {product.alibaba && (
-              <a href={product.alibaba} target="_blank" rel="noopener noreferrer" className="frame-link">
-                <ExternalLink className="w-2.5 h-2.5" /> Fournisseur 1688
-              </a>
-            )}
-            {product.siteweb && (
-              <a href={product.siteweb} target="_blank" rel="noopener noreferrer" className="frame-link">
-                <ExternalLink className="w-2.5 h-2.5" /> Site Concurrent
-              </a>
-            )}
+          {/* Editable Links Section */}
+          <div className="card-frame-links-box">
+            <div className="link-input-row">
+              <LinkIcon className="w-3 h-3 text-gold-deep shrink-0" />
+              <input
+                className="link-input-field"
+                type="text"
+                placeholder="URL Creative Ad..."
+                value={product.creative || ''}
+                onChange={(e) => onUpdate(product.id, 'creative', e.target.value)}
+              />
+              {product.creative && (
+                <a href={product.creative} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir">
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              )}
+            </div>
+
+            <div className="link-input-row">
+              <ShoppingBag className="w-3 h-3 text-gold-deep shrink-0" />
+              <input
+                className="link-input-field"
+                type="text"
+                placeholder="URL Fournisseur (1688 / Alibaba)..."
+                value={product.alibaba || ''}
+                onChange={(e) => onUpdate(product.id, 'alibaba', e.target.value)}
+              />
+              {product.alibaba && (
+                <a href={product.alibaba} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir">
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              )}
+            </div>
+
+            <div className="link-input-row">
+              <Globe className="w-3 h-3 text-gold-deep shrink-0" />
+              <input
+                className="link-input-field"
+                type="text"
+                placeholder="URL Site Concurrent..."
+                value={product.siteweb || ''}
+                onChange={(e) => onUpdate(product.id, 'siteweb', e.target.value)}
+              />
+              {product.siteweb && (
+                <a href={product.siteweb} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir">
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Financial Breakdown, 9 Criteria, COD */}
+        {/* Right Column: Financial Breakdown (All Editable), 9 Criteria, COD */}
         <div className="card-frame-right">
           {/* Bilan Financier Box (Gold) */}
           <div className="frame-section-box gold-box">
             <div className="frame-section-title text-gold-deep">
-              <DollarSign className="w-3.5 h-3.5" /> Bilan Financier & Rentabilité
+              <DollarSign className="w-3.5 h-3.5" /> Bilan Financier (Tous montants en FCFA)
             </div>
 
             <div className="financial-mini-grid">
               <div className="fin-card">
-                <div className="fin-lbl">Sourcing</div>
+                <div className="fin-lbl">Sourcing (FCFA)</div>
                 <div className="fin-val-wrap">
                   <input
                     type="number"
@@ -256,22 +300,62 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               </div>
 
               <div className="fin-card">
-                <div className="fin-lbl">Frais Transport</div>
+                <div className="fin-lbl">Poids (kg)</div>
+                <input
+                  type="number"
+                  step="0.01"
+                  className="fin-in"
+                  placeholder="0"
+                  value={product.poids ?? ''}
+                  onChange={(e) => onUpdate(product.id, 'poids', e.target.value)}
+                />
+              </div>
+
+              <div className="fin-card">
+                <div className="fin-lbl">Frais Fret (Calculé)</div>
                 <div className="fin-val">{formatFCFA(frais)}</div>
               </div>
 
               <div className="fin-card">
-                <div className="fin-lbl">CAC + Livraison</div>
-                <div className="fin-val">{formatFCFA(Number(product.cac) + Number(product.livraison))}</div>
+                <div className="fin-lbl">CAC Pub (FCFA)</div>
+                <input
+                  type="number"
+                  className="fin-in"
+                  placeholder="0"
+                  value={product.cac ?? ''}
+                  onChange={(e) => onUpdate(product.id, 'cac', e.target.value)}
+                />
               </div>
 
               <div className="fin-card">
-                <div className="fin-lbl">COGS (Coût Total)</div>
+                <div className="fin-lbl">Livraison (FCFA)</div>
+                <input
+                  type="number"
+                  className="fin-in"
+                  placeholder="0"
+                  value={product.livraison ?? ''}
+                  onChange={(e) => onUpdate(product.id, 'livraison', e.target.value)}
+                />
+              </div>
+
+              <div className="fin-card">
+                <div className="fin-lbl">Prix Concurrent</div>
+                <input
+                  type="number"
+                  className="fin-in"
+                  placeholder="0"
+                  value={product.concurrent ?? ''}
+                  onChange={(e) => onUpdate(product.id, 'concurrent', e.target.value)}
+                />
+              </div>
+
+              <div className="fin-card">
+                <div className="fin-lbl">COGS Total (FCFA)</div>
                 <div className="fin-val bold">{formatFCFA(cogs)}</div>
               </div>
 
               <div className="fin-card">
-                <div className="fin-lbl">Prix de Vente</div>
+                <div className="fin-lbl">Prix de Vente (FCFA)</div>
                 <input
                   type="number"
                   className="fin-in bold text-gold-deep"
@@ -293,7 +377,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           {/* 9 Critères Validation (Rust) */}
           <div className="frame-section-box rust-box">
             <div className="frame-section-title text-rust">
-              <Layers className="w-3.5 h-3.5" /> Détail des 9 Critères de Validation
+              <Layers className="w-3.5 h-3.5" /> Détail des 9 Critères de Validation (Notes / 5)
             </div>
             <div className="criteria-mini-grid">
               {criteriaList.map((c) => (
