@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { AICopilotDrawer } from '../src/components/copilot/AICopilotDrawer';
 
 export const metadata: Metadata = {
   title: 'Siftly — Recherche produit EAA',
@@ -53,10 +52,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
-        {children}
-        <AICopilotDrawer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

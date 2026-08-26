@@ -47,7 +47,7 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
           <div className="hero-rating-pill">
             <div className="stars-row">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <Star key={i} className="w-3.5 h-3.5" style={{ fill: '#F59E0B', color: '#F59E0B' }} />
               ))}
             </div>
             <span>4.9 / 5 (+1 840 clients satisfaits)</span>
@@ -122,7 +122,7 @@ export const LandingPagePreview: React.FC<LandingPagePreviewProps> = ({
                   </div>
                   <div className="review-stars">
                     {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      <Star key={i} className="w-3 h-3" style={{ fill: '#F59E0B', color: '#F59E0B' }} />
                     ))}
                   </div>
                 </div>
