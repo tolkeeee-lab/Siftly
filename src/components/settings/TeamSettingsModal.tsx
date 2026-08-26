@@ -314,23 +314,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                         </div>
 
                         <div className="member-actions-group">
-                          {member.email && (
-                            <button
-                              type="button"
-                              className="btn-action-invite-mail"
-                              disabled={sendingEmailTarget === member.email}
-                              title="Envoyer un email d'invitation automatique via Supabase"
-                              onClick={() => sendDirectEmailInvite(member.name, member.email, member.role)}
-                            >
-                              {sendingEmailTarget === member.email ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <Send className="w-3.5 h-3.5" />
-                              )}
-                              <span>{sendingEmailTarget === member.email ? 'Envoi...' : 'Envoyer Email'}</span>
-                            </button>
-                          )}
-
                           {waLink && (
                             <a
                               href={waLink}
