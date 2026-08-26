@@ -2457,6 +2457,126 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
   color: #713F12;
 }
 
+.member-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-action-invite-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #25D366;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
+}
+
+.btn-action-invite-wa:hover {
+  background: #1EBE5D;
+  transform: translateY(-1px);
+}
+
+.btn-action-copy-invite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #CBD5E1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-action-copy-invite:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+/* How to connect step-by-step box */
+.member-login-how-to {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.how-to-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.how-to-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.how-to-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .how-to-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.how-to-step-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--gold);
+  color: #141B32;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.step-txt {
+  font-size: 11.5px;
+  color: #334155;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.step-txt code {
+  background: #E2E8F0;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 10.5px;
+}
+
 @keyframes fadeInDown {
   from {
     opacity: 0;
@@ -2467,6 +2587,7 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
     transform: translateY(0);
   }
 }
+
 
 
 
