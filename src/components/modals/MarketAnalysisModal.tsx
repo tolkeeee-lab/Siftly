@@ -1,7 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, TrendingUp, Users, ShieldAlert, Zap, Globe, CheckCircle2, Save, RotateCcw } from 'lucide-react';
+import {
+  X,
+  Sparkles,
+  TrendingUp,
+  Users,
+  ShieldAlert,
+  Zap,
+  Globe,
+  CheckCircle2,
+  Save,
+  AlertTriangle,
+  Flame,
+  HelpCircle,
+  Package,
+  Layers,
+  Scale,
+  Ban,
+} from 'lucide-react';
 import { ProductData, MarketAnalysisData } from '../../types/product';
 import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
 import { formatFCFA } from '../../utils/formatters';
@@ -45,13 +62,13 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
         {/* Header */}
         <div className="market-modal-header">
           <div className="market-modal-title-group">
-            <Sparkles className="w-5 h-5 text-gold" />
+            <Sparkles className="w-5 h-5 text-gold flex-shrink-0" />
             <div>
               <h2 className="market-modal-title">
-                🔬 Analyse de Marché & Intelligence EAA : #{product.seq} {product.produit}
+                🔬 Dossier d'Intelligence Marché EAA : #{product.seq} {product.produit}
               </h2>
               <p className="market-modal-subtitle">
-                Radar de saturation, taille d'audience estimée en Afrique de l'Ouest, risque de retour COD et verdict stratégique.
+                Analyse à 360° : Pourquoi l'utiliser, problèmes résolus, points d'attention logistique et risques d'échec cachés.
               </p>
             </div>
           </div>
@@ -64,7 +81,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
         <div className="market-modal-body">
           {/* Strategic Verdict Alert Banner */}
           <div className="verdict-banner">
-            <div className="verdict-tag">🎯 VERDICT STRATÉGIQUE IA EAA</div>
+            <div className="verdict-tag">🎯 VERDICT STRATÉGIQUE IA EAA (Éditable) :</div>
             <textarea
               className="verdict-textarea"
               rows={2}
@@ -92,7 +109,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
 
             <div className="market-kpi-box">
               <span className="kpi-icon">👥</span>
-              <label>Taille d'Audience Cible (TAM)</label>
+              <label>Taille d'Audience (TAM)</label>
               <div className="market-num-input-wrap">
                 <input
                   type="number"
@@ -101,13 +118,13 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
                   value={analysis.audienceSizeMillion}
                   onChange={(e) => handleUpdate('audienceSizeMillion', Number(e.target.value) || 1)}
                 />
-                <span>Millions de personnes</span>
+                <span>Millions</span>
               </div>
             </div>
 
             <div className="market-kpi-box">
               <span className="kpi-icon">🔥</span>
-              <label>Score Viralité TikTok (sur 10)</label>
+              <label>Score Viralité TikTok (/10)</label>
               <input
                 type="number"
                 min="1"
@@ -120,16 +137,109 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
 
             <div className="market-kpi-box">
               <span className="kpi-icon">🛵</span>
-              <label>Risque de Retour COD</label>
+              <label>Risque Retour COD (Moto)</label>
               <select
                 className="market-select-in"
                 value={analysis.codReturnRisk}
                 onChange={(e) => handleUpdate('codReturnRisk', e.target.value)}
               >
                 <option value="low">🟢 Faible (&lt; 15% retours)</option>
-                <option value="medium">🟡 Moyen (15% - 25% retours)</option>
-                <option value="high">🔴 Élevé (&gt; 25% retours)</option>
+                <option value="medium">🟡 Moyen (15% - 25%)</option>
+                <option value="high">🔴 Élevé (&gt; 25%)</option>
               </select>
+            </div>
+          </div>
+
+          {/* 5 DEEP-DIVE STRATEGIC PILLARS */}
+          <div className="pillars-grid">
+            {/* PILLAR 1: Pourquoi l'utiliser */}
+            <div className="pillar-box blue-pillar">
+              <div className="pillar-header">
+                <span className="pillar-icon">🎯</span>
+                <div>
+                  <h4 className="pillar-title">1. Pourquoi ce Produit Doit Être Utilisé (Usage & Bénéfices)</h4>
+                  <span className="pillar-hint">Transformation vécue par le client et utilité concrète</span>
+                </div>
+              </div>
+              <textarea
+                className="pillar-textarea"
+                rows={4}
+                value={analysis.reasonsToUse}
+                onChange={(e) => handleUpdate('reasonsToUse', e.target.value)}
+                placeholder="Listez les raisons clés pour lesquelles le client doit acheter ce produit..."
+              />
+            </div>
+
+            {/* PILLAR 2: Problèmes résolus */}
+            <div className="pillar-box emerald-pillar">
+              <div className="pillar-header">
+                <span className="pillar-icon">🛑</span>
+                <div>
+                  <h4 className="pillar-title">2. Problèmes & Frustrations Concrètes Résolus</h4>
+                  <span className="pillar-hint">Quelles douleurs profondes ce produit élimine-t-il ?</span>
+                </div>
+              </div>
+              <textarea
+                className="pillar-textarea"
+                rows={4}
+                value={analysis.problemsSolved}
+                onChange={(e) => handleUpdate('problemsSolved', e.target.value)}
+                placeholder="Listez les problèmes résolus par le produit..."
+              />
+            </div>
+
+            {/* PILLAR 3: Pourquoi il vaut la peine */}
+            <div className="pillar-box gold-pillar">
+              <div className="pillar-header">
+                <span className="pillar-icon">💎</span>
+                <div>
+                  <h4 className="pillar-title">3. Pourquoi Il Vaut Vraiment La Peine (Proposition de Valeur)</h4>
+                  <span className="pillar-hint">Rentabilité unitaire, marge en poche et effet waouh</span>
+                </div>
+              </div>
+              <textarea
+                className="pillar-textarea"
+                rows={4}
+                value={analysis.whyItsWorthIt}
+                onChange={(e) => handleUpdate('whyItsWorthIt', e.target.value)}
+                placeholder="Expliquez pourquoi ce produit est rentable et irrésistible..."
+              />
+            </div>
+
+            {/* PILLAR 4: Points d'attention & vigilance */}
+            <div className="pillar-box amber-pillar">
+              <div className="pillar-header">
+                <span className="pillar-icon">⚠️</span>
+                <div>
+                  <h4 className="pillar-title">4. Points d'Attention Critiques (Logistique, Poids, Qualité)</h4>
+                  <span className="pillar-hint">Vérifications obligatoires avant commande fournisseur</span>
+                </div>
+              </div>
+              <textarea
+                className="pillar-textarea"
+                rows={4}
+                value={analysis.criticalAttentionPoints}
+                onChange={(e) => handleUpdate('criticalAttentionPoints', e.target.value)}
+                placeholder="Poids, fragilité, normes électriques, tests usine..."
+              />
+            </div>
+
+            {/* PILLAR 5: Pourquoi il pourrait échouer malgré tout */}
+            <div className="pillar-box red-pillar full-width">
+              <div className="pillar-header">
+                <span className="pillar-icon">💣</span>
+                <div>
+                  <h4 className="pillar-title">5. Pourquoi Il Pourrait Échouer Malgré Tout (Facteurs d'Échec Cachés)</h4>
+                  <span className="pillar-hint">Anticipation des pièges : mauvaise qualité usine, retours massifs, saturation cachée</span>
+                </div>
+              </div>
+              <textarea
+                className="pillar-textarea warning-font"
+                rows={4}
+                value={analysis.failureRisks}
+                onChange={(e) => handleUpdate('failureRisks', e.target.value)}
+                placeholder="Pourquoi ce produit risquerait d'échouer malgré une bonne note..."
+              />
             </div>
           </div>
 
@@ -147,29 +257,6 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
               ))}
             </div>
           </div>
-
-          {/* Recommended Angle & Barrier to entry */}
-          <div className="market-advice-grid">
-            <div className="advice-card">
-              <strong className="advice-title">💡 Angle Publicitaire Gagnant Recommandé :</strong>
-              <textarea
-                className="advice-textarea"
-                rows={2}
-                value={analysis.recommendedAdAngle}
-                onChange={(e) => handleUpdate('recommendedAdAngle', e.target.value)}
-              />
-            </div>
-
-            <div className="advice-card">
-              <strong className="advice-title">🛡️ Barrière à l'Entrée & Logistique :</strong>
-              <textarea
-                className="advice-textarea"
-                rows={2}
-                value={analysis.keyBarrierToEntry}
-                onChange={(e) => handleUpdate('keyBarrierToEntry', e.target.value)}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Footer Actions */}
@@ -179,7 +266,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
           </button>
           <button type="button" className="btn-save-analysis" onClick={handleSave}>
             <Save className="w-4 h-4" />
-            <span>Enregistrer l'Analyse de Marché</span>
+            <span>Enregistrer l'Analyse Complète</span>
           </button>
         </div>
       </div>

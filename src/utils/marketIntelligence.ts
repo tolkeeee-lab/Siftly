@@ -1,5 +1,6 @@
 import { ProductData, MarketAnalysisData } from '../types/product';
-import { calculateNoteFinale, calculateMargin } from './calculations';
+import { calculateNoteFinale, calculateMargin, calculateCOGS } from './calculations';
+import { formatFCFA } from './formatters';
 
 export function getProductMarketAnalysis(product: ProductData): MarketAnalysisData {
   if (product.marketAnalysis) {
@@ -8,10 +9,13 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
 
   const { noteNum: score } = calculateNoteFinale(product);
   const margin = calculateMargin(product);
+  const cogs = calculateCOGS(product);
+  const sellingPrice = Number(product.vente) || 15000;
   const name = (product.produit || '').toLowerCase();
   const weight = Number(product.poids) || 0.5;
+  const category = product.category || 'Maison & Confort';
 
-  // 1. Return Risk estimation (Fragile, multiple sizing vs compact gadget)
+  // 1. Return Risk estimation
   let codReturnRisk: 'low' | 'medium' | 'high' = 'low';
   if (name.includes('robe') || name.includes('chaussure') || name.includes('pantalon') || name.includes('verre')) {
     codReturnRisk = 'high';
@@ -22,7 +26,7 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
   // 2. Viral Factor Score (out of 10)
   const waouh = Number(product.waouh) || 3;
   const innovant = Number(product.innovant) || 3;
-  const viralFactorScore = Math.min(10, Math.max(4, Math.round((waouh * 1.2 + innovant * 0.8))));
+  const viralFactorScore = Math.min(10, Math.max(4, Math.round(waouh * 1.2 + innovant * 0.8)));
 
   // 3. Market Saturation & Competition Level
   let saturationScore: 'low' | 'medium' | 'high' = 'low';
@@ -40,8 +44,8 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
     competitionLevel = 'low';
   }
 
-  // 4. Audience TAM Size (Millions in West & Central Africa: BJ, CI, SN, CM, TG)
-  let audienceSizeMillion = 3.5;
+  // 4. Audience TAM Size (Millions in West & Central Africa)
+  let audienceSizeMillion = 4.5;
   if (name.includes('moustique') || name.includes('santé') || name.includes('douleur') || name.includes('maison')) {
     audienceSizeMillion = 8.5;
   } else if (name.includes('voiture') || name.includes('auto') || name.includes('moto')) {
@@ -61,26 +65,60 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
   }
 
   // 6. Strategic Verdict
-  let strategicVerdict = '🟢 FEU VERT : Fort potentiel de scaling rapide en COD !';
+  let strategicVerdict = '🟢 FEU VERT : Excellent potentiel de scaling en COD avec marge nette solide.';
   if (margin < 3000) {
-    strategicVerdict = '🔴 FEU ROUGE : Marge unitaire trop serrée pour absorber les retours et le CPA publicitaire.';
+    strategicVerdict = '🔴 FEU ROUGE : Marge unitaire trop serrée pour absorber les coûts publicitaires et les retours livreurs.';
   } else if (saturationScore === 'high') {
-    strategicVerdict = '🟡 FEU ORANGE : Marché très disputé. Vendre exclusivement en Pack Bundle 2-en-1 ou avec Offre BOGO pour écraser les concurrents.';
+    strategicVerdict = '🟡 FEU ORANGE : Forte concurrence. Vendre exclusivement en Pack Bundle 2-en-1 ou offre spéciale pour se démarquer.';
   } else if (score !== null && score < 25) {
-    strategicVerdict = '🟡 FEU ORANGE : Score de désirabilité modéré. Tester avec un micro-budget de 20 000 FCFA avant commande de gros volume.';
+    strategicVerdict = '🟡 FEU ORANGE : Score global modéré. Tester avec un budget publicitaire réduit (20 000 FCFA) avant achat de stock.';
   }
 
   // 7. Target Countries
-  const targetCountries = ['Bénin (Cotonou / Calavi)', "Côte d'Ivoire (Abidjan)", 'Sénégal (Dakar)', 'Togo (Lomé)', 'Cameroun (Douala / Yaoundé)'];
+  const targetCountries = [
+    'Bénin (Cotonou / Calavi / Porto-Novo)',
+    "Côte d'Ivoire (Abidjan / Bouaké)",
+    'Sénégal (Dakar / Thiès)',
+    'Togo (Lomé)',
+    'Cameroun (Douala / Yaoundé)',
+  ];
 
-  // 8. Barrier to entry & Recommended angle
-  const keyBarrierToEntry = weight < 1
-    ? 'Faible coût de fret aérien/bateau, accessible aux petits budgets.'
-    : 'Poids élevé : privilégier le groupage maritime pour maximiser la marge nette.';
+  // 8. Key Barrier & Ad Angle
+  const keyBarrierToEntry = weight <= 0.4
+    ? `🪶 Poids très léger (${weight} kg) : Idéal pour fret aérien express et transport moto sans friction.`
+    : `⚖️ Poids de ${weight} kg : Attention au coût du fret aérien. Privilégier le groupage maritime pour préserver la marge nette.`;
 
   const recommendedAdAngle = viralFactorScore >= 7
-    ? 'Vidéo Démonstration Choc "Avant / Après" sur TikTok Ads'
-    : 'Angle Problème & Douleur Quotidienne avec témoignage sur Facebook Ads';
+    ? 'Vidéo TikTok Ads : Démonstration visuelle choc "Avant / Après" avec accroche dans les 3 premières secondes.'
+    : 'Facebook Ads : Témoignage client axé sur la résolution d\'une douleur quotidienne avec offre Promo limitée.';
+
+  // 9. PILLAR 1: Pourquoi ce produit doit être utilisé
+  const reasonsToUse = `• Offre une solution rapide et sans effort à un besoin récurrent de la cible.
+• Fait gagner un temps précieux au quotidien et améliore le confort domestique/personnel.
+• Utilisation intuitive : prise en main immédiate sans compétences techniques requises.
+• Alternative moderne et valorisante par rapport aux méthodes traditionnelles lentes ou fatigantes.`;
+
+  // 10. PILLAR 2: Problèmes concrets résolus
+  const problemsSolved = `• Élimine la frustration quotidienne liée à la méthode manuelle ou inefficace actuelle.
+• Réduit les dépenses récurrentes en remplaçant des consommables jetables ou des services coûteux.
+• Apporte un soulagement direct (douleur physique, perte de temps, inconfort thermique, stress ou insécurité).`;
+
+  // 11. PILLAR 3: Pourquoi il vaut vraiment la peine
+  const whyItsWorthIt = `• Excellente rentabilité unitaire : Marge nette estimée à ${formatFCFA(margin)} pour un prix de vente de ${formatFCFA(sellingPrice)}.
+• Fort coefficient de valeur perçue : Le client a l'impression d'en avoir largement pour son argent.
+• Facilité de vente en lot (Offre Duo / Pack Famille) permettant d'augmenter le panier moyen et d'absorber le coût livreur.`;
+
+  // 12. PILLAR 4: Points d'attention & vigilance
+  const criticalAttentionPoints = `• Poids & Colisage (${weight} kg) : ${weight > 1 ? '⚠️ Poids élevé, vérifier les frais de transitaire' : '✅ Poids léger adapté à la livraison moto'}.
+• Fragilité : Exiger un emballage renforcé (papier bulle / carton rigide) pour éviter les casses lors des tournées de livraison.
+• Prise & Alimentation : S'assurer de la compatibilité des prises électriques (norme européenne 220V utilisée en Afrique de l'Ouest).
+• Contrôle Qualité usine : Tester 100% des pièces à la réception avant remise aux livreurs pour éviter les retours clients à la porte.`;
+
+  // 13. PILLAR 5: Pourquoi il pourrait NE PAS marcher malgré tout
+  const failureRisks = `• 💣 Risque 1 (Qualité fournisseur) : Si le produit tombe en panne après 3 jours ou présente un défaut d'usine, le taux de retour COD explosera (> 25%).
+• 💣 Risque 2 (Démonstration pub ratée) : Si la vidéo n'illustre pas immédiatement la preuve visuelle du résultat, le CPA (coût d'acquisition) sera trop élevé.
+• 💣 Risque 3 (Guerre des prix locale) : Si des boutiques locales ou concurrents vendent une copie bas de gamme à prix cassé au grand marché (Dantokpa / Adjamé / Sandaga).
+• 💣 Risque 4 (Logistique & Livreurs) : ${weight > 1.5 ? 'Colis trop lourd ou encombrant, refus des livreurs à moto de le transporter' : 'Injoignabilité des clients lors de la confirmation téléphonique des commandes'}.`;
 
   return {
     saturationScore,
@@ -93,6 +131,11 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
     targetCountries,
     keyBarrierToEntry,
     recommendedAdAngle,
+    reasonsToUse,
+    problemsSolved,
+    whyItsWorthIt,
+    criticalAttentionPoints,
+    failureRisks,
   };
 }
 

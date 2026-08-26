@@ -23,6 +23,13 @@ export interface MarketAnalysisData {
   targetCountries: string[];                       // Pays prioritaires (ex: Bénin, Côte d'Ivoire, etc.)
   keyBarrierToEntry: string;                       // Barrière à l'entrée
   recommendedAdAngle: string;                      // Angle pub recommandé
+
+  // 5 Piliers Stratégiques Poussés
+  reasonsToUse: string;                            // 1. Pourquoi ce produit doit être utilisé (Usage & Bénéfices)
+  problemsSolved: string;                          // 2. Les Problèmes concrets qu'il résout (Pain points)
+  whyItsWorthIt: string;                           // 3. Pourquoi il vaut vraiment la peine (Rentabilité & Effet Waouh)
+  criticalAttentionPoints: string;                 // 4. Points d'attention & vigilance (Qualité, Fret, Poids)
+  failureRisks: string;                            // 5. Pourquoi il pourrait échouer malgré tout (Pièges cachés)
 }
 
 export interface ProductData extends ProductScoreCriteria {
