@@ -1,15 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { ExpenseItem } from '../types/financeTypes';
 
 const EXPENSES_STORAGE_KEY = 'siftly_expenses_journal_v1';
-
-const DEFAULT_EXPENSES: ExpenseItem[] = [
-  { id: 'exp-1', date: new Date().toISOString().split('T')[0], category: 'ads_facebook', description: 'Campagne Cotonou Test', amountFCFA: 15000 },
-  { id: 'exp-2', date: new Date().toISOString().split('T')[0], category: 'packaging', description: 'Lot 100 cartons emballage', amountFCFA: 6000 },
-  { id: 'exp-3', date: new Date().toISOString().split('T')[0], category: 'phone_internet', description: 'Forfait 4G + Appels clients', amountFCFA: 5000 },
-];
 
 export function useFinanceJournal() {
   const [expenses, setExpenses] = useState<ExpenseItem[]>(() => {
@@ -21,7 +15,7 @@ export function useFinanceJournal() {
         console.warn('Could not read expenses from storage', e);
       }
     }
-    return DEFAULT_EXPENSES;
+    return [];
   });
 
   const [isLoaded, setIsLoaded] = useState<boolean>(true);

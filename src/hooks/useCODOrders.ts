@@ -1,16 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { CODOrder, Livreur } from '../types/codLogistics';
 
 const COD_ORDERS_STORAGE_KEY = 'siftly_cod_orders_v1';
 const COD_LIVREURS_STORAGE_KEY = 'siftly_cod_livreurs_v1';
-
-const DEFAULT_LIVREURS: Livreur[] = [
-  { id: 'liv-1', name: 'Livreur Boris (Cotonou & Akpakpa)', phone: '+229 97 00 11 22', zone: 'Cotonou Centre', deliveryFee: 1500, returnFee: 500 },
-  { id: 'liv-2', name: 'Livreur Jean (Calavi & Vedoko)', phone: '+229 96 33 44 55', zone: 'Abomey-Calavi', deliveryFee: 2000, returnFee: 500 },
-  { id: 'liv-3', name: 'Livreur Franck (Cocody & Marcory)', phone: '+225 07 88 99 00', zone: 'Abidjan Sud', deliveryFee: 2000, returnFee: 1000 },
-];
 
 export function useCODOrders() {
   const [orders, setOrders] = useState<CODOrder[]>(() => {
@@ -34,7 +28,7 @@ export function useCODOrders() {
         console.warn('Could not read livreurs from storage', e);
       }
     }
-    return DEFAULT_LIVREURS;
+    return [];
   });
 
   const [isLoaded, setIsLoaded] = useState<boolean>(true);
@@ -98,6 +92,23 @@ export function useCODOrders() {
     saveOrders(updated);
   }, [orders, saveOrders]);
 
+  // Add Livreur
+  const addLivreur = useCallback((livreurData: Omit<Livreur, 'id'>) => {
+    const newLivreur: Livreur = {
+      ...livreurData,
+      id: crypto.randomUUID(),
+    };
+    const updated = [...livreurs, newLivreur];
+    saveLivreurs(updated);
+    return newLivreur;
+  }, [livreurs, saveLivreurs]);
+
+  // Delete Livreur
+  const deleteLivreur = useCallback((id: string) => {
+    const updated = livreurs.filter((l) => l.id !== id);
+    saveLivreurs(updated);
+  }, [livreurs, saveLivreurs]);
+
   return {
     orders,
     livreurs,
@@ -105,6 +116,8 @@ export function useCODOrders() {
     addOrder,
     updateOrder,
     deleteOrder,
+    addLivreur,
+    deleteLivreur,
     saveLivreurs,
   };
 }
