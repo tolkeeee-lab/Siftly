@@ -50,8 +50,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const [newLivreurZone, setNewLivreurZone] = useState('Cotonou & Calavi');
   const [newLivreurFee, setNewLivreurFee] = useState(1500);
 
-  if (!isOpen) return null;
-
   // Feedback toast
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
@@ -59,6 +57,8 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3000);
   };
+
+  if (!isOpen) return null;
 
   const handleAddMemberSubmit = (e: React.FormEvent) => {
     e.preventDefault();
