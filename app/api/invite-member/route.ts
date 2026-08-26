@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+function cleanSupabaseUrl(raw?: string): string {
+  if (!raw) return 'https://tkbqmthwqxvevlrqrann.supabase.co';
+  let url = raw.trim();
+  url = url.replace(/\/rest\/v1\/?$/i, '');
+  url = url.replace(/\/auth\/v1\/?$/i, '');
+  url = url.replace(/\/+$/, '');
+  return url;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -17,15 +26,9 @@ export async function POST(req: NextRequest) {
     const cleanName = name?.trim() || 'Collaborateur';
     const cleanRole = role || 'assistant';
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl) {
-      return NextResponse.json({
-        success: false,
-        message: 'NEXT_PUBLIC_SUPABASE_URL non configuré',
-      }, { status: 500 });
-    }
+    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
+    const supabaseUrl = cleanSupabaseUrl(rawUrl);
+    const serviceRoleKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/\r?\n|\r/g, '');
 
     if (!serviceRoleKey) {
       return NextResponse.json({
