@@ -7,6 +7,7 @@ import { useTableFeatures } from './hooks/useTableFeatures';
 import { calculateAppStats } from './utils/calculations';
 import { ProductData } from './types/product';
 import { Masthead } from './components/header/Masthead';
+import { NavigationTabs } from './components/navigation/NavigationTabs';
 import { Toolbar } from './components/header/Toolbar';
 import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
@@ -78,6 +79,7 @@ export function App() {
   return (
     <div className="sheet">
       <Masthead />
+      <NavigationTabs />
 
       <Toolbar
         products={processedProducts}
