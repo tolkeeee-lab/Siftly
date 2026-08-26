@@ -10,7 +10,6 @@ import { Masthead } from './components/header/Masthead';
 import { Toolbar } from './components/header/Toolbar';
 import { StatStrip } from './components/stats/StatStrip';
 import { RankPanel } from './components/ranking/RankPanel';
-import { TableControlsBar } from './components/table/TableControlsBar';
 import { ProductTable } from './components/table/ProductTable';
 import { ProductCardGrid } from './components/cards/ProductCardGrid';
 import { StorageBanner } from './components/common/StorageBanner';
@@ -104,9 +103,6 @@ export function App() {
         onApplyPreset={applyPreset}
         onApplyRanking={applyRanking}
         onResetRanking={resetRanking}
-      />
-
-      <TableControlsBar
         layoutMode={layoutMode}
         onSelectLayoutMode={setLayoutMode}
         activeFilter={activeFilter}
