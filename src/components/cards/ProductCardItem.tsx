@@ -293,10 +293,10 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
                     <button
                       type="button"
                       className="currency-btn mini"
-                      title="Convertir ¥/$"
+                      title="Aide calcul FCFA"
                       onClick={() => onOpenCurrencyConverter(product.id)}
                     >
-                      ¥/$
+                      FCFA
                     </button>
                   )}
                 </div>

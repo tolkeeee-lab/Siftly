@@ -101,10 +101,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           className="tbtn load"
           type="button"
           onClick={onOpenCurrencyModal}
-          title="Convertisseur de devises (Yuan ¥, Dollar $, Euro € -> FCFA)"
+          title="Convertisseur rapide vers Franc CFA (FCFA)"
         >
           <DollarSign className="w-3.5 h-3.5 text-gold" />
-          <span>Devises (¥ / $)</span>
+          <span>Convertisseur FCFA</span>
         </button>
       )}
 

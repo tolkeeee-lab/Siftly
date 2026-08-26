@@ -27,9 +27,9 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
   const [supplierLink, setSupplierLink] = useState('');
   const [supplierContact, setSupplierContact] = useState('');
 
-  const [currency, setCurrency] = useState<CurrencyCode>('RMB');
-  const [exchangeRate, setExchangeRate] = useState<number>(88); // 1 RMB = 88 FCFA par défaut
-  const [unitPrice, setUnitPrice] = useState<number>(15);
+  const [currency, setCurrency] = useState<CurrencyCode>('FCFA');
+  const [exchangeRate, setExchangeRate] = useState<number>(1);
+  const [unitPrice, setUnitPrice] = useState<number>(1800);
   const [quantity, setQuantity] = useState<number>(50);
 
   const [freightMode, setFreightMode] = useState<FreightMode>('bateau');
@@ -47,6 +47,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         setProductName(p.produit || '');
         setProductImg(p.imgSrc || '');
         setSupplierLink(p.alibaba || '');
+        setUnitPrice(p.sourcing || 1800);
         const w = parseFloat(String(p.poids)) || 0.3;
         setEstimatedWeightKg(Math.round(w * quantity * 10) / 10);
         if (p.modeimport === 'avion') {
@@ -180,9 +181,9 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   value={currency}
                   onChange={(e) => handleCurrencyChange(e.target.value as CurrencyCode)}
                 >
+                  <option value="FCFA">Franc CFA (FCFA) - Par Défaut</option>
                   <option value="RMB">Yuan Chinois (¥ RMB)</option>
                   <option value="USD">Dollar Américain ($ USD)</option>
-                  <option value="FCFA">Franc CFA (FCFA)</option>
                 </select>
               </div>
 

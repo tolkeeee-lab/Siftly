@@ -53,10 +53,10 @@ export const FinancialCells: React.FC<FinancialCellsProps> = ({
                 <button
                   type="button"
                   className="currency-btn"
-                  title="Convertir Yuan (¥) ou Dollar ($) en FCFA"
+                  title="Aide calcul FCFA"
                   onClick={() => onOpenCurrencyConverter(product.id)}
                 >
-                  ¥/$
+                  FCFA
                 </button>
               )}
             </div>
