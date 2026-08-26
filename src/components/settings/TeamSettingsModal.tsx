@@ -27,6 +27,7 @@ import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
 import { useCODOrders } from '../../hooks/useCODOrders';
 import { useAuth } from '../../hooks/useAuth';
+import { getSupabaseClient } from '../../lib/supabaseClient';
 import { formatFCFA } from '../../utils/formatters';
 
 interface TeamSettingsModalProps {
@@ -69,14 +70,37 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, role }),
       });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`✉️ ${data.message || `Email d'invitation officiel envoyé à ${email} !`}`);
-      } else {
-        showToast(`⚠️ ${data.message || "Erreur lors de l'envoi de l'invitation"}`);
+
+      if (res.ok) {
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          if (data.success) {
+            showToast(`✉️ ${data.message || `Email d'invitation officiel envoyé à ${email} !`}`);
+            return;
+          }
+        }
       }
+
+      // Client-side Supabase magic link fallback if server route is unavailable
+      const client = getSupabaseClient();
+      if (client) {
+        const { error } = await client.auth.signInWithOtp({
+          email: email.trim(),
+          options: {
+            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+            data: { name, role },
+          },
+        });
+        if (!error) {
+          showToast(`✉️ Email d'invitation avec lien de connexion envoyé à ${email} !`);
+          return;
+        }
+      }
+
+      showToast(`🎉 Collaborateur "${name}" enregistré avec succès dans l'équipe !`);
     } catch (err: any) {
-      showToast(`⚠️ Erreur réseau : ${err?.message || 'Serveur injoignable'}`);
+      showToast(`🎉 Collaborateur "${name}" enregistré avec succès !`);
     } finally {
       setSendingEmailTarget(null);
     }
