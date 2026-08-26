@@ -3,13 +3,25 @@
 import React from 'react';
 import { UserMenu } from '../auth/UserMenu';
 import { RoleSwitcher } from './RoleSwitcher';
+import { useShopProfile } from '../../hooks/useShopProfile';
+import { Store } from 'lucide-react';
 
 export const Masthead: React.FC = () => {
+  const { profile } = useShopProfile();
+
   return (
     <header className="masthead">
-      <h1 className="masthead-title">
-        Siftly <em>EAA</em>
-      </h1>
+      <div className="flex items-center gap-2.5">
+        <h1 className="masthead-title">
+          Siftly <em>EAA</em>
+        </h1>
+        {profile.shopName && profile.shopName !== 'Ma Boutique E-Commerce' && (
+          <span className="masthead-shop-badge">
+            <Store className="w-3 h-3 text-gold" />
+            <span>{profile.shopName}</span>
+          </span>
+        )}
+      </div>
       <div className="masthead-actions">
         <RoleSwitcher />
         <UserMenu />

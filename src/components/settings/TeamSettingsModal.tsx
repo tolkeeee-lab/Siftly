@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Users,
@@ -24,11 +24,15 @@ import {
   CheckCircle2,
   Loader2,
   Send,
+  Store,
+  Save,
+  Building2,
 } from 'lucide-react';
 import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
 import { useCODOrders } from '../../hooks/useCODOrders';
 import { useAuth } from '../../hooks/useAuth';
+import { useShopProfile } from '../../hooks/useShopProfile';
 import { formatFCFA } from '../../utils/formatters';
 
 interface TeamSettingsModalProps {
@@ -37,10 +41,24 @@ interface TeamSettingsModalProps {
 }
 
 export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'team' | 'riders' | 'account'>('team');
+  const [activeTab, setActiveTab] = useState<'shop' | 'team' | 'riders'>('shop');
+  const { profile, updateProfile } = useShopProfile();
   const { members, addMember, removeMember } = useTeamMembers();
   const { livreurs, saveLivreurs } = useCODOrders();
   const { user, signOut } = useAuth();
+
+  // Shop Profile state
+  const [editOwnerName, setEditOwnerName] = useState(profile.ownerName || '');
+  const [editShopName, setEditShopName] = useState(profile.shopName || '');
+  const [editPhone, setEditPhone] = useState(profile.phone || '');
+  const [editCountry, setEditCountry] = useState(profile.country || 'Bénin / Côte d\'Ivoire / Sénégal');
+
+  useEffect(() => {
+    setEditOwnerName(profile.ownerName || '');
+    setEditShopName(profile.shopName || '');
+    setEditPhone(profile.phone || '');
+    setEditCountry(profile.country || 'Bénin / Côte d\'Ivoire / Sénégal');
+  }, [profile]);
 
   // New member form
   const [newMemberName, setNewMemberName] = useState('');
@@ -71,9 +89,20 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
   if (!isOpen) return null;
 
-  const ownerName = user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'Propriétaire (Vous)');
+  const ownerDisplayName = profile.ownerName || user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'Propriétaire (Fondateur)');
+  const shopDisplayName = profile.shopName || 'Ma Boutique E-Commerce';
   const ownerEmail = user?.email || 'Non connecté (Session Locale)';
-  const ownerPhone = user?.user_metadata?.phone || '';
+
+  const handleSaveShopProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfile({
+      ownerName: editOwnerName.trim() || 'Propriétaire (Fondateur)',
+      shopName: editShopName.trim() || 'Ma Boutique E-Commerce',
+      phone: editPhone.trim(),
+      country: editCountry.trim(),
+    });
+    showToast(`🏪 Identité de la boutique "${editShopName.trim() || 'Ma Boutique'}" mise à jour avec succès !`);
+  };
 
   const generateInviteLink = (name: string, role: string, email: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://siftly-iota.vercel.app';
@@ -105,7 +134,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       phone,
     });
 
-    // Send direct email via Supabase API
     try {
       const res = await fetch('/api/invite-member', {
         method: 'POST',
@@ -160,11 +188,11 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
         <div className="settings-modal-top">
           <div className="settings-title-group">
             <div className="settings-header-icon">
-              <Users className="w-5 h-5 text-gold" />
+              <Store className="w-5 h-5 text-gold" />
             </div>
             <div>
-              <h2 className="settings-main-title">Paramètres & Gestion d'Équipe</h2>
-              <span className="settings-sub-title">Contrôlez les accès de vos collaborateurs et de vos livreurs</span>
+              <h2 className="settings-main-title">{shopDisplayName}</h2>
+              <span className="settings-sub-title">Profil Propriétaire, Collaborateurs & Livreurs</span>
             </div>
           </div>
           <button type="button" className="btn-close-settings" onClick={onClose}>
@@ -184,6 +212,14 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
         <div className="settings-tabs-capsule">
           <button
             type="button"
+            className={`tab-capsule-item ${activeTab === 'shop' ? 'active' : ''}`}
+            onClick={() => setActiveTab('shop')}
+          >
+            <Store className="w-3.5 h-3.5" />
+            <span>Ma Boutique & Profil</span>
+          </button>
+          <button
+            type="button"
             className={`tab-capsule-item ${activeTab === 'team' ? 'active' : ''}`}
             onClick={() => setActiveTab('team')}
           >
@@ -200,25 +236,119 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
             <span>Livreurs & Hub</span>
             <span className="tab-count-pill">{livreurs.length}</span>
           </button>
-          <button
-            type="button"
-            className={`tab-capsule-item ${activeTab === 'account' ? 'active' : ''}`}
-            onClick={() => setActiveTab('account')}
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Mon Compte</span>
-          </button>
         </div>
 
         {/* Modal Body */}
         <div className="settings-modal-content">
-          {/* TAB 1: TEAM MEMBERS */}
+          {/* TAB 1: SHOP & OWNER PROFILE */}
+          {activeTab === 'shop' && (
+            <div className="settings-section-pane">
+              <div className="premium-account-hero">
+                <div className="account-avatar-circle">
+                  {user?.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Avatar" />
+                  ) : (
+                    <span>👑</span>
+                  )}
+                </div>
+                <div className="account-details-box">
+                  <div className="account-status-badge">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 inline mr-1" />
+                    <span>{user ? 'COMPTE CONNECTÉ ACTIF' : 'SESSION LOCALE ACTIVE'}</span>
+                  </div>
+                  <h3 className="account-email-text">{ownerDisplayName} ({ownerEmail})</h3>
+                  <p className="account-sub-text">
+                    Boutique : <strong>{shopDisplayName}</strong> · Vos collaborateurs et vos bons de commande afficheront ce nom.
+                  </p>
+                </div>
+              </div>
+
+              {/* Edit Shop & Profile Form */}
+              <form onSubmit={handleSaveShopProfile} className="premium-form-card mt-3">
+                <div className="form-card-title">
+                  <Building2 className="w-4 h-4 text-gold-deep" />
+                  <span>Personnaliser l'Identité de votre Boutique & Propriétaire</span>
+                </div>
+
+                <div className="premium-input-grid">
+                  <div className="form-field">
+                    <label>Nom de votre Boutique en Ligne / Marque *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: NovaShop Express, Fenou Store"
+                      className="premium-input font-bold"
+                      value={editShopName}
+                      onChange={(e) => setEditShopName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Votre Nom & Prénom (Fondateur) *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ex: Boris FENOU"
+                      className="premium-input"
+                      value={editOwnerName}
+                      onChange={(e) => setEditOwnerName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Numéro WhatsApp Business</label>
+                    <input
+                      type="tel"
+                      placeholder="+229 97 00 00 00"
+                      className="premium-input"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label>Pays & Zone d'Opération</label>
+                    <input
+                      type="text"
+                      placeholder="Bénin, Côte d'Ivoire, Sénégal"
+                      className="premium-input"
+                      value={editCountry}
+                      onChange={(e) => setEditCountry(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="btn-submit-premium-gold">
+                  <Save className="w-4 h-4" />
+                  <span>Enregistrer les Informations de ma Boutique</span>
+                </button>
+              </form>
+
+              {user && (
+                <div className="account-actions-box mt-3">
+                  <button
+                    type="button"
+                    className="btn-logout-premium"
+                    onClick={() => {
+                      signOut();
+                      onClose();
+                    }}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Se Déconnecter de la Session ({user.email})</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: TEAM MEMBERS */}
           {activeTab === 'team' && (
             <div className="settings-section-pane">
               <div className="settings-guide-card">
                 <Shield className="w-4 h-4 text-gold flex-shrink-0" />
                 <p>
-                  <strong>Gestion d'Équipe :</strong> Ajoutez vos collaborateurs pour leur envoyer automatiquement leur invitation par email Supabase ou leur transmettre leur lien d'accès en 1 clic !
+                  <strong>Gestion d'Équipe :</strong> Ajoutez vos collaborateurs pour leur donner accès à <strong>{shopDisplayName}</strong> par email officiel Supabase ou via leur lien direct !
                 </p>
               </div>
 
@@ -263,7 +393,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     </button>
                     {lastCreatedInvite.phone && (
                       <a
-                        href={`https://wa.me/${lastCreatedInvite.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${lastCreatedInvite.name},\n\nVoici votre lien d'accès direct à notre espace de travail Siftly (${lastCreatedInvite.role}) :\n👉 ${lastCreatedInvite.link}\n\nCliquez dessus pour commencer à travailler !`)}`}
+                        href={`https://wa.me/${lastCreatedInvite.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${lastCreatedInvite.name},\n\nVoici votre lien d'accès direct à l'espace de travail ${shopDisplayName} (${lastCreatedInvite.role}) :\n👉 ${lastCreatedInvite.link}\n\nCliquez dessus pour commencer à travailler !`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn-action-invite-wa"
@@ -365,17 +495,17 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
                     <div className="member-details-col">
                       <div className="member-name-row">
-                        <strong className="member-fullname">{ownerName}</strong>
+                        <strong className="member-fullname">{ownerDisplayName}</strong>
                         <span className="premium-role-tag admin">
-                          👑 Propriétaire (Fondateur)
+                          👑 Propriétaire ({shopDisplayName})
                         </span>
                       </div>
                       <div className="member-contact-row">
                         <span><Mail className="w-3 h-3 inline mr-1" />{ownerEmail}</span>
-                        {ownerPhone && (
+                        {profile.phone && (
                           <>
                             <span>·</span>
-                            <span><Phone className="w-3 h-3 inline mr-1" />{ownerPhone}</span>
+                            <span><Phone className="w-3 h-3 inline mr-1" />{profile.phone}</span>
                           </>
                         )}
                       </div>
@@ -387,7 +517,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     const perm = ROLE_PERMISSIONS[member.role];
                     const cleanPhone = (member.phone || '').replace(/[^0-9]/g, '');
                     const magicLink = generateInviteLink(member.name, member.role, member.email);
-                    const inviteMsg = `Bonjour ${member.name},\n\nVoici votre lien d'accès direct à notre espace de travail Siftly (${perm?.label || member.role}) :\n👉 ${magicLink}\n\nCliquez sur ce lien pour vous connecter immédiatement !`;
+                    const inviteMsg = `Bonjour ${member.name},\n\nVoici votre lien d'accès direct à notre boutique ${shopDisplayName} (${perm?.label || member.role}) :\n👉 ${magicLink}\n\nCliquez sur ce lien pour vous connecter immédiatement !`;
                     const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(inviteMsg)}` : null;
 
                     return (
@@ -461,7 +591,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
             </div>
           )}
 
-          {/* TAB 2: LIVREURS */}
+          {/* TAB 3: LIVREURS */}
           {activeTab === 'riders' && (
             <div className="settings-section-pane">
               <div className="settings-guide-card">
@@ -559,7 +689,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                       <div className="member-actions-group">
                         {r.phone && (
                           <a
-                            href={`https://wa.me/${r.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${r.name}, voici votre contact pour les courses du jour sur Siftly.`)}`}
+                            href={`https://wa.me/${r.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${r.name}, voici votre contact pour les courses du jour sur ${shopDisplayName}.`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn-action-invite-wa"
@@ -586,49 +716,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* TAB 3: ACCOUNT */}
-          {activeTab === 'account' && (
-            <div className="settings-section-pane">
-              <div className="premium-account-hero">
-                <div className="account-avatar-circle">
-                  {user?.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="Avatar" />
-                  ) : (
-                    <span>👑</span>
-                  )}
-                </div>
-                <div className="account-details-box">
-                  <div className="account-status-badge">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 inline mr-1" />
-                    <span>{user ? 'COMPTE AUTHENTIFIÉ ACTIF' : 'SESSION LOCALE ACTIVE'}</span>
-                  </div>
-                  <h3 className="account-email-text">{ownerEmail}</h3>
-                  <p className="account-sub-text">
-                    {user
-                      ? `Connecté en tant que Propriétaire (${user.email}). Vos données sont synchronisées en temps réel avec Supabase Cloud.`
-                      : "Vous êtes actuellement en mode local. Connectez-vous avec Google ou Email pour synchroniser vos données sur le Cloud."}
-                  </p>
-                </div>
-              </div>
-
-              {user && (
-                <div className="account-actions-box">
-                  <button
-                    type="button"
-                    className="btn-logout-premium"
-                    onClick={() => {
-                      signOut();
-                      onClose();
-                    }}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Se Déconnecter de la Session</span>
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>
