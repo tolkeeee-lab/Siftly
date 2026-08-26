@@ -569,3 +569,124 @@
   font-weight: 800;
   color: #0F172A;
 }
+
+/* Quick Edit on Cards */
+.offer-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-quick-edit-offer {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #0F172A;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-quick-edit-offer:hover {
+  background: #E2E8F0;
+  border-color: #94A3B8;
+}
+
+/* Bundle Product Picker in Modal */
+.bundle-product-picker-card {
+  background: #ECFDF5;
+  border: 1.5px solid #86EFAC;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bundle-picker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: #065F46;
+}
+
+.bundle-select-input {
+  background: #ffffff;
+  border: 1.5px solid #10B981;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0F172A;
+  outline: none;
+}
+
+/* Edit Tiers List in Modal */
+.edit-tiers-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-tiers-heading {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748B;
+  margin: 0;
+}
+
+.edit-tiers-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-tier-card {
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-tier-row-1,
+.edit-tier-row-2 {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 540px) {
+  .edit-tier-row-1,
+  .edit-tier-row-2 {
+    flex-direction: column;
+  }
+}
+
+.edit-field-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-field-group label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+}
+

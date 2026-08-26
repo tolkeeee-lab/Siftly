@@ -1,6 +1,6 @@
 export type OfferModelType = 
   | 'volume_pack'      // 📦 Duo / Trio Remisé (1 pc, 2 pcs -20%, 3 pcs -30%)
-  | 'bundle_cross_sell'// 🎁 Bundle 2-en-1 (Produit Principal + Accessoire)
+  | 'bundle_cross_sell'// 🎁 Bundle 2-en-1 (Produit Principal + Produit Complémentaire Choisi)
   | 'bogo'             // 🔥 Achetez 2 = 1 OFFERT (Liquidation rapide & Buzz)
   | 'vip_guarantee';   // 💎 Pack VIP Sérénité (+ Garantie 30j & Priorité)
 
@@ -23,6 +23,13 @@ export interface OfferStructure {
   strategicAdvantage: string;
   tiers: OfferTier[];
   
+  // Custom Bundle Target Info
+  bundleProductId?: string;
+  bundleProductName?: string;
+  bundleProductCostFCFA?: number;
+  bundleProductPriceFCFA?: number;
+  isCustomized?: boolean;
+
   // Financial Simulation metrics (per 100 orders baseline with budget)
   averageOrderValueFCFA: number;     // Panier Moyen (AOV)
   cogsPerOrderFCFA: number;          // Coût d'Achat Moyen

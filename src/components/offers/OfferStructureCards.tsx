@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, CheckCircle2, ArrowRight, Store, Video, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Sparkles, Edit3, Store, Video, ShieldCheck } from 'lucide-react';
 import { OfferStructure } from '../../types/offerTypes';
 import { formatFCFA } from '../../utils/formatters';
 
@@ -9,12 +9,14 @@ interface OfferStructureCardsProps {
   offers: OfferStructure[];
   onApplyOffer: (offer: OfferStructure) => void;
   onGoToAds: (offer: OfferStructure) => void;
+  onEditOffer: (offer: OfferStructure) => void;
 }
 
 export const OfferStructureCards: React.FC<OfferStructureCardsProps> = ({
   offers,
   onApplyOffer,
   onGoToAds,
+  onEditOffer,
 }) => {
   return (
     <div className="offers-grid-container">
@@ -39,7 +41,18 @@ export const OfferStructureCards: React.FC<OfferStructureCardsProps> = ({
                   </span>
                 )}
               </div>
-              <h3 className="offer-title">{offer.title}</h3>
+              <div className="offer-title-row">
+                <h3 className="offer-title">{offer.title}</h3>
+                <button
+                  type="button"
+                  className="btn-quick-edit-offer"
+                  onClick={() => onEditOffer(offer)}
+                  title="Modifier les prix et les produits combinés"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Modifier Prix</span>
+                </button>
+              </div>
               <p className="offer-desc">{offer.description}</p>
             </div>
 
