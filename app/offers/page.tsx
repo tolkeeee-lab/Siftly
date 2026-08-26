@@ -6,11 +6,13 @@ import { useProducts } from '../../src/hooks/useProducts';
 import { useLandingPageConfigs } from '../../src/hooks/useLandingPageConfigs';
 import { calculateOfferStructures } from '../../src/utils/offerCalculations';
 import { OfferStructure, OfferTier } from '../../src/types/offerTypes';
+import { ProductData } from '../../src/types/product';
 import { Masthead } from '../../src/components/header/Masthead';
 import { NavigationTabs } from '../../src/components/navigation/NavigationTabs';
 import { OffersHeader } from '../../src/components/offers/OffersHeader';
 import { OfferStructureCards } from '../../src/components/offers/OfferStructureCards';
 import { OfferSimulatorBreakdown } from '../../src/components/offers/OfferSimulatorBreakdown';
+import { MultiProductBundleBuilder } from '../../src/components/offers/MultiProductBundleBuilder';
 import { ApplyOfferModal } from '../../src/components/offers/modals/ApplyOfferModal';
 import { EditOfferModal } from '../../src/components/offers/modals/EditOfferModal';
 
@@ -99,6 +101,38 @@ export default function OffersPage() {
     router.push(`/landing?product=${activeProduct.id}`);
   };
 
+  const handleApplyMultiBundle = (bundleName: string, selectedProducts: ProductData[], bundlePriceFCFA: number) => {
+    if (!activeProduct) return;
+    const currentConfig = getConfigForProduct(activeProduct);
+    const totalOrig = selectedProducts.reduce((sum, p) => sum + (p.vente || 0), 0);
+    const updatedOffers = [
+      {
+        id: 'offer-1',
+        name: `${activeProduct.produit} (1 Pc Seul)`,
+        quantity: 1,
+        priceFCFA: activeProduct.vente || 15000,
+        originalPriceFCFA: activeProduct.vente || 15000,
+        isRecommended: false,
+      },
+      {
+        id: 'offer-2',
+        name: bundleName,
+        quantity: selectedProducts.length,
+        priceFCFA: bundlePriceFCFA,
+        originalPriceFCFA: totalOrig,
+        badge: '🔥 PACK COMBINÉ ÉCONOMIE',
+        isRecommended: true,
+      },
+    ];
+
+    updateConfig(activeProduct.id, {
+      ...currentConfig,
+      offers: updatedOffers,
+    });
+
+    router.push(`/landing?product=${activeProduct.id}`);
+  };
+
   const handleGoToAds = (offer: OfferStructure) => {
     if (!activeProduct) return;
     router.push(`/ads?product=${activeProduct.id}&offer=${offer.id}`);
@@ -118,6 +152,7 @@ export default function OffersPage() {
     <div className="sheet">
       <Masthead />
       <NavigationTabs />
+
       <div className="offers-page-layout">
         {/* Header & Controls */}
         <OffersHeader
@@ -141,6 +176,13 @@ export default function OffersPage() {
           onApplyOffer={handleOpenApplyModal}
           onGoToAds={handleGoToAds}
           onEditOffer={handleOpenEditModal}
+        />
+
+        {/* Multi-Product Custom Bundle Builder (2 to 5 items) */}
+        <MultiProductBundleBuilder
+          products={products}
+          mainProduct={activeProduct}
+          onApplyMultiBundle={handleApplyMultiBundle}
         />
 
         {/* Financial Breakdown Table */}
