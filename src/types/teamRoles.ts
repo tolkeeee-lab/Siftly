@@ -1,8 +1,19 @@
 export type UserRole =
-  | 'admin'        // 👑 Propriétaire / Admin (Accès 100% total)
-  | 'media_buyer'  // 🎬 Media Buyer (Recherche, Ads, Landing - Finances/Fournisseurs masqués)
-  | 'logistics'    // 🚚 Livreur / Service Client (Suivi COD, Stock - Marges masquées)
+  | 'admin'        // 👑 Propriétaire / Fondateur (Accès Total)
+  | 'assistant'    // 🤝 Assistant de Direction / Bras Droit (Accès Total)
+  | 'media_buyer'  // 🎬 Media Buyer (Recherche, Ads, Landing - Finances masquées)
+  | 'logistics'    // 🚚 Responsable Logistique / Service Client (Suivi COD & Livreurs)
   | 'inventory';   // 📦 Magasinier (Stock & Sourcing)
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  addedDate: string;
+  isActive: boolean;
+}
 
 export interface RolePermission {
   role: UserRole;
@@ -17,8 +28,17 @@ export interface RolePermission {
 export const ROLE_PERMISSIONS: Record<UserRole, RolePermission> = {
   admin: {
     role: 'admin',
-    label: '👑 Propriétaire / Admin',
-    badge: 'Accès Total',
+    label: '👑 Propriétaire (Fondateur)',
+    badge: 'Accès 100% Total',
+    canViewFinances: true,
+    canViewSupplierCosts: true,
+    canEditOrders: true,
+    canEditStock: true,
+  },
+  assistant: {
+    role: 'assistant',
+    label: '🤝 Assistant de Direction (Bras Droit)',
+    badge: 'Accès 100% Total',
     canViewFinances: true,
     canViewSupplierCosts: true,
     canEditOrders: true,
@@ -27,7 +47,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermission> = {
   media_buyer: {
     role: 'media_buyer',
     label: '🎬 Media Buyer',
-    badge: 'Ads & Créatives',
+    badge: 'Ads & Pages de Vente',
     canViewFinances: false,
     canViewSupplierCosts: false,
     canEditOrders: false,
@@ -35,8 +55,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermission> = {
   },
   logistics: {
     role: 'logistics',
-    label: '🚚 Logistique & Service Client',
-    badge: 'Livraisons COD',
+    label: '🚚 Responsable Logistique',
+    badge: 'Suivi COD & Livreurs',
     canViewFinances: false,
     canViewSupplierCosts: false,
     canEditOrders: true,
@@ -45,7 +65,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermission> = {
   inventory: {
     role: 'inventory',
     label: '📦 Magasinier & Stock',
-    badge: 'Gestion Stocks',
+    badge: 'Stock & Arrivages',
     canViewFinances: false,
     canViewSupplierCosts: true,
     canEditOrders: false,
