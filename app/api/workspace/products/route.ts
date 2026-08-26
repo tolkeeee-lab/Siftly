@@ -16,13 +16,11 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const ownerId = searchParams.get('ownerId');
 
-    if (!ownerId) {
-      return NextResponse.json({ products: [] });
-    }
-
     const supabase = getAdminSupabase();
     let data: any[] | null = null;
-    if (ownerId && ownerId !== 'main') {
+    const isUuid = ownerId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ownerId);
+
+    if (isUuid) {
       const res = await supabase
         .from('products')
         .select('*')
@@ -33,7 +31,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Fallback: If no products found for specific ownerId or user_id is null on rows, fetch all workspace products
+    // Fallback: If no products found for specific ownerId or user_id is null/unbound, fetch all products
     if (!data || data.length === 0) {
       const allRes = await supabase.from('products').select('*').order('seq', { ascending: true });
       data = allRes.data || [];

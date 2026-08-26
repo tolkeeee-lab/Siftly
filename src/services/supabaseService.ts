@@ -37,7 +37,8 @@ export function mapProductToDb(p: ProductData, userId?: string): Record<string, 
     updated_at: new Date().toISOString(),
   };
 
-  if (userId) {
+  const isUuid = userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
+  if (isUuid) {
     row.user_id = userId;
   }
 
