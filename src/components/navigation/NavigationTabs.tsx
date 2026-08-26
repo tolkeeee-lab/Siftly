@@ -41,11 +41,10 @@ export const NavigationTabs: React.FC = () => {
     },
     {
       id: 'compare',
-      href: '#',
+      href: '/compare',
       label: 'Comparateur A/B',
       icon: <Scale className="w-3.5 h-3.5" />,
-      isAvailable: false,
-      badge: 'Bientôt',
+      isAvailable: true,
     },
     {
       id: 'ads',
