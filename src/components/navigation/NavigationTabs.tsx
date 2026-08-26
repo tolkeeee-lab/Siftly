@@ -56,11 +56,10 @@ export const NavigationTabs: React.FC = () => {
     },
     {
       id: 'cod',
-      href: '#',
+      href: '/cod',
       label: 'Suivi COD & Livreurs',
       icon: <Truck className="w-3.5 h-3.5" />,
-      isAvailable: false,
-      badge: 'Bientôt',
+      isAvailable: true,
     },
     {
       id: 'finances',
