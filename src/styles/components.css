@@ -358,8 +358,45 @@
 .rank-hint { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); }
 
 /* ---- Table Panel ---- */
-.panel { background: var(--panel); border-radius: 8px; padding: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; min-width: 3150px; border-collapse: separate; border-spacing: 0; font-size: 14.5px; }
+.panel, .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 8px;
+  overflow-x: auto !important;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  display: block;
+  scrollbar-width: auto;
+}
+
+.table-wrap::-webkit-scrollbar,
+.panel::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.table-wrap::-webkit-scrollbar-track,
+.panel::-webkit-scrollbar-track {
+  background: #EAE6DF;
+  border-radius: 6px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb,
+.panel::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 6px;
+  border: 2px solid #EAE6DF;
+}
+
+.table-wrap::-webkit-scrollbar-thumb:hover,
+.panel::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-deep);
+}
+
+table, .eval-table { width: 100%; min-width: 3150px; border-collapse: separate; border-spacing: 0; font-size: 14.5px; }
 thead .grp th { text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; padding: 14px 10px 6px; border-bottom: 1px dashed var(--panel-line); background: var(--panel); }
 thead .grp th.group-block { border-right: 1px solid var(--panel-line); }
 thead .cols th { text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; padding: 8px 12px 14px; border-bottom: 1.5px solid var(--ink); white-space: nowrap; background: var(--panel); }

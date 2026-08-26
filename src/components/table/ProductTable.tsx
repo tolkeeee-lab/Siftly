@@ -41,7 +41,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onOpenLightbox,
 }) => {
   return (
-    <div className="table-wrap">
+    <div className="panel table-wrap">
       <table className="eval-table">
         <TableHeader
           visibleGroups={visibleGroups}
