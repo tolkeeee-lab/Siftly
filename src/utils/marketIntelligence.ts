@@ -11,11 +11,7 @@ import {
 import { calculateNoteFinale, calculateMargin, calculateCOGS } from './calculations';
 import { formatFCFA } from './formatters';
 
-export function getProductMarketAnalysis(product: ProductData): MarketAnalysisData {
-  if (product.marketAnalysis) {
-    return product.marketAnalysis;
-  }
-
+function generateDefaultMarketAnalysis(product: ProductData): MarketAnalysisData {
   const { noteNum: score } = calculateNoteFinale(product);
   const margin = calculateMargin(product);
   const cogs = calculateCOGS(product);
@@ -250,6 +246,93 @@ export function getProductMarketAnalysis(product: ProductData): MarketAnalysisDa
     whyItsWorthIt,
     criticalAttentionPoints,
     failureRisks,
+    buyerPersona,
+    marketProjections,
+    adBenchmarks,
+    reviewsAndObjections,
+    spyShortcuts,
+  };
+}
+
+export function getProductMarketAnalysis(product: ProductData): MarketAnalysisData {
+  if (!product) {
+    return {
+      saturationScore: 'low',
+      competitionLevel: 'low',
+      audienceSizeMillion: 5,
+      viralFactorScore: 5,
+      codReturnRisk: 'low',
+      seasonalityType: 'all_year',
+      strategicVerdict: '🟢 FEU VERT',
+      targetCountries: [],
+      keyBarrierToEntry: '',
+      recommendedAdAngle: '',
+      reasonsToUse: '',
+      problemsSolved: '',
+      whyItsWorthIt: '',
+      criticalAttentionPoints: '',
+      failureRisks: '',
+      buyerPersona: { targetAge: '', genderRatio: '', professionalCategory: '', psychologicalTrigger: '' },
+      marketProjections: { conservativeUnits: 0, conservativeRevenueFCFA: 0, conservativeProfitFCFA: 0, aggressiveUnits: 0, aggressiveRevenueFCFA: 0, aggressiveProfitFCFA: 0 },
+      adBenchmarks: { estimatedCPMFCFA: 1600, targetCTR: 2.5, targetConversionRate: 10, maxAllowedCPAFCFA: 3000 },
+      reviewsAndObjections: { topPositiveReviews: '', topNegativeComplaints: '', commonObjections: [] },
+      spyShortcuts: { facebookAdsUrl: '', tiktokSearchUrl: '', aliexpressReviewsUrl: '', amazonReviewsUrl: '', googleTrendsUrl: '' },
+    };
+  }
+
+  const defaults = generateDefaultMarketAnalysis(product);
+  if (!product.marketAnalysis) {
+    return defaults;
+  }
+
+  const custom = product.marketAnalysis;
+
+  const buyerPersona: BuyerPersonaData = {
+    targetAge: custom.buyerPersona?.targetAge || defaults.buyerPersona?.targetAge || '25 - 50 ans',
+    genderRatio: custom.buyerPersona?.genderRatio || defaults.buyerPersona?.genderRatio || 'Mixte (50% H / 50% F)',
+    professionalCategory: custom.buyerPersona?.professionalCategory || defaults.buyerPersona?.professionalCategory || 'Salariés, Cadres & Commerçants',
+    psychologicalTrigger: custom.buyerPersona?.psychologicalTrigger || defaults.buyerPersona?.psychologicalTrigger || 'Gain de confort & Fierté',
+  };
+
+  const marketProjections: MarketProjectionsData = {
+    conservativeUnits: custom.marketProjections?.conservativeUnits ?? defaults.marketProjections?.conservativeUnits ?? 250,
+    conservativeRevenueFCFA: custom.marketProjections?.conservativeRevenueFCFA ?? defaults.marketProjections?.conservativeRevenueFCFA ?? 3750000,
+    conservativeProfitFCFA: custom.marketProjections?.conservativeProfitFCFA ?? defaults.marketProjections?.conservativeProfitFCFA ?? 1875000,
+    aggressiveUnits: custom.marketProjections?.aggressiveUnits ?? defaults.marketProjections?.aggressiveUnits ?? 1200,
+    aggressiveRevenueFCFA: custom.marketProjections?.aggressiveRevenueFCFA ?? defaults.marketProjections?.aggressiveRevenueFCFA ?? 18000000,
+    aggressiveProfitFCFA: custom.marketProjections?.aggressiveProfitFCFA ?? defaults.marketProjections?.aggressiveProfitFCFA ?? 9000000,
+  };
+
+  const adBenchmarks: AdBenchmarksData = {
+    estimatedCPMFCFA: custom.adBenchmarks?.estimatedCPMFCFA ?? defaults.adBenchmarks?.estimatedCPMFCFA ?? 1600,
+    targetCTR: custom.adBenchmarks?.targetCTR ?? defaults.adBenchmarks?.targetCTR ?? 2.8,
+    targetConversionRate: custom.adBenchmarks?.targetConversionRate ?? defaults.adBenchmarks?.targetConversionRate ?? 11.5,
+    maxAllowedCPAFCFA: custom.adBenchmarks?.maxAllowedCPAFCFA ?? defaults.adBenchmarks?.maxAllowedCPAFCFA ?? 3500,
+  };
+
+  const reviewsAndObjections: ReviewsAndObjectionsData = {
+    topPositiveReviews: custom.reviewsAndObjections?.topPositiveReviews || defaults.reviewsAndObjections?.topPositiveReviews || '',
+    topNegativeComplaints: custom.reviewsAndObjections?.topNegativeComplaints || defaults.reviewsAndObjections?.topNegativeComplaints || '',
+    commonObjections:
+      custom.reviewsAndObjections?.commonObjections && custom.reviewsAndObjections.commonObjections.length > 0
+        ? custom.reviewsAndObjections.commonObjections
+        : defaults.reviewsAndObjections?.commonObjections || [],
+  };
+
+  const spyShortcuts: SpyShortcutsData = {
+    facebookAdsUrl: custom.spyShortcuts?.facebookAdsUrl || defaults.spyShortcuts?.facebookAdsUrl || '',
+    tiktokSearchUrl: custom.spyShortcuts?.tiktokSearchUrl || defaults.spyShortcuts?.tiktokSearchUrl || '',
+    aliexpressReviewsUrl: custom.spyShortcuts?.aliexpressReviewsUrl || defaults.spyShortcuts?.aliexpressReviewsUrl || '',
+    amazonReviewsUrl: custom.spyShortcuts?.amazonReviewsUrl || defaults.spyShortcuts?.amazonReviewsUrl || '',
+    googleTrendsUrl: custom.spyShortcuts?.googleTrendsUrl || defaults.spyShortcuts?.googleTrendsUrl || '',
+  };
+
+  return {
+    ...defaults,
+    ...custom,
+    targetCountries: custom.targetCountries && custom.targetCountries.length > 0
+      ? custom.targetCountries
+      : defaults.targetCountries,
     buyerPersona,
     marketProjections,
     adBenchmarks,

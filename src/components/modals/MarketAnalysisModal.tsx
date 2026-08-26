@@ -632,7 +632,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
               <span>Zone Géographique Prioritaire (Afrique de l'Ouest & Centrale) :</span>
             </h4>
             <div className="countries-tags-row">
-              {analysis.targetCountries.map((country, idx) => (
+              {(analysis.targetCountries || []).map((country, idx) => (
                 <span key={idx} className="country-badge-item">
                   📍 {country}
                 </span>
