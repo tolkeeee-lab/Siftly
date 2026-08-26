@@ -2,27 +2,61 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { TeamMember, UserRole } from '../types/teamRoles';
+import {
+  fetchTeamMembersFromDb,
+  saveTeamMemberToDb,
+  deleteTeamMemberFromDb,
+  checkCollaboratorMembership,
+  MembershipInfo,
+} from '../services/teamService';
+import { useAuth } from './useAuth';
 
 const TEAM_MEMBERS_KEY = 'siftly_team_members_v2';
 
 export function useTeamMembers() {
   const [members, setMembers] = useState<TeamMember[]>([]);
+  const [membership, setMembership] = useState<MembershipInfo>({ isCollaborator: false });
   const [isLoaded, setIsLoaded] = useState(false);
+  const { user } = useAuth();
 
+  // Load from local storage and Supabase Cloud
   useEffect(() => {
+    let localData: TeamMember[] = [];
     try {
       const saved = localStorage.getItem(TEAM_MEMBERS_KEY);
       if (saved) {
-        setMembers(JSON.parse(saved));
-      } else {
-        setMembers([]);
+        localData = JSON.parse(saved);
+        setMembers(localData);
       }
     } catch (e) {
       console.warn('Could not load team members', e);
-      setMembers([]);
     }
     setIsLoaded(true);
-  }, []);
+
+    // Sync with Supabase
+    async function syncCloud() {
+      if (user?.email) {
+        // Check if active user is a collaborator
+        const memberInfo = await checkCollaboratorMembership(user.email);
+        setMembership(memberInfo);
+
+        // If owner, fetch registered team
+        const dbMembers = await fetchTeamMembersFromDb();
+        if (dbMembers.length > 0) {
+          setMembers(dbMembers);
+          try {
+            localStorage.setItem(TEAM_MEMBERS_KEY, JSON.stringify(dbMembers));
+          } catch { /* quota */ }
+        } else if (localData.length > 0) {
+          // Upload local members to Supabase
+          for (const m of localData) {
+            await saveTeamMemberToDb(m);
+          }
+        }
+      }
+    }
+    syncCloud();
+  }, [user]);
 
   const saveMembers = useCallback((newMembers: TeamMember[]) => {
     setMembers(newMembers);
@@ -45,6 +79,10 @@ export function useTeamMembers() {
       saveMembers(next);
       return next;
     });
+
+    // Async save to Supabase
+    saveTeamMemberToDb(newMember);
+
     return newMember;
   }, [saveMembers]);
 
@@ -54,10 +92,14 @@ export function useTeamMembers() {
       saveMembers(next);
       return next;
     });
+
+    // Async delete from Supabase
+    deleteTeamMemberFromDb(id);
   }, [saveMembers]);
 
   return {
     members,
+    membership,
     addMember,
     removeMember,
     saveMembers,

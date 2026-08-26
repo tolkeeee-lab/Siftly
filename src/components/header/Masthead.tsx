@@ -4,10 +4,12 @@ import React from 'react';
 import { UserMenu } from '../auth/UserMenu';
 import { RoleSwitcher } from './RoleSwitcher';
 import { useShopProfile } from '../../hooks/useShopProfile';
-import { Store } from 'lucide-react';
+import { useTeamMembers } from '../../hooks/useTeamMembers';
+import { Store, ShieldCheck } from 'lucide-react';
 
 export const Masthead: React.FC = () => {
   const { profile } = useShopProfile();
+  const { membership } = useTeamMembers();
 
   return (
     <header className="masthead">
@@ -19,6 +21,12 @@ export const Masthead: React.FC = () => {
           <span className="masthead-shop-badge">
             <Store className="w-3 h-3 text-gold" />
             <span>{profile.shopName}</span>
+          </span>
+        )}
+        {membership.isCollaborator && (
+          <span className="masthead-shop-badge" style={{ background: '#064E3B', color: '#6EE7B7', borderColor: '#059669' }}>
+            <ShieldCheck className="w-3 h-3 text-emerald-300" />
+            <span>Membre Rattaché ({membership.role})</span>
           </span>
         )}
       </div>
