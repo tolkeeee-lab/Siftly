@@ -45,12 +45,20 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const [editPhone, setEditPhone] = useState(profile.phone || '');
   const [editCountry, setEditCountry] = useState(profile.country || 'Bénin / Côte d\'Ivoire / Sénégal');
 
+  const [shopCode, setShopCode] = useState('SIFT-8820');
+
   useEffect(() => {
     setEditOwnerName(profile.ownerName || '');
     setEditShopName(profile.shopName || '');
     setEditPhone(profile.phone || '');
     setEditCountry(profile.country || 'Bénin / Côte d\'Ivoire / Sénégal');
-  }, [profile]);
+
+    if (user?.id) {
+      import('../../utils/shopCodeUtils').then(({ getOrCreateShopCode }) => {
+        getOrCreateShopCode(user.id, profile.shopName).then(setShopCode);
+      });
+    }
+  }, [profile, user]);
 
   // New member form
   const [newMemberName, setNewMemberName] = useState('');
@@ -314,16 +322,29 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           {/* TAB 2: TEAM MEMBERS */}
           {activeTab === 'team' && (
             <div className="tab-pane-content">
-              {/* How it works info box */}
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-4 text-xs text-slate-600 flex items-start gap-2.5">
-                <Shield className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              {/* Shop Code Card */}
+              <div className="bg-slate-900 text-white rounded-xl p-4 mb-5 border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                 <div>
-                  <strong className="text-slate-900 block mb-0.5">Comment fonctionne le rattachement automatique :</strong>
-                  <p className="m-0 leading-relaxed">
-                    1. Votre collaborateur se crée un compte ou se connecte sur Siftly avec son adresse email (ex: via le bouton Google).<br />
-                    2. Vous enregistrez son adresse email ci-dessous avec son rôle.<br />
-                    3. <strong>Il est immédiatement et automatiquement rattaché à votre boutique !</strong>
+                  <div className="flex items-center gap-2 text-gold text-xs font-bold uppercase tracking-wider mb-1">
+                    <Building2 className="w-4 h-4" />
+                    <span>Code Boutique Officiel (À transmettre à vos employés)</span>
+                  </div>
+                  <p className="text-slate-300 text-xs m-0">
+                    Vos employés s'inscrivent sur la page d'accueil avec ce code. Leur demande apparaîtra ci-dessous pour validation.
                   </p>
+                </div>
+                <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg shrink-0">
+                  <span className="font-mono font-extrabold text-lg text-amber-400 tracking-widest">{shopCode}</span>
+                  <button
+                    type="button"
+                    className="text-xs bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-2 py-1 rounded font-bold transition"
+                    onClick={() => {
+                      navigator.clipboard.writeText(shopCode);
+                      showToast(`📋 Code Boutique "${shopCode}" copié dans le presse-papier !`);
+                    }}
+                  >
+                    Copier
+                  </button>
                 </div>
               </div>
 
