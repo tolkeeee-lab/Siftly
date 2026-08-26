@@ -13,10 +13,8 @@ import {
   DollarSign,
   Layers,
   Truck,
-  Ship,
-  Plane,
 } from 'lucide-react';
-import { ProductData, ImportMode } from '../../types/product';
+import { ProductData } from '../../types/product';
 import {
   calculateCOGS,
   calculateMargin,
@@ -73,9 +71,9 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
     { key: 'impact', label: 'Impact', val: product.impact },
     { key: 'waouh', label: 'Waouh', val: product.waouh },
     { key: 'innovant', label: 'Innovant', val: product.innovant },
-    { key: 'nonsaison', label: 'Non-saison', val: product.nonsaison },
+    { key: 'nonsaison', label: 'Saison', val: product.nonsaison },
     { key: 'habitudes', label: 'Habitudes', val: product.habitudes },
-    { key: 'poidsfacteur', label: 'Facteur poids', val: product.poidsfacteur },
+    { key: 'poidsfacteur', label: 'Poids', val: product.poidsfacteur },
   ];
 
   const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -91,103 +89,38 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
   };
 
   return (
-    <div
-      style={{
-        background: '#F7F2E4',
-        border: isWinner ? '2.5px solid #B8862F' : '1px solid #DCD3B8',
-        borderRadius: '12px',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        color: '#1E1B14',
-        boxShadow: isWinner ? '0 8px 24px rgba(184, 134, 47, 0.25)' : '0 4px 16px rgba(0, 0, 0, 0.12)',
-        position: 'relative',
-      }}
-    >
+    <div className={`product-card-frame ${isWinner ? 'winner-frame' : ''}`}>
       {/* Header Banner */}
-      <div
-        style={{
-          borderBottom: '2px solid #1E1B14',
-          paddingBottom: '12px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: '12px',
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span
-              style={{
-                background: index === 0 ? '#B8862F' : '#141B32',
-                color: index === 0 ? '#241C0C' : '#fff',
-                padding: '3px 9px',
-                borderRadius: '14px',
-                fontSize: '11px',
-                fontWeight: 700,
-                fontFamily: 'monospace',
-              }}
-            >
-              {rankBadge}
-            </span>
-            <span style={{ fontSize: '11px', color: '#6B6353', fontFamily: 'monospace' }}>
-              Fiche d'Analyse Produit
-            </span>
+      <div className="card-frame-header">
+        <div className="card-frame-header-left">
+          <div className="card-frame-badge-line">
+            <span className={`card-frame-rank ${index === 0 ? 'gold' : ''}`}>{rankBadge}</span>
+            <span className="card-frame-sub-label">Fiche d'Analyse Produit</span>
           </div>
 
           <input
-            style={{
-              margin: 0,
-              fontSize: '20px',
-              fontFamily: 'Georgia, serif',
-              fontWeight: 600,
-              color: '#1E1B14',
-              width: '100%',
-              border: 'none',
-              background: 'transparent',
-              padding: '2px 0',
-              outline: 'none',
-            }}
+            className="card-frame-title-input"
             type="text"
             placeholder="Nom du produit"
             value={product.produit}
             onChange={(e) => onUpdate(product.id, 'produit', e.target.value)}
           />
 
-          <div style={{ fontSize: '11.5px', color: '#6B6353', marginTop: '2px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="card-frame-meta-line">
             <span>Marché : <strong>{product.marche || 'Chine'}</strong></span>
             <span>·</span>
-            <div style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
+            <div className="mode-switch-inline">
               <span>Mode :</span>
               <button
                 type="button"
-                style={{
-                  fontSize: '10.5px',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  border: '1px solid #DCD3B8',
-                  background: (product.modeimport || 'bateau') === 'bateau' ? '#DAE3E8' : 'transparent',
-                  color: '#141B32',
-                  cursor: 'pointer',
-                  fontWeight: (product.modeimport || 'bateau') === 'bateau' ? 700 : 400,
-                }}
+                className={`mode-btn-mini ${(product.modeimport || 'bateau') === 'bateau' ? 'active' : ''}`}
                 onClick={() => onUpdate(product.id, 'modeimport', 'bateau')}
               >
                 🚢 Bateau
               </button>
               <button
                 type="button"
-                style={{
-                  fontSize: '10.5px',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  border: '1px solid #DCD3B8',
-                  background: product.modeimport === 'avion' ? '#DAE3E8' : 'transparent',
-                  color: '#141B32',
-                  cursor: 'pointer',
-                  fontWeight: product.modeimport === 'avion' ? 700 : 400,
-                }}
+                className={`mode-btn-mini ${product.modeimport === 'avion' ? 'active' : ''}`}
                 onClick={() => onUpdate(product.id, 'modeimport', 'avion')}
               >
                 ✈️ Avion
@@ -197,57 +130,27 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
         </div>
 
         {/* Note Finale Pill */}
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6B6353', fontFamily: 'monospace', marginBottom: '2px' }}>
-            Note Finale
-          </div>
-          <div
-            style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              fontFamily: 'monospace',
-              ...getScoreColorStyle(noteNum),
-              padding: '2px 10px',
-              borderRadius: '6px',
-              display: 'inline-block',
-            }}
-          >
+        <div className="card-frame-score-box">
+          <div className="card-frame-score-lbl">Note Finale</div>
+          <div className="card-frame-score-pill" style={getScoreColorStyle(noteNum)}>
             {noteText}
           </div>
         </div>
       </div>
 
       {/* Main 2-Column Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '16px' }}>
+      <div className="card-frame-grid">
         {/* Left Column: Image, Target, Angle, Links */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="card-frame-left">
           {/* Photo */}
           <div
-            style={{
-              width: '100%',
-              height: '180px',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              background: '#EFE0BB',
-              border: '1px solid #DCD3B8',
-              position: 'relative',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            className="card-frame-img-box"
             onClick={() => (product.imgSrc ? onOpenLightbox(product.imgSrc) : fileInputRef.current?.click())}
           >
             {product.imgSrc ? (
-              <img
-                src={product.imgSrc}
-                alt={product.produit}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <img src={product.imgSrc} alt={product.produit} />
             ) : (
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#7A5A1E', fontFamily: 'monospace' }}>
-                + Ajouter Photo
-              </div>
+              <div className="card-frame-img-placeholder">+ Photo</div>
             )}
             <input
               ref={fileInputRef}
@@ -259,20 +162,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
             {product.imgSrc && (
               <button
                 type="button"
-                style={{
-                  position: 'absolute',
-                  top: '6px',
-                  right: '6px',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: 'rgba(20, 27, 50, 0.85)',
-                  border: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                }}
+                className="card-frame-img-edit"
                 title="Changer l'image"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -285,13 +175,13 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </div>
 
           {/* Target & Angle */}
-          <div style={{ background: '#fff', border: '1px solid #DCD3B8', borderRadius: '6px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#7A5A1E', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '3px', fontFamily: 'monospace' }}>
-                <Target className="w-3 h-3" /> Cible Marketing :
+          <div className="card-frame-mkt-box">
+            <div className="mkt-item">
+              <div className="mkt-lbl">
+                <Target className="w-3 h-3 text-gold-deep" /> Cible Marketing :
               </div>
               <input
-                style={{ border: 'none', background: 'transparent', fontSize: '12px', color: '#1E1B14', width: '100%', padding: '0', outline: 'none' }}
+                className="mkt-input"
                 type="text"
                 placeholder="Cible marketing..."
                 value={product.cible || ''}
@@ -299,12 +189,12 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               />
             </div>
 
-            <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#7A5A1E', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '3px', fontFamily: 'monospace' }}>
-                <Award className="w-3 h-3" /> Angle d'Attaque :
+            <div className="mkt-item">
+              <div className="mkt-lbl">
+                <Award className="w-3 h-3 text-gold-deep" /> Angle d'Attaque :
               </div>
               <input
-                style={{ border: 'none', background: 'transparent', fontSize: '12px', color: '#1E1B14', width: '100%', padding: '0', outline: 'none' }}
+                className="mkt-input"
                 type="text"
                 placeholder="Angle d'attaque..."
                 value={product.angle || ''}
@@ -314,19 +204,19 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </div>
 
           {/* Links */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px' }}>
+          <div className="card-frame-links">
             {product.creative && (
-              <a href={product.creative} target="_blank" rel="noopener noreferrer" style={{ color: '#7A5A1E', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none', fontFamily: 'monospace' }}>
+              <a href={product.creative} target="_blank" rel="noopener noreferrer" className="frame-link">
                 <ExternalLink className="w-2.5 h-2.5" /> Creative Ad
               </a>
             )}
             {product.alibaba && (
-              <a href={product.alibaba} target="_blank" rel="noopener noreferrer" style={{ color: '#7A5A1E', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none', fontFamily: 'monospace' }}>
-                <ExternalLink className="w-2.5 h-2.5" /> Fournisseur Alibaba
+              <a href={product.alibaba} target="_blank" rel="noopener noreferrer" className="frame-link">
+                <ExternalLink className="w-2.5 h-2.5" /> Fournisseur 1688
               </a>
             )}
             {product.siteweb && (
-              <a href={product.siteweb} target="_blank" rel="noopener noreferrer" style={{ color: '#7A5A1E', display: 'flex', alignItems: 'center', gap: '3px', textDecoration: 'none', fontFamily: 'monospace' }}>
+              <a href={product.siteweb} target="_blank" rel="noopener noreferrer" className="frame-link">
                 <ExternalLink className="w-2.5 h-2.5" /> Site Concurrent
               </a>
             )}
@@ -334,20 +224,20 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
         </div>
 
         {/* Right Column: Financial Breakdown, 9 Criteria, COD */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="card-frame-right">
           {/* Bilan Financier Box (Gold) */}
-          <div style={{ background: '#EFE0BB', border: '1px solid rgba(184,134,47,0.35)', borderRadius: '8px', padding: '12px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#7A5A1E', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'monospace' }}>
+          <div className="frame-section-box gold-box">
+            <div className="frame-section-title text-gold-deep">
               <DollarSign className="w-3.5 h-3.5" /> Bilan Financier & Rentabilité
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: '8px' }}>
-              <div style={{ background: '#fff', padding: '6px 8px', borderRadius: '4px', border: '1px solid #DCD3B8' }}>
-                <div style={{ fontSize: '9.5px', color: '#6B6353', textTransform: 'uppercase', fontFamily: 'monospace' }}>Sourcing</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+            <div className="financial-mini-grid">
+              <div className="fin-card">
+                <div className="fin-lbl">Sourcing</div>
+                <div className="fin-val-wrap">
                   <input
                     type="number"
-                    style={{ border: 'none', background: 'transparent', fontSize: '13px', fontWeight: 600, fontFamily: 'monospace', width: '100%', outline: 'none' }}
+                    className="fin-in"
                     placeholder="0"
                     value={product.sourcing ?? ''}
                     onChange={(e) => onUpdate(product.id, 'sourcing', e.target.value)}
@@ -355,7 +245,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
                   {onOpenCurrencyConverter && (
                     <button
                       type="button"
-                      style={{ fontSize: '9px', padding: '1px 4px', background: '#EFE0BB', border: '1px solid #DCD3B8', borderRadius: '3px', color: '#7A5A1E', cursor: 'pointer', fontFamily: 'monospace', fontWeight: 700 }}
+                      className="currency-btn mini"
                       title="Convertir ¥/$"
                       onClick={() => onOpenCurrencyConverter(product.id)}
                     >
@@ -365,35 +255,35 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
                 </div>
               </div>
 
-              <div style={{ background: '#fff', padding: '6px 8px', borderRadius: '4px', border: '1px solid #DCD3B8' }}>
-                <div style={{ fontSize: '9.5px', color: '#6B6353', textTransform: 'uppercase', fontFamily: 'monospace' }}>Frais Transport</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'monospace' }}>{formatFCFA(frais)}</div>
+              <div className="fin-card">
+                <div className="fin-lbl">Frais Transport</div>
+                <div className="fin-val">{formatFCFA(frais)}</div>
               </div>
 
-              <div style={{ background: '#fff', padding: '6px 8px', borderRadius: '4px', border: '1px solid #DCD3B8' }}>
-                <div style={{ fontSize: '9.5px', color: '#6B6353', textTransform: 'uppercase', fontFamily: 'monospace' }}>CAC + Livraison</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'monospace' }}>{formatFCFA(Number(product.cac) + Number(product.livraison))}</div>
+              <div className="fin-card">
+                <div className="fin-lbl">CAC + Livraison</div>
+                <div className="fin-val">{formatFCFA(Number(product.cac) + Number(product.livraison))}</div>
               </div>
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', borderTop: '1px dashed #DCD3B8', paddingTop: '8px' }}>
-              <div>
-                <div style={{ fontSize: '10px', color: '#6B6353', fontFamily: 'monospace' }}>COGS (Coût Total)</div>
-                <div style={{ fontSize: '15px', fontWeight: 700, fontFamily: 'monospace' }}>{formatFCFA(cogs)}</div>
+              <div className="fin-card">
+                <div className="fin-lbl">COGS (Coût Total)</div>
+                <div className="fin-val bold">{formatFCFA(cogs)}</div>
               </div>
-              <div>
-                <div style={{ fontSize: '10px', color: '#6B6353', fontFamily: 'monospace' }}>Prix de Vente</div>
+
+              <div className="fin-card">
+                <div className="fin-lbl">Prix de Vente</div>
                 <input
                   type="number"
-                  style={{ border: 'none', background: 'transparent', fontSize: '15px', fontWeight: 700, color: '#7A5A1E', fontFamily: 'monospace', width: '100%', outline: 'none' }}
+                  className="fin-in bold text-gold-deep"
                   placeholder="0"
                   value={product.vente ?? ''}
                   onChange={(e) => onUpdate(product.id, 'vente', e.target.value)}
                 />
               </div>
-              <div>
-                <div style={{ fontSize: '10px', color: '#6B6353', fontFamily: 'monospace' }}>Marge Brute (%)</div>
-                <div style={{ fontSize: '15px', fontWeight: 700, ...getMarginColorStyle(marginPct, true), fontFamily: 'monospace' }}>
+
+              <div className="fin-card">
+                <div className="fin-lbl">Marge Brute (%)</div>
+                <div className="fin-val bold" style={getMarginColorStyle(marginPct, true)}>
                   {formatFCFA(margin)} ({Number(product.vente) > 0 ? marginPct.toFixed(1) + '%' : '—'})
                 </div>
               </div>
@@ -401,42 +291,21 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </div>
 
           {/* 9 Critères Validation (Rust) */}
-          <div style={{ background: '#F0DBCB', border: '1px solid rgba(139,46,26,0.2)', borderRadius: '8px', padding: '10px 12px' }}>
-            <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: '#8B2E1A', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'monospace' }}>
+          <div className="frame-section-box rust-box">
+            <div className="frame-section-title text-rust">
               <Layers className="w-3.5 h-3.5" /> Détail des 9 Critères de Validation
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+            <div className="criteria-mini-grid">
               {criteriaList.map((c) => (
-                <div
-                  key={c.key}
-                  style={{
-                    background: '#fff',
-                    padding: '3px 6px',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontSize: '10.5px',
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  <span style={{ color: '#6B6353', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {c.label}
-                  </span>
+                <div key={c.key} className="criteria-chip">
+                  <span className="criteria-chip-lbl">{c.label}</span>
                   <input
                     type="number"
                     min="0"
                     max="5"
                     step="0.1"
-                    style={{
-                      width: '24px',
-                      border: 'none',
-                      textAlign: 'right',
-                      fontFamily: 'inherit',
-                      fontWeight: 700,
-                      borderRadius: '2px',
-                      ...getScoreColorStyle(c.val),
-                    }}
+                    className="criteria-chip-in"
+                    style={getScoreColorStyle(c.val)}
                     value={c.val ?? ''}
                     onChange={(e) => onUpdate(product.id, c.key as any, e.target.value)}
                   />
@@ -446,18 +315,18 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </div>
 
           {/* COD & Ventes / Jour (Sage) */}
-          <div style={{ background: '#DCE6D3', border: '1px solid rgba(75,107,69,0.25)', borderRadius: '8px', padding: '10px 12px' }}>
-            <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: '#4B6B45', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'monospace' }}>
+          <div className="frame-section-box sage-box">
+            <div className="frame-section-title text-sage">
               <Truck className="w-3.5 h-3.5" /> Objectifs Ventes & Réalité COD (Taux 80%)
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'monospace' }}>
+            <div className="cod-mini-row">
               <div>
-                <span style={{ color: '#6B6353' }}>Ventes / jour : </span>
-                <strong style={{ color: '#7A5A1E' }}>{breakEven.dailySalesForStock} v/jour</strong>
+                <span className="cod-lbl">Objectif quotidien :</span>
+                <strong className="cod-val text-gold-deep">{breakEven.dailySalesForStock} v/jour</strong>
               </div>
               <div>
-                <span style={{ color: '#6B6353' }}>Seuil rentabilité : </span>
-                <strong style={{ color: '#4B6B45' }}>{breakEven.breakEvenUnits} unités ({breakEven.sellThroughPctNeeded}%)</strong>
+                <span className="cod-lbl">Seuil de rentabilité :</span>
+                <strong className="cod-val text-sage">{breakEven.breakEvenUnits} unités ({breakEven.sellThroughPctNeeded}%)</strong>
               </div>
             </div>
           </div>
@@ -465,32 +334,11 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
       </div>
 
       {/* Footer Actions Bar */}
-      <div
-        style={{
-          borderTop: '1px solid #DCD3B8',
-          paddingTop: '10px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <div style={{ display: 'flex', gap: '6px' }}>
+      <div className="card-frame-footer">
+        <div className="frame-actions-left">
           <button
             type="button"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '11.5px',
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: '#B8862F',
-              border: '1px solid #B8862F',
-              color: '#241C0C',
-            }}
+            className="frame-btn primary"
             title="Générer la Fiche Produit Imprimable (PDF One-Pager)"
             onClick={() => onOpenOnePager(product, index)}
           >
@@ -500,20 +348,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
 
           <button
             type="button"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '11.5px',
-              fontFamily: 'monospace',
-              fontWeight: 600,
-              cursor: 'pointer',
-              background: 'transparent',
-              border: '1px solid #DCD3B8',
-              color: '#1E1B14',
-            }}
+            className="frame-btn secondary"
             title="Calculer le Seuil de Rentabilité (Break-Even)"
             onClick={() => onOpenBreakEven(product)}
           >
@@ -522,7 +357,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div className="frame-actions-right">
           <button
             type="button"
             className="rowdel"
