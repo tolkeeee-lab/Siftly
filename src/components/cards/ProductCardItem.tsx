@@ -76,7 +76,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
     { key: 'innovant', label: 'Innovant', val: product.innovant },
     { key: 'nonsaison', label: 'Saison', val: product.nonsaison },
     { key: 'habitudes', label: 'Habitudes', val: product.habitudes },
-    { key: 'poidsfacteur', label: 'Facteur Poids', val: product.poidsfacteur },
+    { key: 'poidsfacteur', label: 'Poids', val: product.poidsfacteur },
   ];
 
   const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -101,9 +101,9 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
             <span className="card-frame-sub-label">Fiche d'Analyse Produit</span>
           </div>
 
-          <input
-            className="card-frame-title-input"
-            type="text"
+          <textarea
+            className="card-frame-title-textarea"
+            rows={2}
             placeholder="Nom du produit..."
             value={product.produit}
             onChange={(e) => onUpdate(product.id, 'produit', e.target.value)}
@@ -186,16 +186,16 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
             )}
           </div>
 
-          {/* Target & Angle */}
+          {/* Target & Angle with Wrapping Textareas */}
           <div className="card-frame-mkt-box">
             <div className="mkt-item">
               <div className="mkt-lbl">
                 <Target className="w-3 h-3 text-gold-deep" /> Cible Marketing :
               </div>
-              <input
-                className="mkt-input"
-                type="text"
-                placeholder="Cible visée..."
+              <textarea
+                className="mkt-textarea"
+                rows={2}
+                placeholder="Cible visée (ex: Parents, Jeunes cadres...)"
                 value={product.cible || ''}
                 onChange={(e) => onUpdate(product.id, 'cible', e.target.value)}
               />
@@ -205,10 +205,10 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               <div className="mkt-lbl">
                 <Award className="w-3 h-3 text-gold-deep" /> Angle d'Attaque :
               </div>
-              <input
-                className="mkt-input"
-                type="text"
-                placeholder="Angle de vente..."
+              <textarea
+                className="mkt-textarea"
+                rows={2}
+                placeholder="Angle de vente / promesse..."
                 value={product.angle || ''}
                 onChange={(e) => onUpdate(product.id, 'angle', e.target.value)}
               />
@@ -218,61 +218,64 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           {/* Editable Links Section */}
           <div className="card-frame-links-box">
             <div className="link-input-row">
-              <LinkIcon className="w-3 h-3 text-gold-deep shrink-0" />
+              <LinkIcon className="w-3.5 h-3.5 text-gold-deep shrink-0" />
               <input
                 className="link-input-field"
                 type="text"
-                placeholder="URL Creative Ad..."
+                placeholder="Lien Creative Ad..."
                 value={product.creative || ''}
+                title={product.creative || ''}
                 onChange={(e) => onUpdate(product.id, 'creative', e.target.value)}
               />
               {product.creative && (
-                <a href={product.creative} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir">
-                  <ExternalLink className="w-2.5 h-2.5" />
+                <a href={product.creative} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir le lien">
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               )}
             </div>
 
             <div className="link-input-row">
-              <ShoppingBag className="w-3 h-3 text-gold-deep shrink-0" />
+              <ShoppingBag className="w-3.5 h-3.5 text-gold-deep shrink-0" />
               <input
                 className="link-input-field"
                 type="text"
-                placeholder="URL Fournisseur (1688 / Alibaba)..."
+                placeholder="Lien Fournisseur (1688 / Alibaba)..."
                 value={product.alibaba || ''}
+                title={product.alibaba || ''}
                 onChange={(e) => onUpdate(product.id, 'alibaba', e.target.value)}
               />
               {product.alibaba && (
-                <a href={product.alibaba} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir">
-                  <ExternalLink className="w-2.5 h-2.5" />
+                <a href={product.alibaba} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir le lien">
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               )}
             </div>
 
             <div className="link-input-row">
-              <Globe className="w-3 h-3 text-gold-deep shrink-0" />
+              <Globe className="w-3.5 h-3.5 text-gold-deep shrink-0" />
               <input
                 className="link-input-field"
                 type="text"
-                placeholder="URL Site Concurrent..."
+                placeholder="Lien Site Concurrent..."
                 value={product.siteweb || ''}
+                title={product.siteweb || ''}
                 onChange={(e) => onUpdate(product.id, 'siteweb', e.target.value)}
               />
               {product.siteweb && (
-                <a href={product.siteweb} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir">
-                  <ExternalLink className="w-2.5 h-2.5" />
+                <a href={product.siteweb} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Ouvrir le lien">
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               )}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Financial Breakdown (All Editable), 9 Criteria, COD */}
+        {/* Right Column: Financial Breakdown, 9 Criteria, COD */}
         <div className="card-frame-right">
           {/* Bilan Financier Box (Gold) */}
           <div className="frame-section-box gold-box">
             <div className="frame-section-title text-gold-deep">
-              <DollarSign className="w-3.5 h-3.5" /> Bilan Financier (Tous montants en FCFA)
+              <DollarSign className="w-3.5 h-3.5" /> Bilan Financier (Montants en FCFA)
             </div>
 
             <div className="financial-mini-grid">
@@ -312,7 +315,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
               </div>
 
               <div className="fin-card">
-                <div className="fin-lbl">Frais Fret (Calculé)</div>
+                <div className="fin-lbl">Frais Fret (FCFA)</div>
                 <div className="fin-val">{formatFCFA(frais)}</div>
               </div>
 
@@ -377,12 +380,12 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           {/* 9 Critères Validation (Rust) */}
           <div className="frame-section-box rust-box">
             <div className="frame-section-title text-rust">
-              <Layers className="w-3.5 h-3.5" /> Détail des 9 Critères de Validation (Notes / 5)
+              <Layers className="w-3.5 h-3.5" /> 9 Critères de Validation (Scores / 5)
             </div>
             <div className="criteria-mini-grid">
               {criteriaList.map((c) => (
                 <div key={c.key} className="criteria-chip">
-                  <span className="criteria-chip-lbl">{c.label}</span>
+                  <span className="criteria-chip-lbl" title={c.label}>{c.label}</span>
                   <input
                     type="number"
                     min="0"
@@ -409,7 +412,7 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
                 <strong className="cod-val text-gold-deep">{breakEven.dailySalesForStock} v/jour</strong>
               </div>
               <div>
-                <span className="cod-lbl">Seuil de rentabilité :</span>
+                <span className="cod-lbl">Seuil rentabilité :</span>
                 <strong className="cod-val text-sage">{breakEven.breakEvenUnits} unités ({breakEven.sellThroughPctNeeded}%)</strong>
               </div>
             </div>

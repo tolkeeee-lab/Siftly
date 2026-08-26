@@ -324,9 +324,9 @@
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.card-frame-title-input {
-  margin: 0;
-  font-size: 20px;
+.card-frame-title-textarea {
+  margin: 2px 0 0;
+  font-size: 19px;
   font-family: 'Georgia', serif;
   font-weight: 600;
   color: var(--ink);
@@ -335,11 +335,14 @@
   background: transparent;
   padding: 2px 0;
   outline: none;
-  white-space: normal;
-  line-height: 1.25;
+  line-height: 1.3;
+  resize: vertical;
+  min-height: 48px;
+  max-height: 90px;
+  box-sizing: border-box;
 }
 
-.card-frame-title-input:focus {
+.card-frame-title-textarea:focus {
   background: var(--gold-wash);
   border-radius: 4px;
 }
@@ -489,7 +492,8 @@
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.mkt-input {
+.mkt-input,
+.mkt-textarea {
   border: none;
   background: transparent;
   font-size: 12px;
@@ -497,6 +501,13 @@
   width: 100%;
   padding: 0;
   outline: none;
+  font-family: inherit;
+  line-height: 1.35;
+  resize: vertical;
+}
+
+.mkt-textarea {
+  min-height: 34px;
 }
 
 .meta-inline-edit {
