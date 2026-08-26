@@ -2463,25 +2463,81 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
   gap: 6px;
 }
 
-.btn-action-invite-mail {
+.btn-action-copy-magic {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #2563EB;
-  color: #ffffff;
+  background: #F1F5F9;
+  color: #0F172A;
+  border: 1px solid #CBD5E1;
   padding: 5px 10px;
   border-radius: 6px;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
   font-weight: 700;
-  text-decoration: none;
+  cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 }
 
-.btn-action-invite-mail:hover {
-  background: #1D4ED8;
-  transform: translateY(-1px);
+.btn-action-copy-magic:hover {
+  background: var(--gold-wash);
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+.last-created-invite-card {
+  background: #F0FDF4;
+  border: 1.5px solid #86EFAC;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.12);
+  animation: fadeInDown 0.25s ease-out;
+}
+
+.invite-link-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .invite-link-row {
+    flex-direction: column;
+  }
+}
+
+.invite-link-input {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #86EFAC;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: #14532D;
+  outline: none;
+}
+
+.btn-copy-magic-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #16A34A;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-magic-link:hover {
+  background: #15803D;
 }
 
 .btn-action-invite-wa {

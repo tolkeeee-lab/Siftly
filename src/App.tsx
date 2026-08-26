@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useProducts } from './hooks/useProducts';
 import { useProductRanking } from './hooks/useProductRanking';
 import { useTableFeatures } from './hooks/useTableFeatures';
@@ -75,6 +75,28 @@ export function App() {
   const [isGlobalCurrencyModalOpen, setIsGlobalCurrencyModalOpen] = useState(false);
 
   const stats = useMemo(() => calculateAppStats(products), [products]);
+
+  // Magic Join Link Handler (Zero-Friction Team Onboarding)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinMode = urlParams.get('join');
+    const memberName = urlParams.get('name');
+    const memberRole = urlParams.get('role');
+    const memberEmail = urlParams.get('email');
+
+    if (joinMode === 'team' && memberName) {
+      const activeUser = {
+        name: memberName,
+        role: memberRole || 'assistant',
+        email: memberEmail || `${memberName.toLowerCase().replace(/\s+/g, '')}@siftly.app`,
+        joinedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('siftly_active_user', JSON.stringify(activeUser));
+      alert(`🎉 Bienvenue ${memberName} !\n\nVous êtes connecté(e) avec succès à l'espace de travail Siftly (${memberRole || 'Assistant'}).`);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Category counts
   const categoryCounts = useMemo(() => {

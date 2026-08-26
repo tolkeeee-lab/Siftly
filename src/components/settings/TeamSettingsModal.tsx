@@ -20,8 +20,8 @@ import {
   Copy,
   ExternalLink,
   KeyRound,
-  Send,
-  Loader2,
+  Link,
+  CheckCircle2,
 } from 'lucide-react';
 import { UserRole, ROLE_PERMISSIONS } from '../../types/teamRoles';
 import { useTeamMembers } from '../../hooks/useTeamMembers';
@@ -53,66 +53,32 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const [newLivreurZone, setNewLivreurZone] = useState('Cotonou & Calavi');
   const [newLivreurFee, setNewLivreurFee] = useState(1500);
 
-  // Feedback toast
+  // Feedback toast & Last Created Member Link Modal
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [sendingEmailTarget, setSendingEmailTarget] = useState<string | null>(null);
+  const [lastCreatedInvite, setLastCreatedInvite] = useState<{
+    name: string;
+    role: string;
+    link: string;
+    phone: string;
+  } | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 4000);
   };
 
-  const sendDirectEmailInvite = async (name: string, email: string, role: string) => {
-    setSendingEmailTarget(email);
-    try {
-      const res = await fetch('/api/invite-member', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, role }),
-      });
-
-      if (res.ok) {
-        const contentType = res.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await res.json();
-          if (data.success) {
-            showToast(`✉️ ${data.message || `Email d'invitation officiel envoyé à ${email} !`}`);
-            return;
-          }
-        }
-      }
-
-      // Client-side Supabase magic link fallback if server route is unavailable
-      const client = getSupabaseClient();
-      if (client) {
-        const { error } = await client.auth.signInWithOtp({
-          email: email.trim(),
-          options: {
-            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-            data: { name, role },
-          },
-        });
-        if (!error) {
-          showToast(`✉️ Email d'invitation avec lien de connexion envoyé à ${email} !`);
-          return;
-        }
-      }
-
-      showToast(`🎉 Collaborateur "${name}" enregistré avec succès dans l'équipe !`);
-    } catch (err: any) {
-      showToast(`🎉 Collaborateur "${name}" enregistré avec succès !`);
-    } finally {
-      setSendingEmailTarget(null);
-    }
-  };
-
   if (!isOpen) return null;
 
-  const handleAddMemberSubmit = async (e: React.FormEvent) => {
+  const generateInviteLink = (name: string, role: string, email: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://siftly-iota.vercel.app';
+    return `${origin}/?join=team&name=${encodeURIComponent(name)}&role=${encodeURIComponent(role)}&email=${encodeURIComponent(email)}`;
+  };
+
+  const handleAddMemberSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMemberName.trim() || !newMemberEmail.trim()) return;
+    if (!newMemberName.trim()) return;
     const name = newMemberName.trim();
-    const email = newMemberEmail.trim();
+    const email = newMemberEmail.trim() || `${name.toLowerCase().replace(/\s+/g, '')}@siftly.app`;
     const phone = newMemberPhone.trim() || '+229 00 00 00 00';
     const role = newMemberRole;
 
@@ -123,12 +89,18 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       role,
     });
 
+    const magicLink = generateInviteLink(name, role, email);
+    setLastCreatedInvite({
+      name,
+      role: ROLE_PERMISSIONS[role]?.label || role,
+      link: magicLink,
+      phone,
+    });
+
+    showToast(`🎉 Collaborateur "${name}" ajouté avec succès !`);
     setNewMemberName('');
     setNewMemberEmail('');
     setNewMemberPhone('');
-
-    // Trigger automated Supabase email send in background
-    await sendDirectEmailInvite(name, email, role);
   };
 
   const handleAddLivreurSubmit = (e: React.FormEvent) => {
@@ -220,15 +192,69 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
               <div className="settings-guide-card">
                 <Shield className="w-4 h-4 text-gold flex-shrink-0" />
                 <p>
-                  <strong>Gestion d'Équipe :</strong> Vos collaborateurs enregistrés apparaissent dans votre annuaire d'équipe ci-dessous. Attribuez-leur des rôles ciblés (Média Buyer, Magasinier, Logistique, Assistant) pour déléguer sereinement votre activité.
+                  <strong>Gestion d'Équipe Infaillible :</strong> Ajoutez vos collaborateurs et donnez-leur accès instantanément en 1 clic grâce à leur <strong>Lien d'Accès Magique</strong> sans mot de passe !
                 </p>
               </div>
+
+              {/* Just Created Member Success Card with Direct Link */}
+              {lastCreatedInvite && (
+                <div className="last-created-invite-card">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <strong className="text-sm text-ink font-bold">
+                        Lien d'accès prêt pour : {lastCreatedInvite.name} ({lastCreatedInvite.role})
+                      </strong>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs text-ink-soft hover:text-ink"
+                      onClick={() => setLastCreatedInvite(null)}
+                    >
+                      Fermer ✕
+                    </button>
+                  </div>
+                  <p className="text-xs text-ink-muted my-1">
+                    Transmettez ce lien unique à votre collaborateur pour qu'il se connecte directement à votre espace de travail :
+                  </p>
+                  <div className="invite-link-row">
+                    <input
+                      type="text"
+                      readOnly
+                      value={lastCreatedInvite.link}
+                      className="invite-link-input"
+                    />
+                    <button
+                      type="button"
+                      className="btn-copy-magic-link"
+                      onClick={() => {
+                        navigator.clipboard.writeText(lastCreatedInvite.link);
+                        showToast(`📋 Lien d'accès copié pour ${lastCreatedInvite.name} !`);
+                      }}
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copier le Lien</span>
+                    </button>
+                    {lastCreatedInvite.phone && (
+                      <a
+                        href={`https://wa.me/${lastCreatedInvite.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ${lastCreatedInvite.name},\n\nVoici votre lien d'accès direct à notre espace de travail Siftly (${lastCreatedInvite.role}) :\n👉 ${lastCreatedInvite.link}\n\nCliquez dessus pour commencer à travailler !`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-action-invite-wa"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>Envoyer WhatsApp</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Form Add */}
               <form onSubmit={handleAddMemberSubmit} className="premium-form-card">
                 <div className="form-card-title">
                   <UserPlus className="w-4 h-4 text-gold-deep" />
-                  <span>Inviter un Nouveau Collaborateur ou Assistant</span>
+                  <span>Ajouter un Nouveau Collaborateur ou Assistant</span>
                 </div>
 
                 <div className="premium-input-grid">
@@ -245,10 +271,9 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Email Collaborateur *</label>
+                    <label>Email Collaborateur</label>
                     <input
                       type="email"
-                      required
                       placeholder="marc@entreprise.com"
                       className="premium-input"
                       value={newMemberEmail}
@@ -257,7 +282,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Numéro WhatsApp</label>
+                    <label>Numéro WhatsApp (Pour envoi direct)</label>
                     <input
                       type="tel"
                       placeholder="+229 97 00 00 00"
@@ -282,22 +307,9 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={!!sendingEmailTarget}
-                  className="btn-submit-premium-gold"
-                >
-                  {sendingEmailTarget ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Envoi de l'invitation par email...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>Enregistrer & Envoyer l'Invitation par Email</span>
-                    </>
-                  )}
+                <button type="submit" className="btn-submit-premium-gold">
+                  <UserPlus className="w-4 h-4" />
+                  <span>Enregistrer & Générer le Lien d'Accès</span>
                 </button>
               </form>
 
@@ -309,13 +321,9 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     const perm = ROLE_PERMISSIONS[member.role];
                     const isOwner = member.role === 'admin';
                     const cleanPhone = (member.phone || '').replace(/[^0-9]/g, '');
-                    const inviteMsg = `Bonjour ${member.name},\n\nVous avez été invité(e) sur notre espace de travail Siftly en tant que *${perm?.label || member.role}*.\n\n🔗 Accédez à l'application : https://siftly-iota.vercel.app\n📧 Connectez-vous avec votre email : ${member.email}\n\nBienvenue dans l'équipe !`;
+                    const magicLink = generateInviteLink(member.name, member.role, member.email);
+                    const inviteMsg = `Bonjour ${member.name},\n\nVoici votre lien d'accès direct à notre espace de travail Siftly (${perm?.label || member.role}) :\n👉 ${magicLink}\n\nCliquez sur ce lien pour vous connecter immédiatement !`;
                     const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(inviteMsg)}` : null;
-                    const mailSubject = encodeURIComponent(`Invitation à rejoindre l'équipe Siftly (${perm?.label || member.role})`);
-                    const mailBody = encodeURIComponent(
-                      `Bonjour ${member.name},\n\nVous avez été invité(e) à rejoindre notre espace de travail sur Siftly en tant que ${perm?.label || member.role}.\n\n🔗 Accédez à l'application ici : https://siftly-iota.vercel.app\n📧 Connectez-vous simplement avec votre adresse email : ${member.email}\n\nBienvenue dans l'équipe !`
-                    );
-                    const mailtoLink = `mailto:${member.email}?subject=${mailSubject}&body=${mailBody}`;
 
                     return (
                       <div key={member.id} className="premium-member-row">
@@ -338,6 +346,19 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                         </div>
 
                         <div className="member-actions-group">
+                          <button
+                            type="button"
+                            className="btn-action-copy-magic"
+                            title="Copier le lien d'accès magique"
+                            onClick={() => {
+                              navigator.clipboard.writeText(magicLink);
+                              showToast(`📋 Lien d'accès magique copié pour ${member.name} !`);
+                            }}
+                          >
+                            <Link className="w-3.5 h-3.5" />
+                            <span>Copier Lien</span>
+                          </button>
+
                           {waLink && (
                             <a
                               href={waLink}
@@ -350,18 +371,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                               <span>WhatsApp</span>
                             </a>
                           )}
-
-                          <button
-                            type="button"
-                            className="btn-action-copy-invite"
-                            title="Copier le message d'invitation avec le lien d'accès"
-                            onClick={() => {
-                              navigator.clipboard.writeText(inviteMsg);
-                              showToast(`📋 Message d'accès copié pour ${member.name} !`);
-                            }}
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
 
                           {!isOwner && (
                             <button
@@ -387,25 +396,25 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
               <div className="member-login-how-to">
                 <div className="how-to-header">
                   <KeyRound className="w-4 h-4 text-gold-deep" />
-                  <span className="how-to-title">🔑 Comment votre collaborateur se connecte-t-il ? (3 étapes simples)</span>
+                  <span className="how-to-title">🔑 Comment votre collaborateur se connecte-t-il ? (Simple & Garanti à 100%)</span>
                 </div>
                 <div className="how-to-steps-grid">
                   <div className="how-to-step-card">
                     <span className="step-num">1</span>
                     <p className="step-txt">
-                      <strong>Transmettez-lui l'accès</strong> en cliquant sur le bouton vert <em>« Inviter WhatsApp »</em> ou en lui envoyant le lien <code>https://siftly-iota.vercel.app</code>.
+                      <strong>Copiez son lien magique</strong> en cliquant sur <em>« Copier Lien »</em> ou <em>« WhatsApp »</em>.
                     </p>
                   </div>
                   <div className="how-to-step-card">
                     <span className="step-num">2</span>
                     <p className="step-txt">
-                      <strong>Il ouvre l'application</strong> sur son téléphone ou son ordinateur et clique sur le bouton <em>« Connexion »</em>.
+                      <strong>Il clique sur le lien</strong> depuis son téléphone ou son ordinateur.
                     </p>
                   </div>
                   <div className="how-to-step-card">
                     <span className="step-num">3</span>
                     <p className="step-txt">
-                      <strong>Il s'authentifie</strong> avec son adresse email enregistrée. Le système le reconnaît automatiquement et lui ouvre l'espace de travail !
+                      <strong>Accès Immédiat :</strong> L'application le reconnaît automatiquement et lui ouvre l'espace de travail avec son rôle !
                     </p>
                   </div>
                 </div>
@@ -555,19 +564,19 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                 <div className="account-details-box">
                   <div className="account-status-badge">
                     <Check className="w-3.5 h-3.5 text-emerald-400 inline mr-1" />
-                    <span>SESSION PROPRIÉTAIRE ACTIVE</span>
+                    <span>SESSION ACTIVE</span>
                   </div>
                   <h3 className="account-email-text">{user?.email || 'admin@siftly.app'}</h3>
                   <p className="account-sub-text">
-                    Connecté via Supabase Auth & Google Cloud · Base de données synchronisée en temps réel
+                    Connecté en tant que Propriétaire (Fondateur). Toutes vos données sont synchronisées en temps réel.
                   </p>
                 </div>
               </div>
 
-              <div className="account-action-footer">
+              <div className="account-actions-box">
                 <button
                   type="button"
-                  className="btn-danger-logout"
+                  className="btn-logout-premium"
                   onClick={() => {
                     signOut();
                     onClose();
@@ -579,13 +588,6 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
               </div>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="settings-modal-bottom">
-          <button type="button" className="btn-close-modal-footer" onClick={onClose}>
-            Fermer
-          </button>
         </div>
       </div>
     </div>
