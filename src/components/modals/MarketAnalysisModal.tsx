@@ -28,10 +28,14 @@ import {
   ThumbsUp,
   ThumbsDown,
   Search,
+  Loader2,
+  Wand2,
+  BrainCircuit,
 } from 'lucide-react';
 import { ProductData, MarketAnalysisData } from '../../types/product';
 import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
 import { formatFCFA } from '../../utils/formatters';
+import { calculateMargin } from '../../utils/calculations';
 
 interface MarketAnalysisModalProps {
   isOpen: boolean;
@@ -50,6 +54,8 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
   const [analysis, setAnalysis] = useState<MarketAnalysisData>(() =>
     product ? getProductMarketAnalysis(product) : ({} as MarketAnalysisData)
   );
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (product) {
@@ -58,6 +64,48 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
   }, [product]);
 
   if (!isOpen || !product) return null;
+
+  const handleGenerateAI = async () => {
+    if (!product) return;
+    setIsGeneratingAI(true);
+    setAiMessage(null);
+    try {
+      const res = await fetch('/api/analyze-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          produit: product.produit,
+          category: product.category,
+          probleme: product.cible || product.angle || '',
+          vente: product.vente,
+          achat: product.sourcing,
+          marge: calculateMargin(product),
+          poids: product.poids,
+          concurrent: product.concurrent,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.analysis) {
+        const aiAnalysis: MarketAnalysisData = {
+          ...analysis,
+          ...data.analysis,
+        };
+        setAnalysis(aiAnalysis);
+        if (onSaveAnalysis) {
+          onSaveAnalysis(product.id, aiAnalysis);
+        }
+        setAiMessage(`✨ Analyse IA sur-mesure générée avec succès pour "${product.produit}" !`);
+        setTimeout(() => setAiMessage(null), 5000);
+      } else {
+        setAiMessage(`⚠️ ${data.message || 'Impossible de joindre le serveur IA'}`);
+      }
+    } catch (err: any) {
+      setAiMessage(`⚠️ Erreur génération IA : ${err?.message || 'Erreur réseau'}`);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const handleUpdate = (field: keyof MarketAnalysisData, value: any) => {
     setAnalysis((prev) => ({ ...prev, [field]: value }));
@@ -149,10 +197,39 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
               </p>
             </div>
           </div>
-          <button type="button" className="modal-close-btn" onClick={onClose}>
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="btn-generate-ai-market"
+              disabled={isGeneratingAI}
+              onClick={handleGenerateAI}
+              title="Générer une analyse 100% sur-mesure par IA (NVIDIA LLM)"
+            >
+              {isGeneratingAI ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Analyse IA en cours...</span>
+                </>
+              ) : (
+                <>
+                  <Wand2 className="w-3.5 h-3.5 text-gold-deep" />
+                  <span>✨ Générer avec l'IA en Direct</span>
+                </>
+              )}
+            </button>
+            <button type="button" className="modal-close-btn" onClick={onClose}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+
+        {/* AI Toast Banner */}
+        {aiMessage && (
+          <div className="market-ai-toast-banner">
+            <BrainCircuit className="w-4 h-4 text-gold flex-shrink-0" />
+            <span>{aiMessage}</span>
+          </div>
+        )}
 
         {/* Sub-Navigation Tabs */}
         <div className="market-modal-tabs-nav">
