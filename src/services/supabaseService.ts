@@ -104,9 +104,14 @@ export async function fetchProductsFromSupabase(targetUserId?: string): Promise<
   const client = getSupabaseClient();
   if (!client) return null;
   
+  const activeId = targetUserId || (await getActiveUserId());
+  
   let query = client.from('products').select('*');
-  if (targetUserId) {
-    query = query.eq('user_id', targetUserId);
+  if (activeId) {
+    query = query.eq('user_id', activeId);
+  } else {
+    // If not authenticated, return null so we don't leak other accounts' products
+    return null;
   }
   
   const { data, error } = await query.order('seq', { ascending: true });
