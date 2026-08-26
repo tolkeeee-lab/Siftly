@@ -19,9 +19,12 @@ import {
   Copy,
   Check,
   Lightbulb,
+  Cpu,
+  Layers,
+  ShoppingBag,
 } from 'lucide-react';
 import { ProductData, PRODUCT_CATEGORIES } from '../../types/product';
-import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
+import { optimizeSourcingQueries } from '../../utils/sourcingKeywords';
 
 interface ImageSourcingModalProps {
   isOpen: boolean;
@@ -38,13 +41,14 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
 }) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [imageUrlInput, setImageUrlInput] = useState<string>('');
-  const [productName, setProductName] = useState<string>('');
-  const [category, setCategory] = useState<string>('Maison & Confort');
-  const [sourcingPrice, setSourcingPrice] = useState<number | ''>(3500);
-  const [sellingPrice, setSellingPrice] = useState<number | ''>(15000);
-  const [weight, setWeight] = useState<number | ''>(0.4);
+  const [productName, setProductName] = useState<string>('Baseus EnerGeek GR11');
+  const [category, setCategory] = useState<string>('High-Tech & Gadgets');
+  const [sourcingPrice, setSourcingPrice] = useState<number | ''>(22000);
+  const [sellingPrice, setSellingPrice] = useState<number | ''>(45000);
+  const [weight, setWeight] = useState<number | ''>(0.6);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [searchTarget, setSearchTarget] = useState<'exact' | 'oem' | 'zh'>('exact');
 
   if (!isOpen) return null;
 
@@ -72,7 +76,6 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
       const base64 = reader.result as string;
       setImageSrc(base64);
 
-      // Only set filename if it's meaningful, NOT generic like IMG_0023.jpg
       const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').trim();
       if (!isGenericFilename(cleanName) && cleanName.length > 3) {
         setProductName(cleanName);
@@ -95,12 +98,10 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
     }
   };
 
-  const handleCopySearchText = () => {
-    if (productName.trim()) {
-      navigator.clipboard.writeText(productName.trim());
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+  const handleCopySearchText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleCreateAndAnalyze = () => {
@@ -108,47 +109,32 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
     const newProduct = onAddProduct({
       produit: finalName,
       imgSrc: imageSrc || undefined,
-      category: category || 'Maison & Confort',
-      sourcing: sourcingPrice || 3500,
-      vente: sellingPrice || 15000,
-      poids: weight || 0.4,
+      category: category || 'High-Tech & Gadgets',
+      sourcing: sourcingPrice || 22000,
+      vente: sellingPrice || 45000,
+      poids: weight || 0.6,
       concurrent: 2,
       douleur: 4,
-      waouh: 4,
-      innovant: 4,
+      waouh: 5,
+      innovant: 5,
       etendue: 4,
     });
 
     onClose();
-    // Open market analysis immediately for this newly created product
     setTimeout(() => {
       onOpenMarketAnalysis(newProduct);
     }, 100);
   };
 
-  const effectiveSearchText = productName.trim() || 'gadget e-commerce';
-  const querySearch = encodeURIComponent(effectiveSearchText);
+  // Compute optimized queries & clean URLs
+  const activeKeyword =
+    searchTarget === 'exact'
+      ? productName
+      : searchTarget === 'oem'
+      ? `${productName} OEM factory`
+      : `${productName} 1688`;
 
-  // 1. Google Lens: If it's a web URL use uploadbyurl, otherwise open Google Lens universal search
-  const googleLensUrl = imageSrc && imageSrc.startsWith('http')
-    ? `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(imageSrc)}`
-    : `https://lens.google.com/`;
-
-  // 2. Direct E-commerce search links
-  const googleImagesUrl = `https://www.google.com/search?tbm=isch&q=${querySearch}`;
-  const alibabaVisualUrl = `https://www.alibaba.com/trade/search?fsb=y&IndexArea=product_en&SearchText=${querySearch}`;
-  const aliexpressUrl = `https://www.aliexpress.com/wholesale?SearchText=${querySearch}`;
-  const tiktokUrl = `https://www.tiktok.com/search?q=${querySearch}`;
-  const amazonUrl = `https://www.amazon.com/s?k=${querySearch}`;
-
-  const sampleQuickSuggestions = [
-    'Mini Hachoir Sans Fil',
-    'Correcteur de Posture',
-    'Lampe Solaire LED',
-    'Diffuseur Flamme Arôme',
-    'Épilateur Cristal Magique',
-    'Support Téléphone Voiture',
-  ];
+  const queries = optimizeSourcingQueries(productName, imageSrc);
 
   return (
     <div className="paste-modal open" onClick={onClose}>
@@ -158,9 +144,9 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
           <div className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-gold" />
             <div>
-              <h2 className="image-sourcing-title">📸 Sourcing par Image & Reconnaissance Visuelle</h2>
+              <h2 className="image-sourcing-title">📸 Sourcing Précis & Anti-Pollution Publicitaire</h2>
               <p className="image-sourcing-subtitle">
-                Importez votre photo, nommez le type de produit, et lancez la recherche usine (Alibaba, Lens, AliExpress, TikTok).
+                Filtre automatique des mots-clés pour cibler l'usine exacte sur Alibaba / AliExpress sans pubs concurrentes (Ugreen/Anker).
               </p>
             </div>
           </div>
@@ -233,61 +219,94 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
               </div>
             </div>
 
+            {/* 3 Sourcing Keyword Targeting Modes */}
+            <div className="targeting-modes-box">
+              <span className="text-[11px] font-bold text-ink-soft uppercase font-mono">
+                🎯 Mode de Ciblage Usine :
+              </span>
+              <div className="flex gap-1.5 mt-1.5">
+                <button
+                  type="button"
+                  className={`target-mode-pill ${searchTarget === 'exact' ? 'active' : ''}`}
+                  onClick={() => setSearchTarget('exact')}
+                  title="Recherche sur le modèle exact sans mots parasites"
+                >
+                  🏷️ Modèle Exact
+                </button>
+                <button
+                  type="button"
+                  className={`target-mode-pill ${searchTarget === 'oem' ? 'active' : ''}`}
+                  onClick={() => setSearchTarget('oem')}
+                  title="Recherche des fabricants du moule générique sans la marque"
+                >
+                  🏭 Usines OEM Génériques
+                </button>
+                <button
+                  type="button"
+                  className={`target-mode-pill ${searchTarget === 'zh' ? 'active' : ''}`}
+                  onClick={() => setSearchTarget('zh')}
+                  title="Recherche en Chinois pour 1688 / Taobao"
+                >
+                  🇨🇳 1688 Chinois
+                </button>
+              </div>
+            </div>
+
             {/* 1-Click Reverse Image & Sourcing Search Buttons */}
             <div className="visual-search-shortcuts">
               <div className="flex items-center justify-between">
-                <span className="shortcuts-label">🔍 Moteurs de Sourcing pour : « {effectiveSearchText} »</span>
-                {productName && (
-                  <button
-                    type="button"
-                    className="text-xs text-gold-deep hover:underline flex items-center gap-1"
-                    onClick={handleCopySearchText}
-                  >
-                    {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                    <span>{copied ? 'Copié !' : 'Copier nom'}</span>
-                  </button>
-                )}
+                <span className="shortcuts-label">
+                  🔍 Moteurs filtrés pour : « {searchTarget === 'zh' ? queries.chineseQuery : searchTarget === 'oem' ? queries.factoryOemQuery : queries.exactModelQuery} »
+                </span>
+                <button
+                  type="button"
+                  className="text-xs text-gold-deep hover:underline flex items-center gap-1"
+                  onClick={() => handleCopySearchText(searchTarget === 'zh' ? queries.chineseQuery : searchTarget === 'oem' ? queries.factoryOemQuery : queries.exactModelQuery)}
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                  <span>{copied ? 'Copié !' : 'Copier'}</span>
+                </button>
               </div>
 
               <div className="shortcuts-grid">
                 <a
-                  href={googleLensUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="v-search-btn lens-btn"
-                  title="Rechercher avec Google Lens (Glissez-y votre image)"
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>Google Lens (Image)</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
-                <a
-                  href={alibabaVisualUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="v-search-btn ali-btn"
-                  title="Rechercher les fabricants sur Alibaba / 1688"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Alibaba (Usines Chine)</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
-                <a
-                  href={aliexpressUrl}
+                  href={queries.aliexpressUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="v-search-btn express-btn"
-                  title="Rechercher sur AliExpress"
+                  title="Rechercher sur AliExpress avec ciblage exact du modèle"
                 >
                   <Search className="w-3.5 h-3.5" />
-                  <span>AliExpress (Prix & Avis)</span>
+                  <span>AliExpress (Modèle Direct)</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
 
                 <a
-                  href={tiktokUrl}
+                  href={queries.alibabaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="v-search-btn ali-btn"
+                  title="Rechercher les fabricants sur Alibaba"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Alibaba (Fournisseurs Gros)</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+
+                <a
+                  href={queries.alibaba1688Url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="v-search-btn zh-btn"
+                  title="Rechercher directement sur 1688 Chine"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>1688 Chine (Prix Usine)</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+
+                <a
+                  href={queries.tiktokUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="v-search-btn tt-btn"
@@ -295,6 +314,18 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
                 >
                   <Search className="w-3.5 h-3.5" />
                   <span>TikTok (Vidéos Virales)</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+
+                <a
+                  href={queries.googleLensUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="v-search-btn lens-btn col-span-2"
+                  title="Rechercher avec Google Lens (Glissez-y votre image)"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Google Lens (Recherche par Image Visuelle Universelle)</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
@@ -310,35 +341,15 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
               <div className="setup-field highlight-field">
                 <label className="text-gold-deep flex items-center gap-1 font-bold">
                   <Tag className="w-3.5 h-3.5" />
-                  <span>Nom / Mots-clés du Produit (Ce qui est recherché) :</span>
+                  <span>Nom / Mots-clés Précis du Produit :</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="👉 Tapez le nom ou type d'objet (ex: Mini Hachoir sans fil)"
+                  placeholder="Ex : Baseus EnerGeek GR11"
                   className="setup-input font-bold text-ink"
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                 />
-              </div>
-
-              {/* Quick suggestions pills */}
-              <div className="quick-suggestions-box">
-                <span className="text-[11px] text-ink-soft flex items-center gap-1 mb-1">
-                  <Lightbulb className="w-3 h-3 text-amber-500" />
-                  <span>Exemples de recherche rapide en 1 clic :</span>
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {sampleQuickSuggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      className="quick-sugg-pill"
-                      onClick={() => setProductName(suggestion)}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="setup-field">
@@ -379,7 +390,7 @@ export const ImageSourcingModal: React.FC<ImageSourcingModalProps> = ({
               </div>
 
               <div className="setup-field">
-                <label>Poids Estimé (kg) — Impact sur fret & moto</label>
+                <label>Poids Estimé (kg) — ⚠️ Sensible pour fret batterie</label>
                 <input
                   type="number"
                   step="0.1"

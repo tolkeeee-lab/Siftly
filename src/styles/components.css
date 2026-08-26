@@ -2236,9 +2236,39 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
   background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
 }
 
-.tt-btn {
-  background: linear-gradient(135deg, #000000 0%, #222222 100%);
-  color: #25F4EE;
+/* Targeting Modes */
+.targeting-modes-box {
+  background: #ffffff;
+  border: 1px solid #CBD5E1;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.target-mode-pill {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  color: #334155;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.target-mode-pill:hover {
+  background: #E2E8F0;
+}
+
+.target-mode-pill.active {
+  background: #0F172A;
+  color: #ffffff;
+  border-color: #0F172A;
+}
+
+.zh-btn {
+  background: linear-gradient(135deg, #E65100 0%, #D84315 100%);
 }
 
 /* Right Setup Column */
