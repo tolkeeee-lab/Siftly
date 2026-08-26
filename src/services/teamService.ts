@@ -96,6 +96,26 @@ export async function deleteTeamMemberFromDb(id: string): Promise<boolean> {
  */
 export async function checkCollaboratorMembership(userEmail?: string): Promise<MembershipInfo> {
   if (!userEmail) return { isCollaborator: false };
+
+  try {
+    const cleanEmail = userEmail.toLowerCase().trim();
+    const res = await fetch(`/api/workspace?email=${encodeURIComponent(cleanEmail)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.isCollaborator) {
+        return {
+          isCollaborator: true,
+          ownerId: data.ownerId,
+          role: data.role as UserRole,
+          memberName: data.memberName,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('API check collaborator membership error:', err);
+  }
+
+  // Fallback to client Supabase if offline / direct
   const client = getSupabaseClient();
   if (!client) return { isCollaborator: false };
 
@@ -120,7 +140,7 @@ export async function checkCollaboratorMembership(userEmail?: string): Promise<M
       memberName: match.name || 'Collaborateur',
     };
   } catch (err) {
-    console.warn('Check collaborator membership error:', err);
+    console.warn('Check collaborator membership fallback error:', err);
     return { isCollaborator: false };
   }
 }

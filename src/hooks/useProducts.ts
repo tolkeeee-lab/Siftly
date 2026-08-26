@@ -73,7 +73,26 @@ export function useProducts() {
         }
       }
 
-      const dbProducts = await fetchProductsFromSupabase(targetOwnerId);
+      let dbProducts: ProductData[] | null = null;
+      if (targetOwnerId) {
+        try {
+          const res = await fetch(`/api/workspace/products?ownerId=${encodeURIComponent(targetOwnerId)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.products) && data.products.length > 0) {
+              const { mapDbToProduct } = await import('../services/supabaseService');
+              dbProducts = data.products.map(mapDbToProduct);
+            }
+          }
+        } catch (e) {
+          console.warn('API workspace products fetch error:', e);
+        }
+      }
+
+      if (!dbProducts) {
+        dbProducts = await fetchProductsFromSupabase(targetOwnerId);
+      }
+
       if (dbProducts !== null && dbProducts.length > 0) {
         setProducts(dbProducts);
         if (typeof window !== 'undefined') {
@@ -83,7 +102,7 @@ export function useProducts() {
             console.warn('LocalStorage quota warning during Supabase load', e);
           }
         }
-      } else if (user) {
+      } else if (user && !targetOwnerId) {
         // Authenticated user with 0 products on cloud: start with a fresh empty workspace
         setProducts([]);
         if (typeof window !== 'undefined') {
