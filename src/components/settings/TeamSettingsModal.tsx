@@ -33,6 +33,14 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
   if (!isOpen) return null;
 
+  // Feedback toast
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
+
   const handleAddMemberSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim() || !newMemberEmail.trim()) return;
@@ -42,6 +50,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       phone: newMemberPhone.trim() || '+229 00 00 00 00',
       role: newMemberRole,
     });
+    showToast(`🎉 Collaborateur "${newMemberName.trim()}" enregistré avec succès !`);
     setNewMemberName('');
     setNewMemberEmail('');
     setNewMemberPhone('');
@@ -59,6 +68,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
       returnFee: 500,
     };
     saveLivreurs([...livreurs, newRider]);
+    showToast(`🛵 Livreur "${newLivreurName.trim()}" ajouté ! Disponible immédiatement dans l'onglet Suivi COD.`);
     setNewLivreurName('');
     setNewLivreurPhone('');
   };
@@ -88,6 +98,14 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Toast Notification Banner */}
+        {toastMsg && (
+          <div className="settings-toast-banner">
+            <Sparkles className="w-4 h-4 text-gold flex-shrink-0" />
+            <span>{toastMsg}</span>
+          </div>
+        )}
 
         {/* Segmented Control Tabs */}
         <div className="settings-tabs-capsule">
@@ -124,6 +142,13 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           {/* TAB 1: TEAM MEMBERS */}
           {activeTab === 'team' && (
             <div className="settings-section-pane">
+              <div className="settings-guide-card">
+                <Shield className="w-4 h-4 text-gold flex-shrink-0" />
+                <p>
+                  <strong>Gestion d'Équipe :</strong> Vos collaborateurs enregistrés apparaissent dans votre annuaire d'équipe ci-dessous. Attribuez-leur des rôles ciblés (Média Buyer, Magasinier, Logistique, Assistant) pour déléguer sereinement votre activité.
+                </p>
+              </div>
+
               {/* Form Add */}
               <form onSubmit={handleAddMemberSubmit} className="premium-form-card">
                 <div className="form-card-title">
@@ -236,6 +261,13 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
           {/* TAB 2: LIVREURS */}
           {activeTab === 'riders' && (
             <div className="settings-section-pane">
+              <div className="settings-guide-card">
+                <Truck className="w-4 h-4 text-gold flex-shrink-0" />
+                <p>
+                  <strong>Où retrouver vos livreurs ?</strong> Dès qu'un livreur est enregistré ici, il apparaît <strong>instantanément dans le menu déroulant de chaque commande dans l'onglet 🚚 Suivi COD</strong> pour lui assigner des livraisons, calculer ses commissions et générer son bordereau de tournée WhatsApp en 1 clic !
+                </p>
+              </div>
+
               {/* Form Add Livreur */}
               <form onSubmit={handleAddLivreurSubmit} className="premium-form-card">
                 <div className="form-card-title">
