@@ -9,33 +9,18 @@ export function generateShopCode(shopName?: string): string {
   return `${prefix}-${num}`;
 }
 
-export async function getOrCreateShopCode(userId: string, shopName?: string): Promise<string> {
-  const client = getSupabaseClient();
-  if (!client || !userId) return 'SIFT-8820';
+export async function getOrCreateShopCode(userId?: string, shopName?: string, userEmail?: string): Promise<string> {
+  if (!userId || userId === 'guest') return 'MABO-8820';
 
   try {
-    // Check if shop already exists for this owner
-    const { data, error } = await client
-      .from('shops')
-      .select('shop_code')
-      .eq('owner_id', userId)
-      .limit(1);
-
-    if (!error && data && data.length > 0 && data[0].shop_code) {
-      return data[0].shop_code;
+    const res = await fetch(`/api/workspace/shop-code?userId=${encodeURIComponent(userId)}&email=${encodeURIComponent(userEmail || '')}&shopName=${encodeURIComponent(shopName || '')}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.shopCode) return data.shopCode;
     }
-
-    // Create new shop code
-    const newCode = generateShopCode(shopName);
-    await client.from('shops').insert({
-      owner_id: userId,
-      shop_name: shopName || 'Ma Boutique E-Commerce',
-      shop_code: newCode,
-    });
-
-    return newCode;
   } catch (err) {
-    console.warn('getOrCreateShopCode notice:', err);
-    return 'SIFT-8820';
+    console.warn('getOrCreateShopCode fetch notice:', err);
   }
+
+  return 'MABO-8820';
 }

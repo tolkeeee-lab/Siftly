@@ -82,7 +82,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </p>
 
         {/* Segmented Auth Mode Switch */}
-        <div className="auth-mode-segmented" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="auth-mode-segmented">
           <button
             type="button"
             className={`auth-mode-btn ${mode === 'login' ? 'active' : ''}`}
@@ -103,7 +103,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               setSuccessMsg(null);
             }}
           >
-            ✨ Compte Fondateur
+            ✨ Fondateur
           </button>
           <button
             type="button"
@@ -114,7 +114,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               setSuccessMsg(null);
             }}
           >
-            💼 Compte Employé
+            💼 Employé
           </button>
         </div>
 
