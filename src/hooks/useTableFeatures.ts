@@ -3,56 +3,93 @@
 import { useState, useMemo, useCallback } from 'react';
 import { ProductData } from '../types/product';
 import {
+  TablePresetView,
   QuickFilterKey,
   SortConfig,
   SortFieldKey,
-  TablePresetView,
   VisibleColumnGroups,
 } from '../types/tableFeatures';
 import {
+  calculateCOGS,
   calculateMargin,
   calculateMarginPct,
   calculateNoteFinale,
-  calculateCOGS,
 } from '../utils/calculations';
-import { parseNum } from '../utils/formatters';
 
-const DEFAULT_VISIBLE_GROUPS: VisibleColumnGroups = {
-  identification: true,
-  costs: true,
-  results: true,
-  scoring: true,
-  marketing: true,
-};
+function parseNum(val: string | number | null | undefined): number {
+  if (val === '' || val === null || val === undefined) return -Infinity;
+  const num = Number(val);
+  return isNaN(num) ? -Infinity : num;
+}
 
 export function useTableFeatures(products: ProductData[]) {
   const [activeFilter, setActiveFilter] = useState<QuickFilterKey>('all');
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [presetView, setPresetView] = useState<TablePresetView>('all');
-  const [visibleGroups, setVisibleGroups] = useState<VisibleColumnGroups>(DEFAULT_VISIBLE_GROUPS);
-
-  const applyPresetView = useCallback((view: TablePresetView) => {
-    setPresetView(view);
-    if (view === 'all') {
-      setVisibleGroups({ identification: true, costs: true, results: true, scoring: true, marketing: true });
-    } else if (view === 'financial') {
-      setVisibleGroups({ identification: false, costs: true, results: true, scoring: false, marketing: false });
-    } else if (view === 'scoring') {
-      setVisibleGroups({ identification: false, costs: false, results: true, scoring: true, marketing: false });
-    } else if (view === 'compact') {
-      setVisibleGroups({ identification: false, costs: false, results: true, scoring: false, marketing: false });
-    }
-  }, []);
+  const [visibleGroups, setVisibleGroups] = useState<VisibleColumnGroups>({
+    identification: true,
+    costs: true,
+    results: true,
+    scoring: true,
+    marketing: true,
+  });
 
   const toggleGroup = useCallback((group: keyof VisibleColumnGroups) => {
-    setVisibleGroups((prev) => ({ ...prev, [group]: !prev[group] }));
-    setPresetView('all');
+    setVisibleGroups((prev) => ({
+      ...prev,
+      [group]: !prev[group],
+    }));
+  }, []);
+
+  const applyPresetView = useCallback((preset: TablePresetView) => {
+    setPresetView(preset);
+    switch (preset) {
+      case 'financial':
+        setVisibleGroups({
+          identification: true,
+          costs: true,
+          results: true,
+          scoring: false,
+          marketing: false,
+        });
+        break;
+      case 'scoring':
+        setVisibleGroups({
+          identification: true,
+          costs: false,
+          results: false,
+          scoring: true,
+          marketing: false,
+        });
+        break;
+      case 'compact':
+        setVisibleGroups({
+          identification: true,
+          costs: false,
+          results: true,
+          scoring: false,
+          marketing: true,
+        });
+        break;
+      case 'all':
+      default:
+        setVisibleGroups({
+          identification: true,
+          costs: true,
+          results: true,
+          scoring: true,
+          marketing: true,
+        });
+        break;
+    }
   }, []);
 
   const toggleSort = useCallback((key: SortFieldKey) => {
     setSortConfig((prev) => {
       if (!prev || prev.key !== key) {
-        return { key, direction: 'desc' };
+        // By default, for weight ('poids'), sort ascending (lightest first)
+        const defaultDir = key === 'poids' || key === 'cogs' || key === 'sourcing' || key === 'cac' ? 'asc' : 'desc';
+        return { key, direction: defaultDir };
       }
       if (prev.direction === 'desc') {
         return { key, direction: 'asc' };
@@ -62,12 +99,20 @@ export function useTableFeatures(products: ProductData[]) {
   }, []);
 
   const filterCounts = useMemo(() => {
+    let weight_light = 0;
+    let weight_medium = 0;
+    let weight_heavy = 0;
     let margin40 = 0;
     let score4 = 0;
     let bateau = 0;
     let avion = 0;
 
     products.forEach((p) => {
+      const weight = Number(p.poids) || 0;
+      if (weight > 0 && weight <= 0.3) weight_light++;
+      else if (weight > 0.3 && weight <= 1.0) weight_medium++;
+      else if (weight > 1.0) weight_heavy++;
+
       const marginPct = calculateMarginPct(p);
       if (marginPct >= 40) margin40++;
 
@@ -80,6 +125,9 @@ export function useTableFeatures(products: ProductData[]) {
 
     return {
       all: products.length,
+      weight_light,
+      weight_medium,
+      weight_heavy,
       margin40,
       score4,
       bateau,
@@ -91,7 +139,20 @@ export function useTableFeatures(products: ProductData[]) {
   const processedProducts = useMemo(() => {
     let list = [...products];
 
-    if (activeFilter === 'margin40') {
+    // Quick Filters
+    if (activeFilter === 'weight_light') {
+      list = list.filter((p) => {
+        const w = Number(p.poids) || 0;
+        return w > 0 && w <= 0.3;
+      });
+    } else if (activeFilter === 'weight_medium') {
+      list = list.filter((p) => {
+        const w = Number(p.poids) || 0;
+        return w > 0.3 && w <= 1.0;
+      });
+    } else if (activeFilter === 'weight_heavy') {
+      list = list.filter((p) => (Number(p.poids) || 0) > 1.0);
+    } else if (activeFilter === 'margin40') {
       list = list.filter((p) => calculateMarginPct(p) >= 40);
     } else if (activeFilter === 'score4') {
       list = list.filter((p) => {
@@ -106,6 +167,7 @@ export function useTableFeatures(products: ProductData[]) {
       list = list.slice(0, 3);
     }
 
+    // Sorting
     if (sortConfig) {
       const { key, direction } = sortConfig;
       const mult = direction === 'asc' ? 1 : -1;
@@ -113,6 +175,11 @@ export function useTableFeatures(products: ProductData[]) {
       list.sort((a, b) => {
         if (key === 'produit') {
           return mult * (a.produit || '').localeCompare(b.produit || '', 'fr');
+        }
+        if (key === 'poids') {
+          const pa = Number(a.poids) || 0;
+          const pb = Number(b.poids) || 0;
+          return mult * (pa - pb);
         }
         if (key === 'marge') {
           return mult * (calculateMargin(a) - calculateMargin(b));

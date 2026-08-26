@@ -101,9 +101,9 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             <th
               className={sortHeaderClass('poids', 'num-col')}
               onClick={() => onToggleSort('poids')}
-              title="Trier par Poids"
+              title="⚖️ Trier : Du Moins Lourd au Plus Lourd (↗️ / ↘️)"
             >
-              Poids (kg) {renderSortIndicator('poids')}
+              ⚖️ Poids (kg) {renderSortIndicator('poids')}
             </th>
             <th className="num-col">Frais import (FCFA)</th>
             <th

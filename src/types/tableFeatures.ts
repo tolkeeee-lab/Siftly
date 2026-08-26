@@ -2,14 +2,24 @@ export type ColumnGroupKey = 'identification' | 'costs' | 'results' | 'scoring' 
 
 export type TablePresetView = 'all' | 'financial' | 'scoring' | 'compact';
 
-export type QuickFilterKey = 'all' | 'margin40' | 'score4' | 'bateau' | 'avion' | 'top3';
+export type QuickFilterKey =
+  | 'all'
+  | 'weight_light'   // 🪶 Ultra-Léger (< 0.3 kg) - Idéal Avion & Moto
+  | 'weight_medium'  // 📦 Standard (0.3 - 1.0 kg) - Format classique COD
+  | 'weight_heavy'   // 🏋️ Lourd (> 1.0 kg) - Bateau recommandé
+  | 'margin40'       // Marge ≥ 40%
+  | 'score4'         // Note ≥ 4.0
+  | 'bateau'         // Fret Maritime
+  | 'avion'          // Fret Aérien
+  | 'top3';          // Top 3 Gagnants
 
 export type SortFieldKey =
   | 'seq'
   | 'produit'
+  | 'category'
   | 'concurrent'
   | 'sourcing'
-  | 'poids'
+  | 'poids'          // Poids (kg) - Tri du moins lourd au plus lourd
   | 'cogs'
   | 'vente'
   | 'marge'

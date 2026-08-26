@@ -12,6 +12,9 @@ import {
   Ship,
   Plane,
   Trophy,
+  Feather,
+  Package,
+  Dumbbell,
 } from 'lucide-react';
 import { ScoreFieldKey } from '../../types/product';
 import { SCORE_CRITERIA_LIST } from '../../constants/presets';
@@ -31,14 +34,7 @@ interface RankPanelProps {
   onSelectLayoutMode: (mode: 'table' | 'grid') => void;
   activeFilter: QuickFilterKey;
   onSelectFilter: (filter: QuickFilterKey) => void;
-  filterCounts: {
-    all: number;
-    margin40: number;
-    score4: number;
-    bateau: number;
-    avion: number;
-    top3: number;
-  };
+  filterCounts: Record<QuickFilterKey, number>;
   presetView: TablePresetView;
   onSelectPresetView: (view: TablePresetView) => void;
   visibleGroups: VisibleColumnGroups;
@@ -67,6 +63,9 @@ export const RankPanel: React.FC<RankPanelProps> = ({
 
   const filters: Array<{ key: QuickFilterKey; label: string; icon: React.ReactNode; count: number }> = [
     { key: 'all', label: 'Tous', icon: null, count: filterCounts.all },
+    { key: 'weight_light', label: '🪶 Plume (<300g)', icon: <Feather className="w-3 h-3 text-emerald-400" />, count: filterCounts.weight_light },
+    { key: 'weight_medium', label: '📦 Standard (300g-1kg)', icon: <Package className="w-3 h-3 text-amber-400" />, count: filterCounts.weight_medium },
+    { key: 'weight_heavy', label: '🏋️ Lourd (>1kg)', icon: <Dumbbell className="w-3 h-3 text-rose-400" />, count: filterCounts.weight_heavy },
     { key: 'margin40', label: 'Marge ≥ 40%', icon: <TrendingUp className="w-3 h-3 text-emerald-400" />, count: filterCounts.margin40 },
     { key: 'score4', label: 'Note ≥ 4.0', icon: <Sparkles className="w-3 h-3 text-amber-400" />, count: filterCounts.score4 },
     { key: 'bateau', label: 'Bateau', icon: <Ship className="w-3 h-3 text-sky-400" />, count: filterCounts.bateau },
