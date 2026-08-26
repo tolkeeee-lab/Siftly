@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { ProductData, MarketAnalysisData } from '../../types/product';
 import { getProductMarketAnalysis } from '../../utils/marketIntelligence';
+import { extractSmartAdSpyQueries } from '../../utils/adSpyKeywords';
 import { formatFCFA } from '../../utils/formatters';
 import { calculateMargin } from '../../utils/calculations';
 
@@ -570,54 +571,131 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
           {/* TAB 5: AVIS, OBJECTIONS & ESPIONNAGE 1-CLIC */}
           {activeTab === 'spy' && (
             <div className="spy-section-wrapper">
-              {/* 1-Click Spy Buttons Bar */}
-              <div className="spy-buttons-bar">
-                <div className="spy-bar-title">
-                  <Zap className="w-4 h-4 text-gold" />
-                  <span>Raccourcis d'Espionnage Direct en 1 Clic (Zéro Perte de Temps) :</span>
-                </div>
-                <div className="spy-actions-row">
-                  <a
-                    href={shortcuts.facebookAdsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="spy-btn fb-spy"
-                  >
-                    <span>🔵 Voir Pubs Actives (Facebook Ads)</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+              {/* Smart Ad Spy Engine */}
+              {(() => {
+                const spy = extractSmartAdSpyQueries(product.produit, product.category);
+                return (
+                  <div className="smart-adspy-panel">
+                    <div className="adspy-panel-header">
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-gold-deep" />
+                        <h3 className="adspy-title">🧠 Espionnage Intelligent Facebook Ads Library & TikTok</h3>
+                      </div>
+                      <span className="adspy-badge">Recherche par Angle & Douleurs COD</span>
+                    </div>
 
-                  <a
-                    href={shortcuts.tiktokSearchUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="spy-btn tt-spy"
-                  >
-                    <span>🎵 Voir Vidéos Virales (TikTok)</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                    <p className="adspy-subtitle">
+                      Les e-commerçants en Afrique ne citent pas le nom d'usine chinois dans leurs pubs. Voici les <strong>4 angles d'attaque réels</strong> pour dénicher instantanément toutes les publicités actives de vos concurrents :
+                    </p>
 
-                  <a
-                    href={shortcuts.aliexpressReviewsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="spy-btn ali-spy"
-                  >
-                    <span>📦 Avis & Photos (AliExpress)</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                    {/* 4 Multi-Angle Facebook Ads Library Buttons */}
+                    <div className="smart-fb-grid">
+                      <a
+                        href={spy.fbCodUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="smart-fb-card cod-angle"
+                        title="Ouvrir Facebook Ads Library avec l'angle Paiement à la Livraison"
+                      >
+                        <div className="smart-fb-top">
+                          <span className="smart-tag">💰 Angle COD (Recommandé)</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </div>
+                        <strong className="smart-fb-query">{spy.fbCodQuery}</strong>
+                        <span className="smart-fb-hint">Toutes les pubs africaines avec paiement à la livraison</span>
+                      </a>
 
-                  <a
-                    href={shortcuts.amazonReviewsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="spy-btn amz-spy"
-                  >
-                    <span>⭐ Retours Clients (Amazon)</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
+                      <a
+                        href={spy.fbDeliveryUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="smart-fb-card delivery-angle"
+                        title="Ouvrir Facebook Ads Library avec l'angle Livraison Gratuite"
+                      >
+                        <div className="smart-fb-top">
+                          <span className="smart-tag">🚚 Angle Offre & Promo</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </div>
+                        <strong className="smart-fb-query">{spy.fbDeliveryQuery}</strong>
+                        <span className="smart-fb-hint">Pubs avec offres irrésistibles & livraison gratuite</span>
+                      </a>
+
+                      <a
+                        href={spy.fbBenefitUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="smart-fb-card pain-angle"
+                        title="Ouvrir Facebook Ads Library avec l'angle Douleur & Problème Résolu"
+                      >
+                        <div className="smart-fb-top">
+                          <span className="smart-tag">🎯 Angle Douleur & Problème</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </div>
+                        <strong className="smart-fb-query">{spy.fbBenefitQuery}</strong>
+                        <span className="smart-fb-hint">Pubs axées sur le problème quotidien résolu</span>
+                      </a>
+
+                      <a
+                        href={spy.fbExactUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="smart-fb-card exact-angle"
+                        title="Ouvrir Facebook Ads Library avec le nom exact"
+                      >
+                        <div className="smart-fb-top">
+                          <span className="smart-tag">🔍 Angle Nom Produit</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </div>
+                        <strong className="smart-fb-query">{spy.fbExactQuery}</strong>
+                        <span className="smart-fb-hint">Recherche brute sur le titre exact</span>
+                      </a>
+                    </div>
+
+                    {/* TikTok & Platform Shortcuts Row */}
+                    <div className="adspy-extra-shortcuts">
+                      <a
+                        href={spy.tiktokViralUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="extra-spy-btn tt-btn"
+                      >
+                        <span>🎵 TikTok #TikTokMadeMeBuyIt</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+
+                      <a
+                        href={spy.tiktokDemoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="extra-spy-btn tt-demo-btn"
+                      >
+                        <span>🎬 Démo Vidéo & Avant/Après</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+
+                      <a
+                        href={spy.aliexpressReviewsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="extra-spy-btn ali-btn"
+                      >
+                        <span>📦 Avis Photos (AliExpress)</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+
+                      <a
+                        href={spy.googleTrendsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="extra-spy-btn trends-btn"
+                      >
+                        <span>📈 Google Trends</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Global Reviews Synthesis */}
               <div className="reviews-synthesis-grid">

@@ -2766,10 +2766,208 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
     padding: 12px 10px;
   }
 
-  .pillars-grid {
-    grid-template-columns: 1fr;
-  }
+/* ==========================================================================
+   SMART AD SPY ENGINE (MULTI-ANGLE BOOLEAN COD SEARCH)
+   ========================================================================== */
+
+.smart-adspy-panel {
+  background: #0F172A;
+  border: 1.5px solid #334155;
+  border-radius: 14px;
+  padding: 16px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
+
+.adspy-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adspy-title {
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.adspy-badge {
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #FDE047;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+}
+
+.adspy-subtitle {
+  font-size: 12px;
+  color: #94A3B8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.adspy-subtitle strong {
+  color: #F8FAFC;
+}
+
+.smart-fb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.smart-fb-card {
+  background: #1E293B;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 12px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.smart-fb-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.smart-fb-card.cod-angle {
+  border-color: #F59E0B;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, #1E293B 100%);
+}
+
+.smart-fb-card.cod-angle:hover {
+  border-color: #FBBF24;
+}
+
+.smart-fb-card.delivery-angle {
+  border-color: #10B981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, #1E293B 100%);
+}
+
+.smart-fb-card.delivery-angle:hover {
+  border-color: #34D399;
+}
+
+.smart-fb-card.pain-angle {
+  border-color: #6366F1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, #1E293B 100%);
+}
+
+.smart-fb-card.pain-angle:hover {
+  border-color: #818CF8;
+}
+
+.smart-fb-card.exact-angle {
+  border-color: #475569;
+}
+
+.smart-fb-card.exact-angle:hover {
+  border-color: #94A3B8;
+}
+
+.smart-fb-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #94A3B8;
+}
+
+.smart-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #F8FAFC;
+}
+
+.smart-fb-query {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #FDE047;
+  word-break: break-word;
+}
+
+.smart-fb-hint {
+  font-size: 10.5px;
+  color: #94A3B8;
+  line-height: 1.3;
+}
+
+.adspy-extra-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.extra-spy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.extra-spy-btn.tt-btn {
+  background: rgba(238, 29, 82, 0.15);
+  border: 1px solid rgba(238, 29, 82, 0.4);
+  color: #FF758F;
+}
+
+.extra-spy-btn.tt-btn:hover {
+  background: rgba(238, 29, 82, 0.3);
+  color: #ffffff;
+}
+
+.extra-spy-btn.tt-demo-btn {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #A5B4FC;
+}
+
+.extra-spy-btn.tt-demo-btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+}
+
+.extra-spy-btn.ali-btn {
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid rgba(249, 115, 22, 0.4);
+  color: #FDBA74;
+}
+
+.extra-spy-btn.ali-btn:hover {
+  background: rgba(249, 115, 22, 0.3);
+  color: #ffffff;
+}
+
+.extra-spy-btn.trends-btn {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93C5FD;
+}
+
+.extra-spy-btn.trends-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
+}
+
 
 
 
