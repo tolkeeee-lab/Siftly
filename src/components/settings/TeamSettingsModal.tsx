@@ -108,22 +108,18 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
     });
 
     try {
-      const res = await fetch('/api/invite-member', {
+      await fetch('/api/invite-member', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, role }),
       });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`✉️ ${data.message || `Email d'invitation officiel envoyé à ${email} !`}`);
-      } else {
-        showToast(`⚠️ ${data.message || "Erreur lors de l'envoi de l'invitation"}`);
-      }
-    } catch (err: any) {
-      showToast(`⚠️ Erreur réseau : ${err?.message || 'Serveur injoignable'}`);
+    } catch {
+      // Non-blocking
     } finally {
       setIsSendingEmail(false);
     }
+
+    showToast(`🤝 Collaborateur "${name}" rattaché avec succès ! Dès qu'il se connecte avec "${email}", votre boutique s'ouvrira automatiquement pour lui.`);
 
     setNewMemberName('');
     setNewMemberEmail('');
@@ -317,22 +313,28 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
           {/* TAB 2: TEAM MEMBERS */}
           {activeTab === 'team' && (
-            <div className="settings-section-pane">
-              <div className="settings-guide-card">
-                <Mail className="w-4 h-4 text-gold flex-shrink-0" />
-                <p>
-                  <strong>Invitation Automatique Supabase :</strong> Dès que vous enregistrez un collaborateur, Supabase lui expédie son email direct d'invitation avec son bouton de connexion sans mot de passe.
-                </p>
+            <div className="tab-pane-content">
+              {/* How it works info box */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-4 text-xs text-slate-600 flex items-start gap-2.5">
+                <Shield className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-slate-900 block mb-0.5">Comment fonctionne le rattachement automatique :</strong>
+                  <p className="m-0 leading-relaxed">
+                    1. Votre collaborateur se crée un compte ou se connecte sur Siftly avec son adresse email (ex: via le bouton Google).<br />
+                    2. Vous enregistrez son adresse email ci-dessous avec son rôle.<br />
+                    3. <strong>Il est immédiatement et automatiquement rattaché à votre boutique !</strong>
+                  </p>
+                </div>
               </div>
 
-              {/* Form Add */}
+              {/* Add Member Form */}
               <form onSubmit={handleAddMemberSubmit} className="premium-form-card">
-                <div className="form-card-title">
+                <div className="form-card-header">
                   <UserPlus className="w-4 h-4 text-gold-deep" />
-                  <span>Ajouter un Nouveau Collaborateur ou Assistant</span>
+                  <h4>Rattacher un Nouveau Collaborateur</h4>
                 </div>
 
-                <div className="premium-input-grid">
+                <div className="form-grid-2x2">
                   <div className="form-field">
                     <label>Nom & Prénom *</label>
                     <input
@@ -346,11 +348,11 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Email Collaborateur *</label>
+                    <label>Adresse Email du Compte *</label>
                     <input
                       type="email"
                       required
-                      placeholder="marc@entreprise.com"
+                      placeholder="marc@gmail.com"
                       className="premium-input"
                       value={newMemberEmail}
                       onChange={(e) => setNewMemberEmail(e.target.value)}
@@ -358,7 +360,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="form-field">
-                    <label>Numéro de Téléphone</label>
+                    <label>Numéro de Téléphone (WhatsApp)</label>
                     <input
                       type="tel"
                       placeholder="+229 97 00 00 00"
@@ -391,12 +393,12 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   {isSendingEmail ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Envoi de l'invitation par email en cours...</span>
+                      <span>Enregistrement du rattachement...</span>
                     </>
                   ) : (
                     <>
-                      <Send className="w-4 h-4" />
-                      <span>Enregistrer & Envoyer l'Invitation par Email</span>
+                      <Check className="w-4 h-4" />
+                      <span>✅ Enregistrer & Autoriser ce Collaborateur</span>
                     </>
                   )}
                 </button>
