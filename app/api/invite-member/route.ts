@@ -18,13 +18,20 @@ export async function POST(req: NextRequest) {
     const cleanRole = role || 'assistant';
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !serviceRoleKey) {
+    if (!supabaseUrl) {
       return NextResponse.json({
-        success: true,
-        message: `Collaborateur "${cleanName}" enregistré avec succès !`,
-      });
+        success: false,
+        message: 'NEXT_PUBLIC_SUPABASE_URL non configuré',
+      }, { status: 500 });
+    }
+
+    if (!serviceRoleKey) {
+      return NextResponse.json({
+        success: false,
+        message: 'SUPABASE_SERVICE_ROLE_KEY manquante sur Vercel. Veuillez ajouter la clé service_role dans les variables d\'environnement Vercel et redéployer.',
+      }, { status: 500 });
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -34,84 +41,61 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 1. If service role key is configured, use admin invite without forcing rigid redirectTo
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY.includes('placeholder')) {
-      try {
-        // First try: inviteUserByEmail without strict redirectTo to avoid "Invalid path" error
-        const { data: inviteData, error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(cleanEmail, {
-          data: {
-            full_name: cleanName,
-            role: cleanRole,
-            invited_at: new Date().toISOString(),
-          },
-        });
+    // 1. Try admin inviteUserByEmail
+    const { data: inviteData, error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(cleanEmail, {
+      data: {
+        full_name: cleanName,
+        role: cleanRole,
+        invited_at: new Date().toISOString(),
+      },
+    });
 
-        if (!inviteErr) {
-          return NextResponse.json({
-            success: true,
-            message: `✉️ Email d'invitation officiel envoyé à ${cleanEmail} !`,
-            user: inviteData?.user,
-          });
-        }
-
-        // If user already exists or invite has a path constraint, generate a magic link
-        console.warn('inviteUserByEmail notice:', inviteErr.message);
-        const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
-          type: 'magiclink',
-          email: cleanEmail,
-          options: {
-            data: {
-              full_name: cleanName,
-              role: cleanRole,
-            },
-          },
-        });
-
-        if (!linkErr && linkData?.properties?.action_link) {
-          return NextResponse.json({
-            success: true,
-            message: `✉️ Invitation activée pour ${cleanEmail} !`,
-            actionLink: linkData.properties.action_link,
-          });
-        }
-
-        return NextResponse.json({
-          success: true,
-          message: `Collaborateur "${cleanName}" enregistré avec succès !`,
-        });
-      } catch (adminEx: any) {
-        console.warn('Admin auth notice:', adminEx);
-        return NextResponse.json({
-          success: true,
-          message: `Collaborateur "${cleanName}" enregistré avec succès !`,
-        });
-      }
+    if (!inviteErr) {
+      return NextResponse.json({
+        success: true,
+        message: `✉️ Email d'invitation officiel envoyé à ${cleanEmail} !`,
+        user: inviteData?.user,
+      });
     }
 
-    // 2. Fallback: OTP signInWithOtp
-    try {
-      await supabase.auth.signInWithOtp({
+    console.warn('inviteUserByEmail error:', inviteErr.message);
+
+    // 2. If user is already registered in Auth, send a direct magic link OTP email
+    if (inviteErr.message?.toLowerCase().includes('already') || inviteErr.message?.toLowerCase().includes('registered')) {
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: cleanEmail,
         options: {
           data: {
-            name: cleanName,
+            full_name: cleanName,
             role: cleanRole,
           },
         },
       });
-    } catch (otpEx) {
-      console.warn('OTP fallback notice:', otpEx);
+
+      if (!otpErr) {
+        return NextResponse.json({
+          success: true,
+          message: `✉️ Utilisateur déjà existant : un nouvel email avec lien de connexion direct a été envoyé à ${cleanEmail} !`,
+        });
+      }
+
+      return NextResponse.json({
+        success: false,
+        message: `Erreur Supabase : ${otpErr.message}`,
+      }, { status: 500 });
     }
 
+    // 3. Other Supabase error
     return NextResponse.json({
-      success: true,
-      message: `Collaborateur "${cleanName}" enregistré avec succès !`,
-    });
+      success: false,
+      message: `Erreur Supabase : ${inviteErr.message}`,
+    }, { status: 500 });
+
   } catch (err: any) {
-    console.error('Invite member API notice:', err);
+    console.error('Invite member API crash:', err);
     return NextResponse.json({
-      success: true,
-      message: `Collaborateur enregistré avec succès !`,
-    });
+      success: false,
+      message: `Erreur serveur : ${err?.message || 'Erreur inconnue'}`,
+    }, { status: 500 });
   }
 }
