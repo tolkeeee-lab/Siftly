@@ -10,7 +10,7 @@ export const Masthead: React.FC = () => {
       <h1 className="masthead-title">
         Siftly <em>EAA</em>
       </h1>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="masthead-actions">
         <RoleSwitcher />
         <UserMenu />
       </div>
