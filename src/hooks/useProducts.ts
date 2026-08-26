@@ -83,7 +83,13 @@ export function useProducts() {
             console.warn('LocalStorage quota warning during Supabase load', e);
           }
         }
-      } else if (!user) {
+      } else if (user) {
+        // Authenticated user with 0 products on cloud: start with a fresh empty workspace
+        setProducts([]);
+        if (typeof window !== 'undefined') {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify([])); } catch { /* ignore */ }
+        }
+      } else {
         // Only initialize from localStorage for anonymous / local offline users
         if (typeof window !== 'undefined') {
           const saved = localStorage.getItem(STORAGE_KEY);

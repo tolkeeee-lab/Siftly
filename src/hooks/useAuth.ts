@@ -85,19 +85,15 @@ export function useAuth() {
     const client = getSupabaseClient();
     if (typeof window !== 'undefined') {
       try {
-        localStorage.removeItem('eaa-produits-benin');
-        localStorage.removeItem('siftly_team_members_v2');
-        localStorage.removeItem('siftly_shop_profile_v2');
-        localStorage.removeItem('siftly_cod_orders_v2');
-        localStorage.removeItem('siftly_livreurs_v2');
-        localStorage.removeItem('siftly_expenses_v2');
+        localStorage.clear();
+        sessionStorage.clear();
       } catch { /* ignore */ }
     }
     if (client) {
       await client.auth.signOut();
     }
     if (typeof window !== 'undefined') {
-      window.location.reload();
+      window.location.href = window.location.origin + '/?bypass=true';
     }
   }, []);
 
