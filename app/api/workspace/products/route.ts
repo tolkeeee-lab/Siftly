@@ -21,15 +21,22 @@ export async function GET(req: NextRequest) {
     }
 
     const supabase = getAdminSupabase();
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('user_id', ownerId)
-      .order('seq', { ascending: true });
+    let data: any[] | null = null;
+    if (ownerId && ownerId !== 'main') {
+      const res = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', ownerId)
+        .order('seq', { ascending: true });
+      if (res.data && res.data.length > 0) {
+        data = res.data;
+      }
+    }
 
-    if (error) {
-      console.warn('API fetch owner products error:', error);
-      return NextResponse.json({ products: [] });
+    // Fallback: If no products found for specific ownerId or user_id is null on rows, fetch all workspace products
+    if (!data || data.length === 0) {
+      const allRes = await supabase.from('products').select('*').order('seq', { ascending: true });
+      data = allRes.data || [];
     }
 
     return NextResponse.json({ products: data || [] });

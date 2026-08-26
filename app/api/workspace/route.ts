@@ -23,12 +23,11 @@ export async function GET(req: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const supabase = getAdminSupabase();
 
-    // Check if this email is in team_members table
+    // 1. Check if this email is in team_members table
     const { data: members, error: memErr } = await supabase
       .from('team_members')
       .select('*')
       .ilike('email', cleanEmail)
-      .eq('is_active', true)
       .limit(1);
 
     if (memErr) {
@@ -39,10 +38,26 @@ export async function GET(req: NextRequest) {
       const match = members[0];
       return NextResponse.json({
         isCollaborator: true,
-        ownerId: match.user_id,
+        ownerId: match.user_id || 'main',
         role: match.role || 'assistant',
         memberName: match.name || 'Collaborateur',
       });
+    }
+
+    // 2. Check in auth.users for invited collaborator metadata
+    try {
+      const { data: authUsers } = await supabase.auth.admin.listUsers();
+      const authMatch = authUsers?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+      if (authMatch && (authMatch.user_metadata?.role || authMatch.invited_at)) {
+        return NextResponse.json({
+          isCollaborator: true,
+          ownerId: 'main',
+          role: authMatch.user_metadata?.role || 'assistant',
+          memberName: authMatch.user_metadata?.full_name || 'Collaborateur',
+        });
+      }
+    } catch (e) {
+      console.warn('Admin user check fallback error:', e);
     }
 
     return NextResponse.json({ isCollaborator: false });
