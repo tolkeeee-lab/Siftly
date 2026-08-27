@@ -142,12 +142,24 @@ export async function saveProductToSupabase(product: ProductData, targetUserId?:
   const row = mapProductToDb(product, userId);
   
   try {
+    const client = getSupabaseClient();
+    const { data: { session } } = await client.auth.getSession();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
     const res = await fetch('/api/workspace/products', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ products: [row] }),
     });
-    return res.ok;
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      console.error('API failed to save product:', errBody);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.warn('Error upserting product to Supabase via API:', err);
     return false;
@@ -171,12 +183,24 @@ export async function saveAllProductsToSupabase(products: ProductData[], targetU
   const rows = products.map((p) => mapProductToDb(p, userId));
   
   try {
+    const client = getSupabaseClient();
+    const { data: { session } } = await client.auth.getSession();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
     const res = await fetch('/api/workspace/products', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ products: rows }),
     });
-    return res.ok;
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      console.error('API failed to save all products:', errBody);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.warn('Error saving products to Supabase via API:', err);
     return false;

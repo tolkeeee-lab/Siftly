@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-function getAdminSupabase() {
+function getAdminSupabase(authToken?: string) {
   let rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
   let cleanUrl = rawUrl.trim().replace(/['"]/g, '');
   try {
@@ -10,9 +10,13 @@ function getAdminSupabase() {
     cleanUrl = cleanUrl.split('/rest/v1')[0].split('/graphql')[0];
   }
   const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/['"]/g, '').replace(/\r?\n|\r/g, '');
-  return createClient(cleanUrl, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  
+  const options: any = { auth: { autoRefreshToken: false, persistSession: false } };
+  if (authToken) {
+    options.global = { headers: { Authorization: `Bearer ${authToken}` } };
+  }
+  
+  return createClient(cleanUrl, serviceKey, options);
 }
 
 // GET /api/workspace/products?ownerId=uuid
@@ -54,7 +58,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const supabase = getAdminSupabase();
+    const authHeader = req.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    const supabase = getAdminSupabase(token);
     
     // Process rows
     const { error } = await supabase.from('products').upsert(products, { onConflict: 'id' });
