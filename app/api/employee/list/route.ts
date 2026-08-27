@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
     const supabase = getAdminSupabase();
 
     let pendingQuery = supabase.from('employees').select('*').eq('status', 'pending');
-    if (ownerId && ownerId !== 'guest') {
+    if (ownerId && ownerId !== 'guest' && shopCode) {
+      pendingQuery = pendingQuery.or(`owner_id.eq.${ownerId},shop_code.ilike.${shopCode.trim()}`);
+    } else if (ownerId && ownerId !== 'guest') {
       pendingQuery = pendingQuery.eq('owner_id', ownerId);
     } else if (shopCode) {
       pendingQuery = pendingQuery.ilike('shop_code', shopCode.trim());
