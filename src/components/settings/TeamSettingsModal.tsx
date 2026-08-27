@@ -116,13 +116,17 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
         if (res.ok) {
           const data = await res.json();
           if (data.shopCode) setShopCode(data.shopCode);
+          showToast('Profil boutique mis à jour avec succès !');
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          console.error('API failed to save shop profile:', errData);
+          alert('Erreur lors de la sauvegarde du profil boutique : ' + JSON.stringify(errData));
         }
-      } catch (err) {
-        console.warn('Failed to sync shop profile', err);
+      } catch (err: any) {
+        console.error(err);
+        alert('Erreur de connexion API (profil boutique) : ' + err.message);
       }
     }
-
-    showToast(`🏪 Identité de la boutique "${newShopName}" enregistrée avec succès !`);
   };
 
   const handleAddMemberSubmit = async (e: React.FormEvent) => {
