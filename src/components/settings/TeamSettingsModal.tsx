@@ -95,15 +95,34 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
   const shopDisplayName = profile.shopName || 'Ma Boutique E-Commerce';
   const ownerEmail = user?.email || 'Non connecté (Session Locale)';
 
-  const handleSaveShopProfile = (e: React.FormEvent) => {
+  const handleSaveShopProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newShopName = editShopName.trim() || 'Ma Boutique E-Commerce';
     updateProfile({
       ownerName: editOwnerName.trim() || 'Propriétaire (Fondateur)',
-      shopName: editShopName.trim() || 'Ma Boutique E-Commerce',
+      shopName: newShopName,
       phone: editPhone.trim(),
       country: editCountry.trim(),
     });
-    showToast(`🏪 Identité de la boutique "${editShopName.trim() || 'Ma Boutique'}" enregistrée avec succès !`);
+    
+    // Sync with DB to regenerate accurate shop code
+    if (user?.id) {
+      try {
+        const res = await fetch('/api/workspace/shop-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, email: user.email, shopName: newShopName }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.shopCode) setShopCode(data.shopCode);
+        }
+      } catch (err) {
+        console.warn('Failed to sync shop profile', err);
+      }
+    }
+
+    showToast(`🏪 Identité de la boutique "${newShopName}" enregistrée avec succès !`);
   };
 
   const handleAddMemberSubmit = async (e: React.FormEvent) => {

@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 function getAdminSupabase() {
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
-  const cleanUrl = rawUrl.trim().replace(/\/+$/, '');
-  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/\r?\n|\r/g, '');
+  let rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
+  let cleanUrl = rawUrl.trim().replace(/['"]/g, '');
+  try {
+    cleanUrl = new URL(cleanUrl).origin;
+  } catch (e) {
+    cleanUrl = cleanUrl.split('/rest/v1')[0].split('/graphql')[0];
+  }
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/['"]/g, '').replace(/\r?\n|\r/g, '');
   return createClient(cleanUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -64,5 +69,31 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     console.error('Shop code exception:', err);
     return NextResponse.json({ shopCode: 'MABO-8820' });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { userId, email, shopName } = body;
+    if (!userId || userId === 'guest') {
+      return NextResponse.json({ success: false }, { status: 400 });
+    }
+
+    const supabase = getAdminSupabase();
+    const stableCode = getDeterministicCode(userId, email || undefined, shopName || undefined);
+
+    const { error } = await supabase.from('shops').upsert({
+      owner_id: userId,
+      shop_name: shopName || 'Ma Boutique E-Commerce',
+      shop_code: stableCode,
+    }, { onConflict: 'owner_id' });
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, shopCode: stableCode });
+  } catch (err: any) {
+    console.error('Shop code POST exception:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
