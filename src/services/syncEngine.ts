@@ -16,6 +16,21 @@ import {
   mapDbToProduct,
 } from './supabaseService';
 
+/**
+ * Safely saves to localStorage and alerts the user if the quota is exceeded.
+ */
+function safeLocalStorageSet(key: string, value: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch (e: any) {
+    console.error('LocalStorage Save Error:', e);
+    if (e.name === 'QuotaExceededError' || e.message?.includes('quota')) {
+      alert("⚠️ Espace de stockage local saturé ! Les images de vos produits sont trop lourdes. Veuillez utiliser des images plus petites ou nettoyer votre cache, sinon vos modifications hors-ligne risquent de ne pas être sauvegardées.");
+    }
+  }
+}
+
 export interface WorkspaceContext {
   workspaceOwnerId: string; // Active Owner ID (either user's own ID or linked founder's ID)
   role: UserRole;
@@ -140,13 +155,13 @@ export async function syncWorkspaceProducts(
     }
 
     if (typeof window !== 'undefined') {
-      try { localStorage.setItem(cacheKey, JSON.stringify(finalProducts)); } catch { /* ignore */ }
+      safeLocalStorageSet(cacheKey, JSON.stringify(finalProducts));
     }
     return { products: finalProducts, isCloudSynced: true };
   } else if (!ctx.isCollaborator) {
     // Both Cloud & Local are empty for an Owner: seed default initial products & push to cloud
     if (typeof window !== 'undefined') {
-      try { localStorage.setItem(cacheKey, JSON.stringify(INITIAL_PRODUCTS)); } catch { /* ignore */ }
+      safeLocalStorageSet(cacheKey, JSON.stringify(INITIAL_PRODUCTS));
     }
     if (ctx.workspaceOwnerId !== 'guest') {
       await saveAllProductsToSupabase(INITIAL_PRODUCTS, ctx.workspaceOwnerId);
@@ -172,14 +187,9 @@ export async function persistProductChange(
 
   const cacheKey = getStorageKey(targetId || 'guest');
 
-  // 1. Immediately update Local Storage
   if (typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(allProducts));
-      localStorage.setItem('eaa-produits-benin', JSON.stringify(allProducts));
-    } catch (e) {
-      console.warn('SyncEngine: LocalStorage save notice:', e);
-    }
+    safeLocalStorageSet(cacheKey, JSON.stringify(allProducts));
+    safeLocalStorageSet('eaa-produits-benin', JSON.stringify(allProducts));
   }
 
   // 2. Persist to Supabase Cloud
@@ -205,10 +215,8 @@ export async function persistProductDeletion(
   const cacheKey = getStorageKey(targetId || 'guest');
 
   if (typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(allProducts));
-      localStorage.setItem('eaa-produits-benin', JSON.stringify(allProducts));
-    } catch { /* ignore */ }
+    safeLocalStorageSet(cacheKey, JSON.stringify(allProducts));
+    safeLocalStorageSet('eaa-produits-benin', JSON.stringify(allProducts));
   }
 
   return await deleteProductFromSupabase(deletedId);

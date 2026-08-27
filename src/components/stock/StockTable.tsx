@@ -23,12 +23,12 @@ export const StockTable: React.FC<StockTableProps> = ({ items, onAddStockQuick }
           <thead>
             <tr>
               <th>Article</th>
-              <th style={{ textAlign: 'center' }}>Stock Dispo</th>
-              <th style={{ textAlign: 'center' }}>Réservé (En cours)</th>
-              <th style={{ textAlign: 'center' }}>Autonomie Estimée</th>
-              <th style={{ textAlign: 'right' }}>Valeur Stock (COGS)</th>
-              <th style={{ textAlign: 'center' }}>Santé Stock</th>
-              <th style={{ textAlign: 'center' }}>Ajustement Rapide</th>
+              <th className="text-center">Stock Dispo</th>
+              <th className="text-center">Réservé (En cours)</th>
+              <th className="text-center">Autonomie Estimée</th>
+              <th className="text-right">Valeur Stock (COGS)</th>
+              <th className="text-center">Santé Stock</th>
+              <th className="text-center">Ajustement Rapide</th>
             </tr>
           </thead>
           <tbody>
@@ -40,7 +40,7 @@ export const StockTable: React.FC<StockTableProps> = ({ items, onAddStockQuick }
                       {item.productImg ? (
                         <img src={item.productImg} alt={item.productName} />
                       ) : (
-                        <span style={{ fontSize: '10px', color: '#999' }}>Photo</span>
+                        <span className="stock-thumb-placeholder">Photo</span>
                       )}
                     </div>
                     <div>
@@ -52,26 +52,26 @@ export const StockTable: React.FC<StockTableProps> = ({ items, onAddStockQuick }
                   </div>
                 </td>
 
-                <td style={{ textAlign: 'center' }}>
+                <td className="text-center">
                   <span className={`stock-qty-badge ${item.isCriticalLow ? 'low' : 'ok'}`}>
                     {item.currentStock} pcs
                   </span>
                 </td>
 
-                <td style={{ textAlign: 'center', color: '#8E44AD', fontWeight: 600 }}>
+                <td className="stock-reserved-cell">
                   {item.reservedStock > 0 ? `${item.reservedStock} pcs` : '0'}
                 </td>
 
-                <td style={{ textAlign: 'center', fontSize: '12px' }}>
+                <td className="stock-autonomy-cell">
                   <strong>~{item.daysOfStockLeft} jours</strong>
-                  <div style={{ fontSize: '10.5px', color: '#888' }}>({item.avgDailySales} v/j)</div>
+                  <div className="stock-autonomy-sub">({item.avgDailySales} v/j)</div>
                 </td>
 
-                <td style={{ textAlign: 'right', fontWeight: 600, color: '#7A5A1E' }}>
+                <td className="stock-value-cell">
                   {formatFCFA(item.currentStock * item.unitCOGSFCFA)}
                 </td>
 
-                <td style={{ textAlign: 'center' }}>
+                <td className="text-center">
                   {item.isCriticalLow ? (
                     <span className="stock-alert-pill">
                       <AlertCircle className="w-3 h-3 inline mr-1" /> Recommander !
@@ -83,7 +83,7 @@ export const StockTable: React.FC<StockTableProps> = ({ items, onAddStockQuick }
                   )}
                 </td>
 
-                <td style={{ textAlign: 'center' }}>
+                <td className="text-center">
                   <div className="stock-inline-actions">
                     <button
                       type="button"

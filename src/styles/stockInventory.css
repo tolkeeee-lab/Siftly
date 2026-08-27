@@ -268,3 +268,12 @@
   color: #2980b9;
   background: #ebf5fb;
 }
+  
+/* ---- Extracted Inline Styles ---- */  
+.text-center { text-align: center; }  
+.text-right { text-align: right; }  
+.stock-thumb-placeholder { font-size: 10px; color: #999; }  
+.stock-reserved-cell { text-align: center; color: #8E44AD; font-weight: 600; }  
+.stock-autonomy-cell { text-align: center; font-size: 12px; }  
+.stock-autonomy-sub { font-size: 10.5px; color: #888; }  
+.stock-value-cell { text-align: right; font-weight: 600; color: #7A5A1E; } 
