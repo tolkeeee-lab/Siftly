@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Register employee in employees and team_members table
     const employeeRow = {
-      id: 'emp-' + Date.now(),
+      id: crypto.randomUUID(),
       user_id: userId,
       owner_id: ownerId,
       shop_code: cleanCode,
@@ -85,15 +85,18 @@ export async function POST(req: NextRequest) {
       status: 'pending',
     };
 
-    await supabase.from('employees').upsert(employeeRow, { onConflict: 'id' });
-    await supabase.from('team_members').upsert({
-      id: 'member-' + Date.now(),
+    const { error: empErr } = await supabase.from('employees').upsert(employeeRow, { onConflict: 'id' });
+    if (empErr) console.error('Error inserting employee:', empErr);
+
+    const { error: teamErr } = await supabase.from('team_members').upsert({
+      id: crypto.randomUUID(),
       user_id: ownerId,
       name: cleanName,
       email: cleanEmail,
       role: 'assistant',
       is_active: false,
     }, { onConflict: 'id' });
+    if (teamErr) console.error('Error inserting team_member:', teamErr);
 
     return NextResponse.json({
       success: true,
