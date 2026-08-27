@@ -70,7 +70,7 @@ export function useTeamMembers() {
   const addMember = useCallback((data: { name: string; email: string; phone: string; role: UserRole }) => {
     const newMember: TeamMember = {
       ...data,
-      id: 'member-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+      id: crypto.randomUUID(),
       addedDate: new Date().toISOString().split('T')[0],
       isActive: true,
     };
