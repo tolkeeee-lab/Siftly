@@ -68,8 +68,7 @@ export const ProductOnePagerModal: React.FC<ProductOnePagerModalProps> = ({
   return (
     <div className="paste-modal open one-pager-overlay" onClick={onClose}>
       <div
-        className="paste-box one-pager-container"
-        style={{ maxWidth: '780px', maxHeight: '92vh', overflowY: 'auto', padding: '24px' }}
+        className="paste-box one-pager-container one-pager-modal-container"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Actions (Hidden on Print) */}
@@ -112,21 +111,12 @@ export const ProductOnePagerModal: React.FC<ProductOnePagerModalProps> = ({
         {/* Printable Area */}
         <div className="one-pager-printable">
           {/* Header */}
-          <div
-            style={{
-              borderBottom: '2px solid var(--ink)',
-              paddingBottom: '12px',
-              marginBottom: '18px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-            }}
-          >
+          <div className="one-pager-header-flex">
             <div>
-              <h1 style={{ margin: 0, fontSize: '24px', fontFamily: 'Georgia, serif', color: 'var(--ink)' }}>
+              <h1 className="one-pager-title">
                 {product.produit || 'Produit sans nom'}
               </h1>
-              <div style={{ fontSize: '12px', color: 'var(--ink-soft)', marginTop: '4px', fontFamily: 'monospace' }}>
+              <div className="one-pager-subtitle">
                 Marché d'origine : <strong>{product.marche || 'Non spécifié'}</strong> · Mode import :{' '}
                 <strong>{product.modeimport === 'avion' ? '✈️ Avion' : '🚢 Bateau'}</strong>
               </div>

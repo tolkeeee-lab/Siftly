@@ -41,12 +41,12 @@ export const PrintPOModal: React.FC<PrintPOModalProps> = ({ po, isOpen, onClose 
         <div className="one-pager-header-controls no-print">
           <div className="po-print-header-badge">
             <span className="po-number-badge">{po.orderNumber}</span>
-            <span style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>
+            <span className="po-print-header-badge-sub">
               Bon de Commande Officiel
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="po-print-actions">
             <button type="button" className="tbtn save" onClick={handlePrint}>
               <Printer className="w-4 h-4" />
               <span>Imprimer / PDF</span>
@@ -98,10 +98,10 @@ export const PrintPOModal: React.FC<PrintPOModalProps> = ({ po, isOpen, onClose 
               <thead>
                 <tr>
                   <th>Description de l'article</th>
-                  <th style={{ textAlign: 'center' }}>Quantité</th>
-                  <th style={{ textAlign: 'right' }}>Prix Usine ({po.currency})</th>
-                  <th style={{ textAlign: 'right' }}>Total ({po.currency})</th>
-                  <th style={{ textAlign: 'right' }}>Total (FCFA)</th>
+                  <th className="text-center">Quantité</th>
+                  <th className="text-right">Prix Usine ({po.currency})</th>
+                  <th className="text-right">Total ({po.currency})</th>
+                  <th className="text-right">Total (FCFA)</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,15 +109,15 @@ export const PrintPOModal: React.FC<PrintPOModalProps> = ({ po, isOpen, onClose 
                   <td>
                     <strong>{po.productName}</strong>
                     {po.variants && po.variants.length > 0 && (
-                      <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                      <div className="po-variants-list">
                         {po.variants.map((v) => `${v.name} (${v.quantity} pcs)`).join(' · ')}
                       </div>
                     )}
                   </td>
-                  <td style={{ textAlign: 'center', fontWeight: 600 }}>{po.quantity} pcs</td>
-                  <td style={{ textAlign: 'right' }}>{currencySymbol}{po.unitPriceOriginal}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 600 }}>{currencySymbol}{totalOrig.toLocaleString()}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 700, color: '#7A5A1E' }}>{formatFCFA(totalMerchandiseFCFA)}</td>
+                  <td className="text-center-bold">{po.quantity} pcs</td>
+                  <td className="text-right">{currencySymbol}{po.unitPriceOriginal}</td>
+                  <td className="text-right-bold">{currencySymbol}{totalOrig.toLocaleString()}</td>
+                  <td className="text-right-value">{formatFCFA(totalMerchandiseFCFA)}</td>
                 </tr>
               </tbody>
             </table>
