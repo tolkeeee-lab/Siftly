@@ -26,15 +26,9 @@ export async function GET(req: NextRequest) {
         .select('*')
         .eq('user_id', ownerId)
         .order('seq', { ascending: true });
-      if (res.data && res.data.length > 0) {
+      if (res.data) {
         data = res.data;
       }
-    }
-
-    // Fallback: If no products found for specific ownerId or user_id is null/unbound, fetch all products
-    if (!data || data.length === 0) {
-      const allRes = await supabase.from('products').select('*').order('seq', { ascending: true });
-      data = allRes.data || [];
     }
 
     return NextResponse.json({ products: data || [] });
