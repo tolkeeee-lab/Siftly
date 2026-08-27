@@ -150,11 +150,13 @@ export async function saveProductToSupabase(product: ProductData, targetUserId?:
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
       console.error('API failed to save product:', errBody);
+      alert('Erreur lors de la sauvegarde du produit dans Supabase: ' + JSON.stringify(errBody));
       return false;
     }
     return true;
-  } catch (err) {
+  } catch (err: any) {
     console.warn('Error upserting product to Supabase via API:', err);
+    alert('Erreur de connexion API Supabase (sauvegarde produit): ' + err.message);
     return false;
   }
 }
@@ -184,11 +186,13 @@ export async function saveAllProductsToSupabase(products: ProductData[], targetU
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
       console.error('API failed to save all products:', errBody);
+      alert('Erreur lors de la sauvegarde des produits (Synchro Cloud): ' + JSON.stringify(errBody));
       return false;
     }
     return true;
-  } catch (err) {
+  } catch (err: any) {
     console.warn('Error saving products to Supabase via API:', err);
+    alert('Erreur de connexion API Supabase (Synchro Cloud): ' + err.message);
     return false;
   }
 }
