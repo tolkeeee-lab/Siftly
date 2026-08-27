@@ -142,16 +142,9 @@ export async function saveProductToSupabase(product: ProductData, targetUserId?:
   const row = mapProductToDb(product, userId);
   
   try {
-    const client = getSupabaseClient();
-    const { data: { session } } = await client.auth.getSession();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`;
-    }
-
     const res = await fetch('/api/workspace/products', {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ products: [row] }),
     });
     if (!res.ok) {
@@ -183,16 +176,9 @@ export async function saveAllProductsToSupabase(products: ProductData[], targetU
   const rows = products.map((p) => mapProductToDb(p, userId));
   
   try {
-    const client = getSupabaseClient();
-    const { data: { session } } = await client.auth.getSession();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`;
-    }
-
     const res = await fetch('/api/workspace/products', {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ products: rows }),
     });
     if (!res.ok) {

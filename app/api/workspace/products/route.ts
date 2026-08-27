@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-function getAdminSupabase(authToken?: string) {
+function getAdminSupabase() {
   let rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
   let cleanUrl = rawUrl.trim().replace(/['"]/g, '');
   try {
@@ -11,12 +11,9 @@ function getAdminSupabase(authToken?: string) {
   }
   const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/['"]/g, '').replace(/\r?\n|\r/g, '');
   
-  const options: any = { auth: { autoRefreshToken: false, persistSession: false } };
-  if (authToken) {
-    options.global = { headers: { Authorization: `Bearer ${authToken}` } };
-  }
-  
-  return createClient(cleanUrl, serviceKey, options);
+  return createClient(cleanUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 // GET /api/workspace/products?ownerId=uuid
@@ -58,9 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const authHeader = req.headers.get('Authorization');
-    const token = authHeader?.replace('Bearer ', '');
-    const supabase = getAdminSupabase(token);
+    const supabase = getAdminSupabase();
     
     // Process rows
     const { error } = await supabase.from('products').upsert(products, { onConflict: 'id' });
