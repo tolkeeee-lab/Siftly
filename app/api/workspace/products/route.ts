@@ -32,21 +32,9 @@ export async function GET(req: NextRequest) {
         .eq('user_id', ownerId)
         .order('seq', { ascending: true });
         
-      if (res.error && res.error.message.includes('user_id')) {
-        // Fallback if user_id column doesn't exist in the database
-        const fallbackRes = await supabase.from('products').select('*').order('seq', { ascending: true });
-        if (fallbackRes.data) data = fallbackRes.data;
-      } else if (res.data && res.data.length > 0) {
+      if (res.data) {
         data = res.data;
-      } else {
-        // If query succeeds but returns empty, the user_id might be null in DB
-        const fallbackRes = await supabase.from('products').select('*').order('seq', { ascending: true });
-        if (fallbackRes.data) data = fallbackRes.data;
       }
-    } else {
-      // If no valid ownerId, just fetch all if it's a legacy setup
-      const allRes = await supabase.from('products').select('*').order('seq', { ascending: true });
-      if (allRes.data) data = allRes.data;
     }
 
     return NextResponse.json({ products: data || [] });
