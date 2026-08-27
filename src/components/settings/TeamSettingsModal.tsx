@@ -264,7 +264,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     <Check className="w-3.5 h-3.5 text-emerald-400 inline mr-1" />
                     <span>{user ? 'COMPTE CONNECTÉ ACTIF' : 'SESSION LOCALE ACTIVE'}</span>
                   </div>
-                  <h3 className="account-email-text">{ownerDisplayName} ({ownerEmail})</h3>
+                  <h3 className="account-email-text truncate w-full max-w-[250px] sm:max-w-none">{ownerDisplayName} ({ownerEmail})</h3>
                   <p className="account-sub-text">
                     Boutique : <strong>{shopDisplayName}</strong> · Vos collaborateurs et vos clients verront ce nom.
                   </p>
@@ -353,7 +353,7 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                     }}
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Se Déconnecter de la Session ({user.email})</span>
+                    <span className="truncate max-w-[200px] sm:max-w-none">Se Déconnecter ({user.email})</span>
                   </button>
                 </div>
               )}
@@ -499,30 +499,30 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   {members.map((member) => {
                     const perm = ROLE_PERMISSIONS[member.role];
                     return (
-                      <div key={member.id} className="p-3.5 rounded-xl bg-white border border-slate-200/90 flex items-center justify-between gap-3 shadow-sm hover:border-slate-300 transition">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
-                            {getInitials(member.name)}
+                      <div key={member.id} className="premium-member-row">
+                        <div className="member-avatar-badge">
+                          {getInitials(member.name)}
+                        </div>
+                        <div className="member-details-col" style={{ flex: 1 }}>
+                          <div className="member-name-row flex-wrap">
+                            <strong className="member-fullname">{member.name}</strong>
+                            <span className={`premium-role-tag ${
+                              member.role === 'assistant' ? 'assistant' :
+                              member.role === 'media_buyer' ? 'mediabuyer' :
+                              member.role === 'logistics' ? 'logistics' :
+                              'inventory'
+                            }`}>
+                              {perm?.label || member.role}
+                            </span>
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <strong className="text-sm font-bold text-slate-900">{member.name}</strong>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                member.role === 'assistant' ? 'bg-emerald-100 text-emerald-800' :
-                                member.role === 'media_buyer' ? 'bg-purple-100 text-purple-800' :
-                                member.role === 'logistics' ? 'bg-blue-100 text-blue-800' :
-                                'bg-amber-100 text-amber-800'
-                              }`}>
-                                {perm?.label || member.role}
-                              </span>
-                            </div>
-                            <span className="text-xs text-slate-500">{member.email}</span>
+                          <div className="member-contact-row">
+                            <span><Mail className="w-3 h-3 inline mr-1" />{member.email}</span>
                           </div>
                         </div>
 
                         <button
                           type="button"
-                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                          className="btn-remove-member ml-auto p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                           onClick={() => {
                             if (confirm(`Retirer l'accès à ${member.name} ?`)) {
                               removeMember(member.id);
