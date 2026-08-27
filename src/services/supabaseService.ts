@@ -138,23 +138,20 @@ export async function fetchProductsFromSupabase(targetUserId?: string): Promise<
 }
 
 export async function saveProductToSupabase(product: ProductData, targetUserId?: string): Promise<boolean> {
-  const client = getSupabaseClient();
-  if (!client) return false;
   const userId = targetUserId || (await getActiveUserId());
   const row = mapProductToDb(product, userId);
-  let { error } = await client.from('products').upsert(row, { onConflict: 'id' });
   
-  if (error && (error.code === 'PGRST204' || error.message?.includes('user_id'))) {
-    delete row.user_id;
-    const retry = await client.from('products').upsert(row, { onConflict: 'id' });
-    error = retry.error;
-  }
-
-  if (error) {
-    console.warn('Error upserting product to Supabase:', error);
+  try {
+    const res = await fetch('/api/workspace/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ products: [row] }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Error upserting product to Supabase via API:', err);
     return false;
   }
-  return true;
 }
 
 export async function deleteProductFromSupabase(id: string): Promise<boolean> {
@@ -169,21 +166,19 @@ export async function deleteProductFromSupabase(id: string): Promise<boolean> {
 }
 
 export async function saveAllProductsToSupabase(products: ProductData[], targetUserId?: string): Promise<boolean> {
-  const client = getSupabaseClient();
-  if (!client || products.length === 0) return false;
+  if (products.length === 0) return false;
   const userId = targetUserId || (await getActiveUserId());
   const rows = products.map((p) => mapProductToDb(p, userId));
-  let { error } = await client.from('products').upsert(rows, { onConflict: 'id' });
-
-  if (error && (error.code === 'PGRST204' || error.message?.includes('user_id'))) {
-    const fallbackRows = products.map((p) => mapProductToDb(p, undefined));
-    const retry = await client.from('products').upsert(fallbackRows, { onConflict: 'id' });
-    error = retry.error;
-  }
-
-  if (error) {
-    console.warn('Error saving products to Supabase:', error);
+  
+  try {
+    const res = await fetch('/api/workspace/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ products: rows }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Error saving products to Supabase via API:', err);
     return false;
   }
-  return true;
 }

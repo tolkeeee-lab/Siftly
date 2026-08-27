@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 function getAdminSupabase() {
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
-  const cleanUrl = rawUrl.trim().replace(/\/+$/, '');
-  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/\r?\n|\r/g, '');
+  let rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
+  let cleanUrl = rawUrl.trim().replace(/['"]/g, '');
+  try {
+    cleanUrl = new URL(cleanUrl).origin;
+  } catch (e) {
+    cleanUrl = cleanUrl.split('/rest/v1')[0].split('/graphql')[0];
+  }
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim().replace(/['"]/g, '').replace(/\r?\n|\r/g, '');
   return createClient(cleanUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -35,5 +40,39 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     console.error('Workspace products exception:', err);
     return NextResponse.json({ products: [], error: err.message }, { status: 500 });
+  }
+}
+
+// POST /api/workspace/products
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { products } = body;
+    
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return NextResponse.json({ success: true });
+    }
+
+    const supabase = getAdminSupabase();
+    
+    // Process rows
+    const { error } = await supabase.from('products').upsert(products, { onConflict: 'id' });
+    
+    if (error && (error.code === 'PGRST204' || error.message?.includes('user_id'))) {
+      const fallbackRows = products.map((p: any) => {
+        const copy = { ...p };
+        delete copy.user_id;
+        return copy;
+      });
+      const retry = await supabase.from('products').upsert(fallbackRows, { onConflict: 'id' });
+      if (retry.error) throw retry.error;
+    } else if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error('Workspace products POST exception:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
