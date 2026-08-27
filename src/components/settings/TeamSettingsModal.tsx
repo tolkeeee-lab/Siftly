@@ -316,13 +316,23 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
 
                   <div className="form-field">
                     <label>Pays & Zone d'Opération</label>
-                    <input
-                      type="text"
-                      placeholder="Bénin, Côte d'Ivoire, Sénégal"
+                    <select
                       className="premium-input"
                       value={editCountry}
                       onChange={(e) => setEditCountry(e.target.value)}
-                    />
+                    >
+                      <option value="Bénin">Bénin</option>
+                      <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                      <option value="Sénégal">Sénégal</option>
+                      <option value="Togo">Togo</option>
+                      <option value="Mali">Mali</option>
+                      <option value="Burkina Faso">Burkina Faso</option>
+                      <option value="Cameroun">Cameroun</option>
+                      <option value="Guinée">Guinée</option>
+                      <option value="Gabon">Gabon</option>
+                      <option value="RDC">RDC</option>
+                      <option value="Autre">Autre</option>
+                    </select>
                   </div>
                 </div>
 
