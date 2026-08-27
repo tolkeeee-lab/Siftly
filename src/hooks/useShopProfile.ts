@@ -20,9 +20,12 @@ const DEFAULT_SHOP_PROFILE: ShopProfile = {
   currency: 'FCFA',
 };
 
+import { useAuth } from './useAuth';
+
 export function useShopProfile() {
   const [profile, setProfile] = useState<ShopProfile>(DEFAULT_SHOP_PROFILE);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     try {
@@ -35,6 +38,27 @@ export function useShopProfile() {
     }
     setIsLoaded(true);
   }, []);
+
+  // Fetch shop name from cloud if user is logged in
+  useEffect(() => {
+    if (user?.id) {
+      fetch(`/api/workspace/shop-code?userId=${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.shopName && data.shopName !== 'Ma Boutique E-Commerce') {
+            setProfile(prev => {
+              if (prev.shopName !== data.shopName) {
+                const updated = { ...prev, shopName: data.shopName };
+                localStorage.setItem(SHOP_PROFILE_STORAGE_KEY, JSON.stringify(updated));
+                return updated;
+              }
+              return prev;
+            });
+          }
+        })
+        .catch(err => console.warn('Cloud sync error for shop profile:', err));
+    }
+  }, [user?.id]);
 
   const updateProfile = useCallback((newProfile: Partial<ShopProfile>) => {
     setProfile((prev) => {
