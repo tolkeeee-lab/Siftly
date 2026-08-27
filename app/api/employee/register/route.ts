@@ -47,19 +47,7 @@ export async function POST(req: NextRequest) {
       ownerId = shops[0].owner_id;
       shopName = shops[0].shop_name;
     } else {
-      // Find main owner from Auth users or team_members
-      const { data: mainUsers } = await supabase.auth.admin.listUsers();
-      if (mainUsers?.users && mainUsers.users.length > 0) {
-        ownerId = mainUsers.users[0].id;
-        // Auto-create shop row for future lookups
-        await supabase.from('shops').upsert({
-          owner_id: ownerId,
-          shop_name: 'Ma Boutique E-Commerce',
-          shop_code: cleanCode,
-        }, { onConflict: 'owner_id' });
-      } else {
-        ownerId = 'owner-main';
-      }
+      return NextResponse.json({ success: false, message: 'Code boutique invalide. Vérifiez auprès de votre administrateur.' }, { status: 400 });
     }
 
     // 2. Create user account in Auth Supabase
