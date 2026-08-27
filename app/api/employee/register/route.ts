@@ -66,11 +66,28 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (authErr && !authErr.message.includes('already')) {
-      console.warn('Auth user create warning:', authErr.message);
+    let userId = authData?.user?.id;
+
+    if (authErr) {
+      if (authErr.message.includes('already')) {
+        // User already exists in auth.users, we need to fetch their real ID to avoid FK violations
+        const { data: existingUsers, error: searchErr } = await supabase.auth.admin.listUsers();
+        const existingUser = existingUsers?.users?.find(u => u.email === cleanEmail);
+        
+        if (existingUser) {
+          userId = existingUser.id;
+        } else {
+          return NextResponse.json({ success: false, message: 'Ce compte existe déjà mais est introuvable. Veuillez contacter le support.' }, { status: 400 });
+        }
+      } else {
+        console.error('Auth user create error:', authErr.message);
+        return NextResponse.json({ success: false, message: `Erreur d'authentification: ${authErr.message}` }, { status: 500 });
+      }
     }
 
-    const userId = authData?.user?.id || crypto.randomUUID();
+    if (!userId) {
+      return NextResponse.json({ success: false, message: 'Erreur lors de la création de l\'utilisateur (ID manquant).' }, { status: 500 });
+    }
 
     // 3. Register employee in employees and team_members table
     const employeeRow = {
@@ -86,7 +103,10 @@ export async function POST(req: NextRequest) {
     };
 
     const { error: empErr } = await supabase.from('employees').upsert(employeeRow, { onConflict: 'id' });
-    if (empErr) console.error('Error inserting employee:', empErr);
+    if (empErr) {
+      console.error('Error inserting employee:', empErr);
+      return NextResponse.json({ success: false, message: `DB Error (employees): ${empErr.message}` }, { status: 500 });
+    }
 
     const { error: teamErr } = await supabase.from('team_members').upsert({
       id: crypto.randomUUID(),
@@ -96,7 +116,11 @@ export async function POST(req: NextRequest) {
       role: 'assistant',
       is_active: false,
     }, { onConflict: 'id' });
-    if (teamErr) console.error('Error inserting team_member:', teamErr);
+    
+    if (teamErr) {
+      console.error('Error inserting team_member:', teamErr);
+      return NextResponse.json({ success: false, message: `DB Error (team_members): ${teamErr.message}` }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
