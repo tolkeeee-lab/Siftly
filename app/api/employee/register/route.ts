@@ -3,10 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 
 function getAdminSupabase() {
   let rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tkbqmthwqxvevlrqrann.supabase.co';
-  let cleanUrl = rawUrl.trim().replace(/['"]/g, '').replace(/\/+$/, '');
-  if (!cleanUrl.startsWith('http')) {
-    cleanUrl = `https://${cleanUrl}`;
+  let cleanUrl = rawUrl.trim().replace(/['"]/g, '');
+  try {
+    cleanUrl = new URL(cleanUrl).origin;
+  } catch (e) {
+    cleanUrl = cleanUrl.split('/rest/v1')[0].split('/graphql')[0];
   }
+  
   const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '')
     .trim().replace(/['"]/g, '').replace(/\r?\n|\r/g, '');
   
