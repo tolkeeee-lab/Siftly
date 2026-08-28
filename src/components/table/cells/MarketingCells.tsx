@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Copy, Calculator, FileText, Sparkles } from 'lucide-react';
+import { X, Copy, Calculator, FileText, Sparkles, Star } from 'lucide-react';
 import { ProductData } from '../../../types/product';
 
 interface MarketingCellsProps {
@@ -71,6 +71,14 @@ export const MarketingCells: React.FC<MarketingCellsProps> = ({
               <FileText className="w-3 h-3 text-gold-deep" />
             </button>
           )}
+          <button
+            className={`rowdel ${product.isFavorite ? 'fav-active' : ''}`}
+            type="button"
+            title={product.isFavorite ? "Retirer de la Shortlist" : "Ajouter à ma Shortlist (Favori)"}
+            onClick={() => onChange('isFavorite', !product.isFavorite)}
+          >
+            <Star className={`w-3 h-3 ${product.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-slate-400'}`} />
+          </button>
           <button
             className="rowdel"
             type="button"

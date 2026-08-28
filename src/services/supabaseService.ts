@@ -47,7 +47,9 @@ export function mapProductToDb(p: ProductData, userId?: string): Record<string, 
     poidsfacteur: p.poidsfacteur === '' ? null : parseNum(p.poidsfacteur),
     cible: p.cible || '',
     angle: p.angle || '',
-    market_analysis: p.marketAnalysis ? JSON.stringify(p.marketAnalysis) : null,
+    market_analysis: p.marketAnalysis || p.isFavorite !== undefined 
+      ? JSON.stringify({ ...(p.marketAnalysis || {}), _isFavorite: p.isFavorite }) 
+      : null,
     updated_at: new Date().toISOString(),
   };
 
@@ -61,9 +63,18 @@ export function mapProductToDb(p: ProductData, userId?: string): Record<string, 
 
 export function mapDbToProduct(row: Record<string, any>): ProductData {
   let marketAnalysis = undefined;
+  let isFavorite = false;
+
   if (row.market_analysis) {
     try {
-      marketAnalysis = typeof row.market_analysis === 'string' ? JSON.parse(row.market_analysis) : row.market_analysis;
+      const parsed = typeof row.market_analysis === 'string' ? JSON.parse(row.market_analysis) : row.market_analysis;
+      if (parsed._isFavorite !== undefined) {
+        isFavorite = parsed._isFavorite;
+        delete parsed._isFavorite;
+      }
+      if (Object.keys(parsed).length > 0) {
+        marketAnalysis = parsed;
+      }
     } catch { /* ignore */ }
   }
 
@@ -97,6 +108,7 @@ export function mapDbToProduct(row: Record<string, any>): ProductData {
     poidsfacteur: row.poidsfacteur ?? '',
     cible: row.cible || '',
     angle: row.angle || '',
+    isFavorite,
     marketAnalysis,
   };
 }

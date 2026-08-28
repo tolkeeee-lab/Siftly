@@ -40,11 +40,10 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
         <button
           type="button"
           className={`category-pill ${selectedCategory === 'favorites' ? 'active' : ''}`}
-          onClick={() => onSelectCategory('favorites')}
-          style={{ borderColor: selectedCategory === 'favorites' ? '#ef4444' : undefined }}
+          onClick={() => onSelectCategory(selectedCategory === 'favorites' ? 'all' : 'favorites')}
         >
-          <span>❤️ Ma Shortlist (Favoris)</span>
-          {favoritesCount > 0 && <span className="cat-count-badge" style={{ backgroundColor: '#ef4444' }}>{favoritesCount}</span>}
+          <span>⭐ Shortlist</span>
+          {favoritesCount > 0 && <span className="cat-count-badge">{favoritesCount}</span>}
         </button>
 
         {PRODUCT_CATEGORIES.map((cat) => {

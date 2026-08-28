@@ -483,8 +483,10 @@ input.cell-in.score { text-align: center; font-family: 'IBM Plex Mono', monospac
 .computed { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; color: var(--gold-deep); text-align: right; white-space: nowrap; padding: 8px 12px; }
 .computed.note-finale { text-align: center; border-radius: 6px; font-size: 14px; font-weight: 600; }
 
-.rowdel { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--panel-line); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background .15s; }
+.rowdel { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--panel-line); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background .15s, border-color .15s; }
 .rowdel:hover { background: var(--rust-wash); }
+.rowdel.fav-active { background: var(--gold-wash); border-color: var(--gold); }
+.rowdel.fav-active:hover { background: #E6D3A2; }
 .addrow-wrap { padding: 16px 10px 6px; }
 .addrow { display: inline-flex; align-items: center; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: .04em; color: var(--gold-deep); background: var(--gold-wash); border: none; padding: 10px 16px; border-radius: 20px; cursor: pointer; transition: background .15s; }
 .addrow:hover { background: #E6D3A2; }

@@ -44,12 +44,15 @@ export async function GET(req: NextRequest) {
     if (userId && userId !== 'guest') {
       const { data: shops } = await supabase
         .from('shops')
-        .select('shop_code')
+        .select('shop_code, shop_name')
         .eq('owner_id', userId)
         .limit(1);
 
       if (shops && shops.length > 0 && shops[0].shop_code) {
-        return NextResponse.json({ shopCode: shops[0].shop_code });
+        return NextResponse.json({ 
+          shopCode: shops[0].shop_code,
+          shopName: shops[0].shop_name 
+        });
       }
     }
 

@@ -19,6 +19,7 @@ import {
   Sparkles,
   Download,
   Heart,
+  Star,
 } from 'lucide-react';
 import { ProductData, PRODUCT_CATEGORIES } from '../../types/product';
 import {
@@ -205,6 +206,9 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
         <div className="card-frame-header-left">
           <div className="card-frame-badge-line">
             <span className={`card-frame-rank ${index === 0 ? 'gold' : ''}`}>{rankBadge}</span>
+            {product.isFavorite && (
+              <span className="card-frame-fav-tag">⭐ Shortlist</span>
+            )}
             <span className="card-frame-sub-label">Fiche d'Analyse Produit</span>
           </div>
 
@@ -261,24 +265,11 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </div>
         </div>
 
-        {/* Favorite & Note Finale Pill */}
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            className="flex items-center justify-center p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            onClick={() => onUpdate(product.id, 'isFavorite', !product.isFavorite)}
-            title={product.isFavorite ? "Retirer des Favoris" : "Ajouter aux Favoris (Shortlist)"}
-          >
-            <Heart 
-              className={`w-6 h-6 transition-all ${product.isFavorite ? 'fill-red-500 text-red-500 scale-110' : 'text-slate-400 hover:text-red-400'}`} 
-            />
-          </button>
-          
-          <div className="card-frame-score-box">
-            <div className="card-frame-score-lbl">Note Finale</div>
-            <div className="card-frame-score-pill" style={getScoreColorStyle(noteNum)}>
-              {noteText}
-            </div>
+        {/* Note Finale Pill */}
+        <div className="card-frame-score-box">
+          <div className="card-frame-score-lbl">Note Finale</div>
+          <div className="card-frame-score-pill" style={getScoreColorStyle(noteNum)}>
+            {noteText}
           </div>
         </div>
       </div>
@@ -612,6 +603,14 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
         </div>
 
         <div className="frame-actions-right">
+          <button
+            type="button"
+            className={`rowdel ${product.isFavorite ? 'fav-active' : ''}`}
+            title={product.isFavorite ? "Retirer de la Shortlist" : "Ajouter à ma Shortlist (Favori)"}
+            onClick={() => onUpdate(product.id, 'isFavorite', !product.isFavorite)}
+          >
+            <Star className={`w-3.5 h-3.5 ${product.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-slate-400'}`} />
+          </button>
           <button
             type="button"
             className="rowdel"
