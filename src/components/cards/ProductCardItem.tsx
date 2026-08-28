@@ -17,6 +17,7 @@ import {
   Globe,
   ShoppingBag,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { ProductData, PRODUCT_CATEGORIES } from '../../types/product';
 import {
@@ -94,8 +95,76 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
     reader.readAsDataURL(file);
   };
 
+  const handleExportHTML = () => {
+    try {
+      const cardId = `product-card-${product.id}`;
+      const cardNode = document.getElementById(cardId);
+      if (!cardNode) return;
+
+      // Ensure input values are reflected in attributes before cloning
+      const inputs = cardNode.querySelectorAll('input, textarea');
+      inputs.forEach((input: any) => {
+        if (input.type === 'checkbox') {
+          if (input.checked) input.setAttribute('checked', 'checked');
+          else input.removeAttribute('checked');
+        } else {
+          input.setAttribute('value', input.value);
+          if (input.tagName === 'TEXTAREA') {
+            input.textContent = input.value;
+          }
+        }
+      });
+
+      const clone = cardNode.cloneNode(true) as HTMLElement;
+      
+      // Remove footer actions from export
+      const footer = clone.querySelector('.card-frame-footer');
+      if (footer) footer.remove();
+      
+      // Optional: remove rowdel (trash) buttons from headers/lists
+      clone.querySelectorAll('.rowdel').forEach(el => el.remove());
+
+      let styles = '';
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          if (sheet.cssRules) {
+            for (const rule of Array.from(sheet.cssRules)) {
+              styles += rule.cssText + '\\n';
+            }
+          }
+        } catch (e) {}
+      }
+
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Fiche Produit - ${product.produit || 'Nouveau'}</title>
+  <style>
+    body { background-color: #0F172A; color: #F8FAFC; padding: 2rem; display: flex; justify-content: center; }
+    ${styles}
+    .product-card-frame { margin: 0 auto; max-width: 800px; }
+  </style>
+</head>
+<body>
+  ${clone.outerHTML}
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Fiche_Produit_${product.produit.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
+      link.click();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div className={`product-card-frame ${isWinner ? 'winner-frame' : ''}`}>
+    <div id={`product-card-${product.id}`} className={`product-card-frame ${isWinner ? 'winner-frame' : ''}`}>
       {/* Header Banner */}
       <div className="card-frame-header">
         <div className="card-frame-header-left">
@@ -471,6 +540,16 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           >
             <FileText className="w-3.5 h-3.5" />
             <span>Fiche PDF</span>
+          </button>
+
+          <button
+            type="button"
+            className="frame-btn secondary"
+            title="Exporter la Fiche en HTML interactif"
+            onClick={handleExportHTML}
+          >
+            <Download className="w-3.5 h-3.5 text-sky-400" />
+            <span>HTML</span>
           </button>
 
           <button
