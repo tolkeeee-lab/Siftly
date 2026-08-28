@@ -96,13 +96,12 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
     reader.readAsDataURL(file);
   };
 
-  const handleExportHTML = () => {
+  const handleExportHTML = async () => {
     try {
       const cardId = `product-card-${product.id}`;
       const cardNode = document.getElementById(cardId);
       if (!cardNode) return;
 
-      // Ensure input values are reflected in attributes before cloning
       const inputs = cardNode.querySelectorAll('input, textarea');
       inputs.forEach((input: any) => {
         if (input.type === 'checkbox') {
@@ -118,38 +117,73 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
 
       const clone = cardNode.cloneNode(true) as HTMLElement;
       
-      // Remove footer actions from export
       const footer = clone.querySelector('.card-frame-footer');
       if (footer) footer.remove();
       
-      // Optional: remove rowdel (trash) buttons from headers/lists
       clone.querySelectorAll('.rowdel').forEach(el => el.remove());
 
+      // Better CSS extraction that works on Vercel/Next.js
       let styles = '';
-      for (const sheet of Array.from(document.styleSheets)) {
-        try {
-          if (sheet.cssRules) {
-            for (const rule of Array.from(sheet.cssRules)) {
-              styles += rule.cssText + '\\n';
+      const styleElements = document.querySelectorAll('style, link[rel="stylesheet"]');
+      for (const el of Array.from(styleElements)) {
+        if (el.tagName === 'STYLE') {
+          styles += el.innerHTML + '\\n';
+        } else if (el.tagName === 'LINK') {
+          try {
+            const href = (el as HTMLLinkElement).href;
+            if (href) {
+              const res = await fetch(href);
+              const cssText = await res.text();
+              styles += cssText + '\\n';
             }
+          } catch (err) {
+            console.warn('Could not fetch stylesheet:', el);
           }
-        } catch (e) {}
+        }
       }
 
+      // Add a background matching the app's theme so the card looks identical
       const htmlContent = `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8">
   <title>Fiche Produit - ${product.produit || 'Nouveau'}</title>
   <style>
-    body { background-color: #0F172A; color: #F8FAFC; padding: 2rem; display: flex; justify-content: center; }
+    /* Reset and global setup */
+    body, html {
+      background-color: #0B1121; /* Tailwind slate-950 */
+      color: #F8FAFC;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    /* Injected app styles */
     ${styles}
-    .product-card-frame { margin: 0 auto; max-width: 800px; }
+    
+    /* Wrapper styling to mimic the app grid environment */
+    .export-container {
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .product-card-frame { 
+      margin: 0 auto; 
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    }
   </style>
 </head>
 <body>
-  ${clone.outerHTML}
+  <div class="export-container">
+    ${clone.outerHTML}
+  </div>
 </body>
 </html>`;
 

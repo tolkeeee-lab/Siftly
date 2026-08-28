@@ -146,7 +146,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
     onClose();
   };
 
-  const handleExportHTML = () => {
+  const handleExportHTML = async () => {
     try {
       const modalNode = document.querySelector('.market-analysis-modal');
       if (!modalNode) return;
@@ -155,31 +155,68 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
       const footer = clone.querySelector('.market-modal-footer');
       if (footer) footer.remove();
 
+      // Better CSS extraction that works on Vercel/Next.js
       let styles = '';
-      for (const sheet of Array.from(document.styleSheets)) {
-        try {
-          if (sheet.cssRules) {
-            for (const rule of Array.from(sheet.cssRules)) {
-              styles += rule.cssText + '\n';
+      const styleElements = document.querySelectorAll('style, link[rel="stylesheet"]');
+      for (const el of Array.from(styleElements)) {
+        if (el.tagName === 'STYLE') {
+          styles += el.innerHTML + '\\n';
+        } else if (el.tagName === 'LINK') {
+          try {
+            const href = (el as HTMLLinkElement).href;
+            if (href) {
+              const res = await fetch(href);
+              const cssText = await res.text();
+              styles += cssText + '\\n';
             }
+          } catch (err) {
+            console.warn('Could not fetch stylesheet:', el);
           }
-        } catch (e) {}
+        }
       }
 
       const htmlContent = `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8">
   <title>Analyse Marché - ${product.produit}</title>
   <style>
-    body { background-color: #0F172A; color: #F8FAFC; padding: 2rem; }
+    /* Reset and global setup */
+    body, html { 
+      background-color: #0B1121; /* Tailwind slate-950 */
+      color: #F8FAFC; 
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    /* Injected app styles */
     ${styles}
-    .market-analysis-modal { position: static; max-width: 900px; margin: 0 auto; }
+    
+    /* Export specific overrides */
+    .export-container {
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .market-analysis-modal { 
+      position: static !important;
+      transform: none !important;
+      max-width: 900px !important; 
+      width: 100% !important;
+      margin: 0 auto !important; 
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    }
   </style>
 </head>
 <body>
-  ${clone.outerHTML}
+  <div class="export-container">
+    ${clone.outerHTML}
+  </div>
 </body>
 </html>`;
 
@@ -187,7 +224,7 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Analyse_${product.produit}.html`;
+      link.download = `Analyse_Marche_${product.seq}_${product.produit.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
       link.click();
     } catch (err) {
       console.error(err);
