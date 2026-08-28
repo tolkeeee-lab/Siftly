@@ -589,108 +589,108 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
                     </p>
 
                     {/* 4 Multi-Angle Facebook Ads Library Buttons */}
-                    <div className="smart-fb-grid">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                       <a
                         href={spy.fbCodUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="smart-fb-card cod-angle"
+                        className="flex flex-col gap-1.5 p-3 rounded-xl border border-amber-500/40 bg-slate-900/50 hover:bg-slate-900 hover:border-amber-400 hover:-translate-y-0.5 transition-all duration-200 no-underline shadow-sm"
                         title="Ouvrir Facebook Ads Library avec l'angle Paiement à la Livraison"
                       >
-                        <div className="smart-fb-top">
-                          <span className="smart-tag">💰 Angle COD (Recommandé)</span>
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span className="text-[10px] font-bold text-slate-100 uppercase tracking-wider font-mono">💰 Angle COD (Recommandé)</span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </div>
-                        <strong className="smart-fb-query">{spy.fbCodQuery}</strong>
-                        <span className="smart-fb-hint">Toutes les pubs africaines avec paiement à la livraison</span>
+                        <strong className="text-xs text-amber-300 font-mono break-words">{spy.fbCodQuery}</strong>
+                        <span className="text-[11px] text-slate-400 leading-tight">Toutes les pubs africaines avec paiement à la livraison</span>
                       </a>
 
                       <a
                         href={spy.fbDeliveryUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="smart-fb-card delivery-angle"
+                        className="flex flex-col gap-1.5 p-3 rounded-xl border border-emerald-500/40 bg-slate-900/50 hover:bg-slate-900 hover:border-emerald-400 hover:-translate-y-0.5 transition-all duration-200 no-underline shadow-sm"
                         title="Ouvrir Facebook Ads Library avec l'angle Livraison Gratuite"
                       >
-                        <div className="smart-fb-top">
-                          <span className="smart-tag">🚚 Angle Offre & Promo</span>
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span className="text-[10px] font-bold text-slate-100 uppercase tracking-wider font-mono">🚚 Angle Offre & Promo</span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </div>
-                        <strong className="smart-fb-query">{spy.fbDeliveryQuery}</strong>
-                        <span className="smart-fb-hint">Pubs avec offres irrésistibles & livraison gratuite</span>
+                        <strong className="text-xs text-amber-300 font-mono break-words">{spy.fbDeliveryQuery}</strong>
+                        <span className="text-[11px] text-slate-400 leading-tight">Pubs avec offres irrésistibles & livraison gratuite</span>
                       </a>
 
                       <a
                         href={spy.fbBenefitUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="smart-fb-card pain-angle"
+                        className="flex flex-col gap-1.5 p-3 rounded-xl border border-indigo-500/40 bg-slate-900/50 hover:bg-slate-900 hover:border-indigo-400 hover:-translate-y-0.5 transition-all duration-200 no-underline shadow-sm"
                         title="Ouvrir Facebook Ads Library avec l'angle Douleur & Problème Résolu"
                       >
-                        <div className="smart-fb-top">
-                          <span className="smart-tag">🎯 Angle Douleur & Problème</span>
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span className="text-[10px] font-bold text-slate-100 uppercase tracking-wider font-mono">🎯 Angle Douleur & Problème</span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </div>
-                        <strong className="smart-fb-query">{spy.fbBenefitQuery}</strong>
-                        <span className="smart-fb-hint">Pubs axées sur le problème quotidien résolu</span>
+                        <strong className="text-xs text-amber-300 font-mono break-words">{spy.fbBenefitQuery}</strong>
+                        <span className="text-[11px] text-slate-400 leading-tight">Pubs axées sur le problème quotidien résolu</span>
                       </a>
 
                       <a
                         href={spy.fbExactUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="smart-fb-card exact-angle"
+                        className="flex flex-col gap-1.5 p-3 rounded-xl border border-slate-600/50 bg-slate-900/50 hover:bg-slate-900 hover:border-slate-400 hover:-translate-y-0.5 transition-all duration-200 no-underline shadow-sm"
                         title="Ouvrir Facebook Ads Library avec le nom exact"
                       >
-                        <div className="smart-fb-top">
-                          <span className="smart-tag">🔍 Angle Nom Produit</span>
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span className="text-[10px] font-bold text-slate-100 uppercase tracking-wider font-mono">🔍 Angle Nom Produit</span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </div>
-                        <strong className="smart-fb-query">{spy.fbExactQuery}</strong>
-                        <span className="smart-fb-hint">Recherche brute sur le titre exact</span>
+                        <strong className="text-xs text-amber-300 font-mono break-words">{spy.fbExactQuery}</strong>
+                        <span className="text-[11px] text-slate-400 leading-tight">Recherche brute sur le titre exact</span>
                       </a>
                     </div>
 
                     {/* TikTok & Platform Shortcuts Row */}
-                    <div className="adspy-extra-shortcuts">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <a
                         href={spy.tiktokViralUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="extra-spy-btn tt-btn"
+                        className="flex items-center justify-between p-2 rounded-lg bg-black text-white hover:bg-gray-900 border border-gray-800 transition-colors text-[10px] sm:text-xs font-bold no-underline shadow-sm"
                       >
-                        <span>🎵 TikTok #TikTokMadeMeBuyIt</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span className="truncate mr-1">🎵 TikTok Viral</span>
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
                       </a>
 
                       <a
                         href={spy.tiktokDemoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="extra-spy-btn tt-demo-btn"
+                        className="flex items-center justify-between p-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 border border-rose-800 transition-colors text-[10px] sm:text-xs font-bold no-underline shadow-sm"
                       >
-                        <span>🎬 Démo Vidéo & Avant/Après</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span className="truncate mr-1">🎬 Démo Vidéo</span>
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
                       </a>
 
                       <a
                         href={spy.aliexpressReviewsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="extra-spy-btn ali-btn"
+                        className="flex items-center justify-between p-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 border border-orange-800 transition-colors text-[10px] sm:text-xs font-bold no-underline shadow-sm"
                       >
-                        <span>📦 Avis Photos (AliExpress)</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span className="truncate mr-1">📦 Avis Ali</span>
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
                       </a>
 
                       <a
                         href={spy.googleTrendsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="extra-spy-btn trends-btn"
+                        className="flex items-center justify-between p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 border border-blue-800 transition-colors text-[10px] sm:text-xs font-bold no-underline shadow-sm"
                       >
-                        <span>📈 Google Trends</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span className="truncate mr-1">📈 Trends</span>
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
                       </a>
                     </div>
                   </div>
