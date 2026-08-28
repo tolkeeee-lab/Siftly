@@ -9,12 +9,14 @@ interface CategoryFilterBarProps {
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
   categoryCounts?: Record<string, number>;
+  favoritesCount?: number;
 }
 
 export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
   selectedCategory,
   onSelectCategory,
   categoryCounts = {},
+  favoritesCount = 0,
 }) => {
   const totalAll = Object.values(categoryCounts).reduce((a, b) => a + b, 0);
 
@@ -33,6 +35,16 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
         >
           <span>🌐 Toutes les Niches</span>
           {totalAll > 0 && <span className="cat-count-badge">{totalAll}</span>}
+        </button>
+
+        <button
+          type="button"
+          className={`category-pill ${selectedCategory === 'favorites' ? 'active' : ''}`}
+          onClick={() => onSelectCategory('favorites')}
+          style={{ borderColor: selectedCategory === 'favorites' ? '#ef4444' : undefined }}
+        >
+          <span>❤️ Ma Shortlist (Favoris)</span>
+          {favoritesCount > 0 && <span className="cat-count-badge" style={{ backgroundColor: '#ef4444' }}>{favoritesCount}</span>}
         </button>
 
         {PRODUCT_CATEGORIES.map((cat) => {

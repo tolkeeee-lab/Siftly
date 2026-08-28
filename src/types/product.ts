@@ -87,6 +87,7 @@ export interface ProductData extends ProductScoreCriteria {
   produit: string;
   category?: string;                               // Catégorie / Niche du produit
   imgSrc?: string;
+  isFavorite?: boolean;                            // Favoris (Shortlist finale)
   creative?: string;
   alibaba?: string;
   siteweb?: string;

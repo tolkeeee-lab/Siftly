@@ -110,6 +110,7 @@ export function App() {
 
   // Filter products by selected category
   const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'favorites') return processedProducts.filter(p => p.isFavorite);
     if (selectedCategory === 'all') return processedProducts;
     return processedProducts.filter((p) => (p.category || 'Maison & Confort') === selectedCategory);
   }, [processedProducts, selectedCategory]);
@@ -147,6 +148,7 @@ export function App() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         categoryCounts={categoryCounts}
+        favoritesCount={processedProducts.filter(p => p.isFavorite).length}
       />
 
       <StatStrip stats={stats} />

@@ -18,6 +18,7 @@ import {
   ShoppingBag,
   Sparkles,
   Download,
+  Heart,
 } from 'lucide-react';
 import { ProductData, PRODUCT_CATEGORIES } from '../../types/product';
 import {
@@ -226,11 +227,24 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
           </div>
         </div>
 
-        {/* Note Finale Pill */}
-        <div className="card-frame-score-box">
-          <div className="card-frame-score-lbl">Note Finale</div>
-          <div className="card-frame-score-pill" style={getScoreColorStyle(noteNum)}>
-            {noteText}
+        {/* Favorite & Note Finale Pill */}
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            className="flex items-center justify-center p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            onClick={() => onUpdate(product.id, 'isFavorite', !product.isFavorite)}
+            title={product.isFavorite ? "Retirer des Favoris" : "Ajouter aux Favoris (Shortlist)"}
+          >
+            <Heart 
+              className={`w-6 h-6 transition-all ${product.isFavorite ? 'fill-red-500 text-red-500 scale-110' : 'text-slate-400 hover:text-red-400'}`} 
+            />
+          </button>
+          
+          <div className="card-frame-score-box">
+            <div className="card-frame-score-lbl">Note Finale</div>
+            <div className="card-frame-score-pill" style={getScoreColorStyle(noteNum)}>
+              {noteText}
+            </div>
           </div>
         </div>
       </div>
