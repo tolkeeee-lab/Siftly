@@ -53,7 +53,14 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
     setEditOwnerName(profile.ownerName || '');
     setEditShopName(profile.shopName || '');
     setEditPhone(profile.phone || '');
-    setEditCountry(profile.country || 'Bénin / Côte d\'Ivoire / Sénégal');
+    
+    // Normalize country for the select dropdown
+    const c = profile.country || '';
+    if (c === 'Bénin / Côte d\'Ivoire / Sénégal') {
+      setEditCountry(''); // Force them to choose
+    } else {
+      setEditCountry(c);
+    }
 
     if (user?.id) {
       import('../../utils/shopCodeUtils').then(({ getOrCreateShopCode }) => {
@@ -317,10 +324,17 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                   <div className="form-field">
                     <label>Pays & Zone d'Opération</label>
                     <select
-                      className="premium-input"
-                      value={editCountry}
-                      onChange={(e) => setEditCountry(e.target.value)}
+                      className="premium-input mb-2"
+                      value={editCountry.startsWith('Autre:') ? 'Autre' : editCountry}
+                      onChange={(e) => {
+                        if (e.target.value === 'Autre') {
+                          setEditCountry('Autre: ');
+                        } else {
+                          setEditCountry(e.target.value);
+                        }
+                      }}
                     >
+                      <option value="" disabled>Sélectionnez votre pays...</option>
                       <option value="Bénin">Bénin</option>
                       <option value="Côte d'Ivoire">Côte d'Ivoire</option>
                       <option value="Sénégal">Sénégal</option>
@@ -331,8 +345,19 @@ export const TeamSettingsModal: React.FC<TeamSettingsModalProps> = ({ isOpen, on
                       <option value="Guinée">Guinée</option>
                       <option value="Gabon">Gabon</option>
                       <option value="RDC">RDC</option>
-                      <option value="Autre">Autre</option>
+                      <option value="Autre">Autre (Préciser)</option>
                     </select>
+                    
+                    {editCountry.startsWith('Autre') && (
+                      <input
+                        type="text"
+                        placeholder="Précisez votre pays..."
+                        className="premium-input"
+                        value={editCountry.replace('Autre:', '').trim()}
+                        onChange={(e) => setEditCountry('Autre: ' + e.target.value)}
+                        autoFocus
+                      />
+                    )}
                   </div>
                 </div>
 

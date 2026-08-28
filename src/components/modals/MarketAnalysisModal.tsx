@@ -11,6 +11,7 @@ import {
   Globe,
   CheckCircle2,
   Save,
+  Download,
   AlertTriangle,
   Flame,
   HelpCircle,
@@ -143,6 +144,54 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
       onSaveAnalysis(product.id, analysis);
     }
     onClose();
+  };
+
+  const handleExportHTML = () => {
+    try {
+      const modalNode = document.querySelector('.market-analysis-modal');
+      if (!modalNode) return;
+
+      const clone = modalNode.cloneNode(true) as HTMLElement;
+      const footer = clone.querySelector('.market-modal-footer');
+      if (footer) footer.remove();
+
+      let styles = '';
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          if (sheet.cssRules) {
+            for (const rule of Array.from(sheet.cssRules)) {
+              styles += rule.cssText + '\n';
+            }
+          }
+        } catch (e) {}
+      }
+
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Analyse Marché - ${product.produit}</title>
+  <style>
+    body { background-color: #0F172A; color: #F8FAFC; padding: 2rem; }
+    ${styles}
+    .market-analysis-modal { position: static; max-width: 900px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  ${clone.outerHTML}
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Analyse_${product.produit}.html`;
+      link.click();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const persona = analysis.buyerPersona || {
@@ -799,14 +848,25 @@ export const MarketAnalysisModal: React.FC<MarketAnalysisModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="market-modal-footer">
+        <div className="market-modal-footer flex items-center justify-between">
           <button type="button" className="btn-cancel" onClick={onClose}>
             Fermer
           </button>
-          <button type="button" className="btn-save-analysis" onClick={handleSave}>
-            <Save className="w-4 h-4" />
-            <span>Enregistrer l'Analyse Complète</span>
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              type="button" 
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 hover:text-white transition-colors"
+              onClick={handleExportHTML}
+            >
+              <Download className="w-4 h-4" />
+              <span>Exporter HTML</span>
+            </button>
+            <button type="button" className="btn-save-analysis" onClick={handleSave}>
+              <Save className="w-4 h-4" />
+              <span>Enregistrer l'Analyse Complète</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
