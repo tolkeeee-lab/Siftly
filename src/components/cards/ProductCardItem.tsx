@@ -206,9 +206,15 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
         <div className="card-frame-header-left">
           <div className="card-frame-badge-line">
             <span className={`card-frame-rank ${index === 0 ? 'gold' : ''}`}>{rankBadge}</span>
-            {product.isFavorite && (
-              <span className="card-frame-fav-tag">⭐ Shortlist</span>
-            )}
+            <button
+              type="button"
+              className={`card-frame-fav-btn ${product.isFavorite ? 'active' : ''}`}
+              onClick={() => onUpdate(product.id, 'isFavorite', !product.isFavorite)}
+              title={product.isFavorite ? "Retirer des Favoris" : "Ajouter aux Favoris"}
+            >
+              <Star className={`w-3.5 h-3.5 ${product.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-slate-400'}`} />
+              <span>{product.isFavorite ? '⭐ En Favoris' : '☆ Ajouter Favoris'}</span>
+            </button>
             <span className="card-frame-sub-label">Fiche d'Analyse Produit</span>
           </div>
 

@@ -324,6 +324,36 @@
   font-family: 'IBM Plex Mono', monospace;
 }
 
+.card-frame-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94A3B8;
+  padding: 3px 9px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.card-frame-fav-btn:hover {
+  background: rgba(255, 184, 0, 0.15);
+  border-color: var(--gold);
+  color: #F8FAFC;
+  transform: translateY(-1px);
+}
+
+.card-frame-fav-btn.active {
+  background: rgba(255, 184, 0, 0.18);
+  border-color: var(--gold);
+  color: var(--gold-deep);
+  box-shadow: 0 0 10px rgba(255, 184, 0, 0.25);
+}
+
 .card-frame-fav-tag {
   display: inline-flex;
   align-items: center;
