@@ -15,6 +15,7 @@ import {
   Feather,
   Package,
   Dumbbell,
+  Star,
 } from 'lucide-react';
 import { ScoreFieldKey } from '../../types/product';
 import { SCORE_CRITERIA_LIST } from '../../constants/presets';
@@ -63,6 +64,7 @@ export const RankPanel: React.FC<RankPanelProps> = ({
 
   const filters: Array<{ key: QuickFilterKey; label: string; icon: React.ReactNode; count: number }> = [
     { key: 'all', label: 'Tous', icon: null, count: filterCounts.all },
+    { key: 'favorites', label: '⭐ Favoris', icon: <Star className="w-3 h-3 text-amber-400 fill-amber-400" />, count: filterCounts.favorites || 0 },
     { key: 'weight_light', label: '🪶 Plume (<300g)', icon: <Feather className="w-3 h-3 text-emerald-400" />, count: filterCounts.weight_light },
     { key: 'weight_medium', label: '📦 Standard (300g-1kg)', icon: <Package className="w-3 h-3 text-amber-400" />, count: filterCounts.weight_medium },
     { key: 'weight_heavy', label: '🏋️ Lourd (>1kg)', icon: <Dumbbell className="w-3 h-3 text-rose-400" />, count: filterCounts.weight_heavy },

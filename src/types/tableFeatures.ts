@@ -4,6 +4,7 @@ export type TablePresetView = 'all' | 'financial' | 'scoring' | 'compact';
 
 export type QuickFilterKey =
   | 'all'
+  | 'favorites'      // ⭐ Favoris (Shortlist retenue)
   | 'weight_light'   // 🪶 Ultra-Léger (< 0.3 kg) - Idéal Avion & Moto
   | 'weight_medium'  // 📦 Standard (0.3 - 1.0 kg) - Format classique COD
   | 'weight_heavy'   // 🏋️ Lourd (> 1.0 kg) - Bateau recommandé

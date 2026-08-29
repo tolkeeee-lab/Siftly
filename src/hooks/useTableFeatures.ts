@@ -99,6 +99,7 @@ export function useTableFeatures(products: ProductData[]) {
   }, []);
 
   const filterCounts = useMemo(() => {
+    let favorites = 0;
     let weight_light = 0;
     let weight_medium = 0;
     let weight_heavy = 0;
@@ -108,6 +109,8 @@ export function useTableFeatures(products: ProductData[]) {
     let avion = 0;
 
     products.forEach((p) => {
+      if (p.isFavorite) favorites++;
+
       const weight = Number(p.poids) || 0;
       if (weight > 0 && weight <= 0.3) weight_light++;
       else if (weight > 0.3 && weight <= 1.0) weight_medium++;
@@ -125,6 +128,7 @@ export function useTableFeatures(products: ProductData[]) {
 
     return {
       all: products.length,
+      favorites,
       weight_light,
       weight_medium,
       weight_heavy,
@@ -140,7 +144,9 @@ export function useTableFeatures(products: ProductData[]) {
     let list = [...products];
 
     // Quick Filters
-    if (activeFilter === 'weight_light') {
+    if (activeFilter === 'favorites') {
+      list = list.filter((p) => p.isFavorite);
+    } else if (activeFilter === 'weight_light') {
       list = list.filter((p) => {
         const w = Number(p.poids) || 0;
         return w > 0 && w <= 0.3;
