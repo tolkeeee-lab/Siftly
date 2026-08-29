@@ -17,17 +17,15 @@ import {
 } from './supabaseService';
 
 /**
- * Safely saves to localStorage and alerts the user if the quota is exceeded.
+ * Safely saves to localStorage as a best-effort cache.
  */
 function safeLocalStorageSet(key: string, value: string) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(key, value);
   } catch (e: any) {
-    console.error('LocalStorage Save Error:', e);
-    if (e.name === 'QuotaExceededError' || e.message?.includes('quota')) {
-      alert("⚠️ Espace de stockage local saturé ! Les images de vos produits sont trop lourdes. Veuillez utiliser des images plus petites ou nettoyer votre cache, sinon vos modifications hors-ligne risquent de ne pas être sauvegardées.");
-    }
+    // Silently catch quota issues: Supabase Cloud is the real source of truth
+    console.warn('LocalStorage cache write skipped (size limit reached):', e?.message || e);
   }
 }
 
@@ -177,7 +175,6 @@ export async function persistProductChange(
 
   if (typeof window !== 'undefined') {
     safeLocalStorageSet(cacheKey, JSON.stringify(allProducts));
-    safeLocalStorageSet('eaa-produits-benin', JSON.stringify(allProducts));
   }
 
   // 2. Persist to Supabase Cloud
@@ -204,7 +201,6 @@ export async function persistProductDeletion(
 
   if (typeof window !== 'undefined') {
     safeLocalStorageSet(cacheKey, JSON.stringify(allProducts));
-    safeLocalStorageSet('eaa-produits-benin', JSON.stringify(allProducts));
   }
 
   return await deleteProductFromSupabase(deletedId);
