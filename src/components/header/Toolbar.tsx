@@ -25,6 +25,7 @@ import { PWAInstallButton } from '../common/PWAInstallButton';
 
 interface ToolbarProps {
   products: ProductData[];
+  totalProductsCount?: number;
   onLoadProducts: (products: ProductData[]) => void;
   onImportTextRows: (rows: Partial<ProductData>[]) => void;
   onOpenPasteModal: () => void;
@@ -37,6 +38,7 @@ interface ToolbarProps {
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   products,
+  totalProductsCount,
   onLoadProducts,
   onImportTextRows,
   onOpenPasteModal,
@@ -46,6 +48,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   showAutoSaveToast,
   isSyncing,
 }) => {
+  const isFiltered = totalProductsCount !== undefined && products.length !== totalProductsCount;
+  const countLabel = `(${products.length})`;
+
   const handleLoadJson = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -123,29 +128,41 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </button>
       )}
 
+      <button
+        className="tbtn export"
+        type="button"
+        onClick={() => downloadHtmlReport(products)}
+        title={isFiltered 
+          ? `Exporter le Dossier de Cadrage des ${products.length} produit(s) filtrés (sur ${totalProductsCount} au total)`
+          : `Exporter le Dossier de Cadrage complet (${products.length} produits)`}
+      >
+        <FileText className="w-3.5 h-3.5 text-gold" />
+        <span>📁 Dossier HTML {countLabel}</span>
+      </button>
+
       <button className="tbtn save" type="button" onClick={() => downloadJsonBackup(products)}>
         <Download className="w-3.5 h-3.5" />
-        Télécharger (.json)
+        Sauvegarde (.json)
       </button>
 
       <button
         className="tbtn export"
         type="button"
         onClick={() => downloadExcelXml(products)}
-        title="Exporter vers Microsoft Excel (.xls)"
+        title={`Exporter vers Excel (.xls) les ${products.length} produit(s) sélectionnés`}
       >
         <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-        Excel (.xls)
+        Excel {countLabel}
       </button>
 
       <button
         className="tbtn export"
         type="button"
         onClick={() => downloadCsvExport(products)}
-        title="Exporter fichier CSV universel (Google Sheets, Numbers)"
+        title={`Exporter vers CSV les ${products.length} produit(s) sélectionnés`}
       >
         <FileText className="w-3.5 h-3.5 text-sky-400" />
-        CSV (.csv)
+        CSV {countLabel}
       </button>
 
       <label className="tbtn load">
@@ -163,16 +180,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <button className="tbtn load" type="button" onClick={onOpenPasteModal}>
         <Clipboard className="w-3.5 h-3.5" />
         Coller une fiche
-      </button>
-
-      <button
-        className="tbtn export"
-        type="button"
-        onClick={() => downloadHtmlReport(products)}
-        title="Télécharger le Dossier de Cadrage complet (Catalogue HTML autonome cadré de tous vos produits avec sommaire interactif, calculs et fiches)"
-      >
-        <FileText className="w-3.5 h-3.5 text-gold" />
-        Dossier HTML Cadré
       </button>
 
       <span className={`toolbar-hint ${showAutoSaveToast || isSyncing ? 'show' : ''}`}>

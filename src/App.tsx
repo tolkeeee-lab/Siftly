@@ -132,7 +132,8 @@ export function App() {
       <NavigationTabs />
 
       <Toolbar
-        products={processedProducts}
+        products={filteredProducts}
+        totalProductsCount={products.length}
         onLoadProducts={replaceAllProducts}
         onImportTextRows={addMultipleProducts}
         onOpenPasteModal={() => setIsPasteModalOpen(true)}
