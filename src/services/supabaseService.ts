@@ -174,14 +174,20 @@ export async function saveProductToSupabase(product: ProductData, targetUserId?:
 }
 
 export async function deleteProductFromSupabase(id: string): Promise<boolean> {
-  const client = getSupabaseClient();
-  if (!client) return false;
-  const { error } = await client.from('products').delete().eq('id', id);
-  if (error) {
-    console.warn('Error deleting product from Supabase:', error);
+  try {
+    const res = await fetch(`/api/workspace/products?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      console.error('API failed to delete product from Supabase:', errBody);
+      return false;
+    }
+    return true;
+  } catch (err: any) {
+    console.warn('Error deleting product from Supabase via API:', err);
     return false;
   }
-  return true;
 }
 
 export async function saveAllProductsToSupabase(products: ProductData[], targetUserId?: string): Promise<boolean> {

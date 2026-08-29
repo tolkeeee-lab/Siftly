@@ -78,3 +78,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+
+// DELETE /api/workspace/products?id=uuid
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing product ID' }, { status: 400 });
+    }
+
+    const supabase = getAdminSupabase();
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error('Workspace products DELETE exception:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
