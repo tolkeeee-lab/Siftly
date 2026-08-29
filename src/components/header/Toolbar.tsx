@@ -165,9 +165,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         Coller une fiche
       </button>
 
-      <button className="tbtn export" type="button" onClick={() => downloadHtmlReport(products)}>
-        <Code className="w-3.5 h-3.5" />
-        Exporter HTML
+      <button
+        className="tbtn export"
+        type="button"
+        onClick={() => downloadHtmlReport(products)}
+        title="Télécharger le Dossier de Cadrage complet (Catalogue HTML autonome cadré de tous vos produits avec sommaire interactif, calculs et fiches)"
+      >
+        <FileText className="w-3.5 h-3.5 text-gold" />
+        Dossier HTML Cadré
       </button>
 
       <span className={`toolbar-hint ${showAutoSaveToast || isSyncing ? 'show' : ''}`}>
