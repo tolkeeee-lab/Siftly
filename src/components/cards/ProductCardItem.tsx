@@ -209,7 +209,11 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
             <button
               type="button"
               className={`card-frame-fav-btn ${product.isFavorite ? 'active' : ''}`}
-              onClick={() => onUpdate(product.id, 'isFavorite', !product.isFavorite)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onUpdate(product.id, 'isFavorite', !product.isFavorite);
+              }}
               title={product.isFavorite ? "Retirer des Favoris" : "Ajouter aux Favoris"}
             >
               <Star className={`w-3.5 h-3.5 ${product.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-slate-400'}`} />
@@ -613,7 +617,11 @@ export const ProductCardItem: React.FC<ProductCardItemProps> = ({
             type="button"
             className={`rowdel ${product.isFavorite ? 'fav-active' : ''}`}
             title={product.isFavorite ? "Retirer de la Shortlist" : "Ajouter à ma Shortlist (Favori)"}
-            onClick={() => onUpdate(product.id, 'isFavorite', !product.isFavorite)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onUpdate(product.id, 'isFavorite', !product.isFavorite);
+            }}
           >
             <Star className={`w-3.5 h-3.5 ${product.isFavorite ? 'fill-amber-400 text-amber-500' : 'text-slate-400'}`} />
           </button>

@@ -328,30 +328,34 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #94A3B8;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 14px;
   font-size: 11px;
   font-weight: 700;
   font-family: 'IBM Plex Mono', monospace;
   cursor: pointer;
+  position: relative;
+  z-index: 5;
+  touch-action: manipulation;
+  user-select: none;
   transition: all 0.15s ease;
 }
 
 .card-frame-fav-btn:hover {
-  background: rgba(255, 184, 0, 0.15);
+  background: rgba(255, 184, 0, 0.18);
   border-color: var(--gold);
   color: #F8FAFC;
   transform: translateY(-1px);
 }
 
 .card-frame-fav-btn.active {
-  background: rgba(255, 184, 0, 0.18);
+  background: rgba(255, 184, 0, 0.22);
   border-color: var(--gold);
   color: var(--gold-deep);
-  box-shadow: 0 0 10px rgba(255, 184, 0, 0.25);
+  box-shadow: 0 0 12px rgba(255, 184, 0, 0.35);
 }
 
 .card-frame-fav-tag {
