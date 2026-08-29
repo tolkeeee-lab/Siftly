@@ -115,61 +115,49 @@ export async function syncWorkspaceProducts(
 
   // Fetch Cloud Products via Server API (bypasses RLS) or direct Supabase client
   let cloudProducts: ProductData[] | null = null;
-  try {
-    const res = await fetch(`/api/workspace/products?ownerId=${encodeURIComponent(ctx.workspaceOwnerId)}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data.products) && data.products.length > 0) {
-        cloudProducts = data.products.map(mapDbToProduct);
+  if (ctx.workspaceOwnerId !== 'guest') {
+    try {
+      const res = await fetch(`/api/workspace/products?ownerId=${encodeURIComponent(ctx.workspaceOwnerId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.products)) {
+          cloudProducts = data.products.map(mapDbToProduct);
+        }
       }
-    }
-  } catch (err) {
-    console.warn('SyncEngine: Server workspace products fetch notice:', err);
-  }
-
-  if (!cloudProducts) {
-    cloudProducts = await fetchProductsFromSupabase(ctx.workspaceOwnerId);
-  }
-
-  // UNION MERGE: Combine Cloud and Local products by ID so no newly added product is ever lost!
-  const mergedMap = new Map<string, ProductData>();
-
-  // 1. Add Cloud products
-  if (cloudProducts && cloudProducts.length > 0) {
-    cloudProducts.forEach((p) => mergedMap.set(p.id, p));
-  }
-
-  // 2. Preserve Local products (adds newly created local items that Cloud hasn't received yet)
-  localProducts.forEach((p) => {
-    if (p.id && !mergedMap.has(p.id)) {
-      mergedMap.set(p.id, p);
-    }
-  });
-
-  const finalProducts = Array.from(mergedMap.values());
-
-  if (finalProducts.length > 0) {
-    // If local had new products missing from Cloud, auto-sync the merged list to Supabase
-    if (ctx.workspaceOwnerId !== 'guest' && finalProducts.length > (cloudProducts?.length || 0)) {
-      saveAllProductsToSupabase(finalProducts, ctx.workspaceOwnerId);
+    } catch (err) {
+      console.warn('SyncEngine: Server workspace products fetch notice:', err);
     }
 
+    if (!cloudProducts) {
+      cloudProducts = await fetchProductsFromSupabase(ctx.workspaceOwnerId);
+    }
+  }
+
+  // If we successfully retrieved data from Cloud for an authenticated user:
+  if (cloudProducts !== null && ctx.workspaceOwnerId !== 'guest') {
+    // If brand new account with 0 products on cloud and user requested seeding:
+    if (cloudProducts.length === 0 && !ctx.isCollaborator && localProducts.length > 0 && forceUpload) {
+      await saveAllProductsToSupabase(localProducts, ctx.workspaceOwnerId);
+      return { products: localProducts, isCloudSynced: true };
+    }
+
+    // Strict Cloud Source of Truth: update local cache with exact cloud state
     if (typeof window !== 'undefined') {
-      safeLocalStorageSet(cacheKey, JSON.stringify(finalProducts));
+      safeLocalStorageSet(cacheKey, JSON.stringify(cloudProducts));
     }
-    return { products: finalProducts, isCloudSynced: true };
+    return { products: cloudProducts, isCloudSynced: true };
+  }
+
+  // Fallback: Guest mode or offline fallback
+  if (localProducts.length > 0) {
+    return { products: localProducts, isCloudSynced: false };
   } else if (!ctx.isCollaborator) {
-    // Both Cloud & Local are empty for an Owner: seed default initial products & push to cloud
     if (typeof window !== 'undefined') {
       safeLocalStorageSet(cacheKey, JSON.stringify(INITIAL_PRODUCTS));
     }
-    if (ctx.workspaceOwnerId !== 'guest') {
-      await saveAllProductsToSupabase(INITIAL_PRODUCTS, ctx.workspaceOwnerId);
-    }
-    return { products: INITIAL_PRODUCTS, isCloudSynced: true };
+    return { products: INITIAL_PRODUCTS, isCloudSynced: false };
   }
 
-  // Collaborator with 0 products on cloud yet
   return { products: [], isCloudSynced: false };
 }
 
