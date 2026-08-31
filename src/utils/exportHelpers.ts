@@ -112,6 +112,153 @@ export function downloadCsvExport(products: ProductData[]): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/**
+ * Exporte un fichier CSV spécialement formaté pour Google Sheets (séparateur virgule standard, UTF-8 avec BOM, nombres purs sans symboles pour calculs immédiats dans Sheets)
+ */
+export function downloadGoogleSheetsCsv(products: ProductData[]): void {
+  const headers = [
+    'Rang',
+    'Produit',
+    'Lien Alibaba / Sourcing',
+    'Lien Publicité / Créative',
+    'Lien Concurrent',
+    'Marché Origine',
+    'Prix Concurrent (FCFA)',
+    'Prix Sourcing Usine (FCFA)',
+    'Poids Unitaire (kg)',
+    'Mode Transport Retenu',
+    'Tarif Fret Bateau (FCFA/kg)',
+    'Tarif Fret Avion (FCFA/kg)',
+    'Frais Import Unitaire (FCFA)',
+    'Budget Pub CAC (FCFA)',
+    'Frais Livraison Locale (FCFA)',
+    'Coût Total Revient COGS (FCFA)',
+    'Prix de Vente Conseillé (FCFA)',
+    'Marge Nette (FCFA)',
+    'Marge Nette (%)',
+    'Note Douleur (/5)',
+    'Note Non-résolution (/5)',
+    'Note Étendue Marché (/5)',
+    'Note Impact (/5)',
+    'Note Effet Waouh (/5)',
+    'Note Caractère Innovant (/5)',
+    'Note Non-saisonnalité (/5)',
+    'Note Habitudes Conso (/5)',
+    'Note Facteur Poids (/5)',
+    'Score Global Note (/5)',
+    'Cible / Persona Marketing',
+    'Angle d\'Attaque Publicitaire',
+  ];
+
+  const escapeGoogleCsv = (val: any) => {
+    const s = String(val ?? '').replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = products.map((p, idx) => {
+    const frais = calculateFreightCost(p);
+    const cogs = calculateCOGS(p);
+    const marge = calculateMargin(p);
+    const margePct = calculateMarginPct(p);
+    const { noteNum, noteText } = calculateNoteFinale(p);
+
+    return [
+      idx + 1,
+      p.produit || '',
+      p.alibaba || '',
+      p.creative || '',
+      p.siteweb || '',
+      p.marche || 'Chine',
+      Number(p.concurrent) || 0,
+      Number(p.sourcing) || 0,
+      Number(p.poids) || 0,
+      p.modeimport === 'avion' ? 'Avion' : 'Bateau',
+      Number(p.tarifbateau) || 0,
+      Number(p.tarifavion) || 0,
+      frais,
+      Number(p.cac) || 0,
+      Number(p.livraison) || 0,
+      cogs,
+      Number(p.vente) || 0,
+      marge,
+      Number(p.vente) > 0 ? (margePct / 100).toFixed(4) : 0, // Format décimal pour que Google Sheets applique % automatiquement
+      Number(p.douleur) || '',
+      Number(p.nonres) || '',
+      Number(p.etendue) || '',
+      Number(p.impact) || '',
+      Number(p.waouh) || '',
+      Number(p.innovant) || '',
+      Number(p.nonsaison) || '',
+      Number(p.habitudes) || '',
+      Number(p.poidsfacteur) || '',
+      noteNum !== null ? noteNum.toFixed(1) : (noteText || ''),
+      p.cible || '',
+      p.angle || '',
+    ].map(escapeGoogleCsv).join(',');
+  });
+
+  const csvContent = '\uFEFF' + [headers.map(escapeGoogleCsv).join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `siftly-google-sheets-${stamp}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  // Copie également dans le presse-papier au format tabulation pour un collage direct (Ctrl+V) dans Google Sheets
+  try {
+    const tsvContent = [
+      headers.join('\t'),
+      ...products.map((p, idx) => {
+        const frais = calculateFreightCost(p);
+        const cogs = calculateCOGS(p);
+        const marge = calculateMargin(p);
+        const margePct = calculateMarginPct(p);
+        const { noteNum, noteText } = calculateNoteFinale(p);
+        return [
+          idx + 1,
+          p.produit || '',
+          p.alibaba || '',
+          p.creative || '',
+          p.siteweb || '',
+          p.marche || 'Chine',
+          Number(p.concurrent) || 0,
+          Number(p.sourcing) || 0,
+          Number(p.poids) || 0,
+          p.modeimport === 'avion' ? 'Avion' : 'Bateau',
+          Number(p.tarifbateau) || 0,
+          Number(p.tarifavion) || 0,
+          frais,
+          Number(p.cac) || 0,
+          Number(p.livraison) || 0,
+          cogs,
+          Number(p.vente) || 0,
+          marge,
+          Number(p.vente) > 0 ? margePct.toFixed(1) + '%' : '0%',
+          Number(p.douleur) || '',
+          Number(p.nonres) || '',
+          Number(p.etendue) || '',
+          Number(p.impact) || '',
+          Number(p.waouh) || '',
+          Number(p.innovant) || '',
+          Number(p.nonsaison) || '',
+          Number(p.habitudes) || '',
+          Number(p.poidsfacteur) || '',
+          noteNum !== null ? noteNum.toFixed(1) : (noteText || ''),
+          p.cible || '',
+          p.angle || '',
+        ].join('\t');
+      })
+    ].join('\r\n');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsvContent).catch(() => {});
+    }
+  } catch {}
+}
+
 export function downloadExcelXml(products: ProductData[]): void {
   const stamp = new Date().toISOString().slice(0, 10);
   const headers = [

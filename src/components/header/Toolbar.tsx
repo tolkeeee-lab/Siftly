@@ -12,6 +12,7 @@ import {
   DollarSign,
   FileSpreadsheet,
   Camera,
+  Table2,
 } from 'lucide-react';
 import { ProductData } from '../../types/product';
 import {
@@ -19,6 +20,7 @@ import {
   downloadHtmlReport,
   downloadCsvExport,
   downloadExcelXml,
+  downloadGoogleSheetsCsv,
 } from '../../utils/exportHelpers';
 import { parseTextSheet, parseJsonFile } from '../../utils/parsers';
 import { PWAInstallButton } from '../common/PWAInstallButton';
@@ -148,6 +150,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <button
         className="tbtn export"
         type="button"
+        onClick={() => downloadGoogleSheetsCsv(products)}
+        title={`Exporter vers Google Sheets les ${products.length} produit(s) sélectionnés (CSV optimisé + copie automatique au format presse-papier pour un Ctrl+V direct)`}
+      >
+        <Table2 className="w-3.5 h-3.5 text-emerald-400" />
+        <span>Sheets {countLabel}</span>
+      </button>
+
+      <button
+        className="tbtn export"
+        type="button"
         onClick={() => downloadExcelXml(products)}
         title={`Exporter vers Excel (.xls) les ${products.length} produit(s) sélectionnés`}
       >
@@ -159,7 +171,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         className="tbtn export"
         type="button"
         onClick={() => downloadCsvExport(products)}
-        title={`Exporter vers CSV les ${products.length} produit(s) sélectionnés`}
+        title={`Exporter vers CSV universel les ${products.length} produit(s) sélectionnés`}
       >
         <FileText className="w-3.5 h-3.5 text-sky-400" />
         CSV {countLabel}
