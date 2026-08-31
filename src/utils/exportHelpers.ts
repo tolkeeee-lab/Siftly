@@ -113,7 +113,7 @@ export function downloadCsvExport(products: ProductData[]): void {
 }
 
 /**
- * Exporte un fichier CSV spécialement formaté pour Google Sheets (séparateur virgule standard, UTF-8 avec BOM, nombres purs sans symboles pour calculs immédiats dans Sheets)
+ * Exporte un fichier CSV spécialement formaté pour Google Sheets (séparateur point-virgule universel pour Google Sheets FR/Afrique, UTF-8 avec BOM, nombres purs pour calculs immédiats)
  */
 export function downloadGoogleSheetsCsv(products: ProductData[]): void {
   const headers = [
@@ -181,7 +181,7 @@ export function downloadGoogleSheetsCsv(products: ProductData[]): void {
       cogs,
       Number(p.vente) || 0,
       marge,
-      Number(p.vente) > 0 ? (margePct / 100).toFixed(4) : 0, // Format décimal pour que Google Sheets applique % automatiquement
+      Number(p.vente) > 0 ? margePct.toFixed(1) + '%' : '0%',
       Number(p.douleur) || '',
       Number(p.nonres) || '',
       Number(p.etendue) || '',
@@ -194,10 +194,11 @@ export function downloadGoogleSheetsCsv(products: ProductData[]): void {
       noteNum !== null ? noteNum.toFixed(1) : (noteText || ''),
       p.cible || '',
       p.angle || '',
-    ].map(escapeGoogleCsv).join(',');
+    ].map(escapeGoogleCsv).join(';');
   });
 
-  const csvContent = '\uFEFF' + [headers.map(escapeGoogleCsv).join(','), ...rows].join('\r\n');
+  // Délimiteur point-virgule avec BOM UTF-8 pour détection automatique immédiate des colonnes dans Google Sheets FR
+  const csvContent = '\uFEFF' + [headers.map(escapeGoogleCsv).join(';'), ...rows].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const stamp = new Date().toISOString().slice(0, 10);
@@ -207,7 +208,7 @@ export function downloadGoogleSheetsCsv(products: ProductData[]): void {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-  // Copie également dans le presse-papier au format tabulation pour un collage direct (Ctrl+V) dans Google Sheets
+  // Copie également dans le presse-papier au format tabulation pour un collage direct (Ctrl+V) parfait dans Google Sheets
   try {
     const tsvContent = [
       headers.join('\t'),
@@ -219,11 +220,11 @@ export function downloadGoogleSheetsCsv(products: ProductData[]): void {
         const { noteNum, noteText } = calculateNoteFinale(p);
         return [
           idx + 1,
-          p.produit || '',
-          p.alibaba || '',
-          p.creative || '',
-          p.siteweb || '',
-          p.marche || 'Chine',
+          (p.produit || '').replace(/\t|\r|\n/g, ' '),
+          (p.alibaba || '').replace(/\t|\r|\n/g, ' '),
+          (p.creative || '').replace(/\t|\r|\n/g, ' '),
+          (p.siteweb || '').replace(/\t|\r|\n/g, ' '),
+          (p.marche || 'Chine').replace(/\t|\r|\n/g, ' '),
           Number(p.concurrent) || 0,
           Number(p.sourcing) || 0,
           Number(p.poids) || 0,
@@ -247,8 +248,8 @@ export function downloadGoogleSheetsCsv(products: ProductData[]): void {
           Number(p.habitudes) || '',
           Number(p.poidsfacteur) || '',
           noteNum !== null ? noteNum.toFixed(1) : (noteText || ''),
-          p.cible || '',
-          p.angle || '',
+          (p.cible || '').replace(/\t|\r|\n/g, ' '),
+          (p.angle || '').replace(/\t|\r|\n/g, ' '),
         ].join('\t');
       })
     ].join('\r\n');
